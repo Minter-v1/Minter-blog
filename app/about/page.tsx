@@ -113,7 +113,7 @@ export default async function AboutPage() {
                 <article
                   key={p.name}
                   data-reveal
-                  className="group relative flex flex-col rounded-[24px] bg-surface p-6 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,23,51,0.08)]"
+                  className="group relative flex flex-col rounded-[24px] bg-surface p-6 transition-[translate,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,23,51,0.08)]"
                 >
                   {/* 카드 전체가 상세 페이지 링크. 안쪽 링크(관련 기록)는 relative로 그 위에 */}
                   <Link

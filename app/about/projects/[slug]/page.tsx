@@ -158,7 +158,7 @@ function ProjectNav(props: { href: string; dir: string; name: string; alignRight
   return (
     <Link
       href={props.href}
-      className={`group rounded-[22px] bg-surface p-5 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(0,23,51,0.08)] ${
+      className={`group rounded-[22px] bg-surface p-5 transition-[translate,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(0,23,51,0.08)] ${
         props.alignRight ? "text-right" : ""
       }`}
     >

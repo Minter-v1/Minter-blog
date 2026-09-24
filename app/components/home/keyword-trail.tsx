@@ -13,7 +13,7 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
 export type TrailTerm = { title: string; description: string; href: string };
 export type TrailCommand = { title: string; usage: string; description: string };
 
-export const MIN_UNIQUE = 3; // 서로 다른 항목이 이보다 적으면 그 줄은 숨긴다 (같은 단어 반복은 오류처럼 보임)
+export const MIN_UNIQUE = 1; // 항목이 하나라도 있으면 그 줄을 보여준다 (적으면 반복해서 채움)
 const MIN_PER_ROW = 10; // 화면을 채우고도 남도록 반복
 
 function fill<T>(items: T[]) {

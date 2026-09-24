@@ -47,7 +47,7 @@ export function CollectionCards(props: { counts: Record<CollectionId, number>; r
           <div
             key={c.id}
             data-card
-            className="group relative flex flex-col rounded-[24px] bg-surface p-6 transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,23,51,0.08)]"
+            className="group relative flex flex-col rounded-[24px] bg-surface p-6 transition-[translate,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,23,51,0.08)]"
           >
             <Link href={`/${c.id}`} className="absolute inset-0 rounded-[24px]" aria-label={c.label} />
             <div className="flex items-start justify-between">
