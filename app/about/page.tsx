@@ -265,7 +265,7 @@ function Timeline({ items }: { items: TimelineItem[] }) {
         <li
           key={it.title + it.period}
           data-reveal
-          className="grid grid-cols-[132px_minmax(0,1fr)] gap-4 rounded-2xl px-3 py-4 transition-colors hover:bg-fill/60"
+          className="grid grid-cols-[132px_minmax(0,1fr)] gap-4 px-3 py-4"
         >
           <span className="pt-0.5 text-[13px] font-medium text-text-3 tabular-nums">{it.period}</span>
           <div>
