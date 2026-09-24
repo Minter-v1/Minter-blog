@@ -1,42 +1,59 @@
-# IT 용어 사전
+# Minter.log
 
-공부하다 메모해 둔 용어를 주 1회 옮겨 적으면, 마크다운으로 변환해 GitHub repo에 커밋하는 개인용 사전.
+학습 기록 · IT 용어 사전 · Git 명령어 · 트러블슈팅을 GitHub 저장소에 쌓는 개인 블로그.
 
-- 목록: 누구나 볼 수 있음 (`/`)
-- 등록 · 태그 추가: `/login`에서 비밀번호로 로그인한 뒤 가능 (30일 유지)
+- 읽기: 누구나. 쓰기(등록·수정·삭제·태그 추가): `/login`에서 비밀번호 로그인 후
+- 기록(md)은 **데이터 전용 repo**에 저장된다. 이 앱은 실행 중에 GitHub API로 읽고 커밋한다 (서브모듈·재배포 불필요)
 
-## 준비
+## 구조
 
-1. 용어를 저장할 **public repo**를 만든다. 빈 repo는 커밋을 쌓을 수 없으니 README 하나라도 넣어 초기화할 것.
-2. Fine-grained Personal Access Token 발급
-   - Repository access: 위 repo 하나만
-   - Permissions → Repository → **Contents: Read and write**
-3. `.env.example`을 `.env.local`로 복사해서 채운다.
+| 경로 | 내용 |
+|---|---|
+| `/` | 최근 기록 카드, 연결 지도(연관 기록 그래프), 컬렉션, 주간 활동 |
+| `/log` `/terms` `/git` `/troubleshooting` | 컬렉션 목록 (검색 `/` 키, 태그 필터) |
+| `/{컬렉션}/{파일명}` | 상세 (목차, 연관 기록) |
+| `/write?c=git` | 작성·수정 (BlockNote 에디터) |
+| `/about` · `/about/projects/{slug}` | 소개 · 프로젝트 상세 |
+
+데이터 repo 구조:
+
+```
+log/  terms/  git/  troubleshooting/
+└── {파일명}.md, tags.json, images/{파일명}/1.jpg
+```
+
+코드에서 직접 고치는 곳:
+
+- `lib/site.ts` — 블로그 이름, 링크, 주간 목표
+- `lib/profile.ts` — About 내용 (레쥬메)
+- `content/projects/{slug}.md` — 프로젝트 상세 본문, 이미지는 `public/projects/{slug}/`
+- `lib/collections.ts` — 컬렉션별 입력 칸·기본 태그·본문 템플릿
+
+## 환경변수
+
+`.env.example` 참고. 로컬은 `.env.local`, Vercel은 Project Settings → Environment Variables.
+
+| 이름 | 설명 |
+|---|---|
+| `GITHUB_TOKEN` | Fine-grained PAT. 데이터 repo 하나만, Contents: Read and write |
+| `GITHUB_OWNER` | 데이터 repo 소유자 (예: `Minter-v1`) |
+| `GITHUB_REPO` | 데이터 repo 이름 (예: `Minter-archive`) |
+| `GITHUB_BRANCH` | 기본 `main` |
+| `ADMIN_PASSWORD` | 쓰기 로그인 비밀번호. 바꾸면 기존 로그인 모두 해제 |
+
+> 터미널에 같은 이름의 환경변수가 export돼 있으면 `.env.local`보다 우선한다(Next.js 로드 순서).
+> `.env` 값을 셸로 불러올 땐 `( set -a; source .env.local; set +a; ... )`처럼 서브셸로.
+
+## 로컬 실행
 
 ```bash
-cp .env.example .env.local
 npm install
 npm run dev
 ```
 
-## Vercel 배포
+## 배포 (Vercel)
 
-Project Settings → Environment Variables에 `.env.example`의 값을 그대로 넣는다.
-`ADMIN_PASSWORD`는 길게 (쓰기 권한 전부가 이 비밀번호 하나에 걸려 있음).
-
-## 저장 구조
-
-```
-terms/
-├── tags.json                 # 태그 목록 (첫 태그 추가 시 기본 7개로 생성)
-├── 폴백함수.md
-├── load-balancer.md
-└── images/
-    └── 폴백함수/
-        └── 1.jpg
-```
-
-- 파일명: 용어명 그대로. 공백은 `-`, 영문은 소문자 (`Load Balancer` → `load-balancer.md`)
-- 등록일: 한국 시간 기준
-- md 파일과 이미지는 커밋 하나로 올라감 (`add term: {용어명}`)
-- 이미지는 브라우저에서 긴 변 2000px JPEG로 줄인 뒤 업로드 (합계 4MB 제한 — Vercel 요청 본문 한도)
+1. 이 repo를 Vercel에 Import (Framework: Next.js 자동 인식)
+2. 위 환경변수 5개 입력 후 Deploy
+3. Settings → Domains에서 구입한 도메인 연결
+4. 토큰 만료일이 지나면 새 토큰으로 `GITHUB_TOKEN` 교체 후 Redeploy
