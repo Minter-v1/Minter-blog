@@ -1,12 +1,10 @@
-import Link from "next/link";
 import { isAuthed } from "@/lib/auth";
 import { loadDictionary, type Dictionary } from "@/lib/dictionary";
-import { LogoutButton } from "./components/logout-button";
-import { TermForm } from "./components/term-form";
+import { SiteHeader } from "./components/site-header";
 import { TermList } from "./components/term-list";
 
-export default async function Home() {
-  const authed = await isAuthed();
+export default async function Home(props: PageProps<"/">) {
+  const [authed, { tag }] = await Promise.all([isAuthed(), props.searchParams]);
 
   let dictionary: Dictionary | null = null;
   let loadError: string | null = null;
@@ -17,31 +15,8 @@ export default async function Home() {
   }
 
   return (
-    <div className={`mx-auto px-6 pb-24 ${authed ? "max-w-[1120px]" : "max-w-[720px]"}`}>
-      <header className="flex items-center justify-between py-8">
-        <Link href="/" className="text-[22px] font-bold tracking-[-0.03em]">
-          IT 용어 사전
-          {dictionary && (
-            <span className="ml-2 align-middle text-[15px] font-semibold text-primary tabular-nums">
-              {dictionary.terms.length}
-            </span>
-          )}
-        </Link>
-        <nav className="flex items-center gap-1 text-[14px] font-medium text-text-2">
-          {dictionary && (
-            <a href={dictionary.repoUrl} target="_blank" rel="noreferrer" className="rounded-lg px-3 py-1.5 hover:bg-fill-strong/60">
-              GitHub
-            </a>
-          )}
-          {authed ? (
-            <LogoutButton />
-          ) : (
-            <Link href="/login" className="rounded-lg px-3 py-1.5 hover:bg-fill-strong/60">
-              로그인
-            </Link>
-          )}
-        </nav>
-      </header>
+    <div className="mx-auto max-w-[760px] px-6 pb-24">
+      <SiteHeader authed={authed} count={dictionary?.terms.length} repoUrl={dictionary?.repoUrl} showWrite />
 
       {loadError && (
         <div className="rounded-2xl bg-danger-weak px-5 py-4 text-[15px] text-danger">
@@ -51,17 +26,14 @@ export default async function Home() {
       )}
 
       {dictionary && (
-        <div className={authed ? "grid grid-cols-[400px_minmax(0,1fr)] items-start gap-6" : ""}>
-          {authed && (
-            <section className="sticky top-6 rounded-[24px] bg-surface p-7">
-              <h2 className="mb-6 text-[20px] font-bold tracking-[-0.02em]">새 용어 등록</h2>
-              <TermForm tags={dictionary.tags} existingSlugs={dictionary.terms.map((t) => t.slug)} />
-            </section>
-          )}
-          <section className="rounded-[24px] bg-surface p-7">
-            <TermList terms={dictionary.terms} tags={dictionary.tags} />
-          </section>
-        </div>
+        <section className="rounded-[24px] bg-surface p-7">
+          <TermList
+            // 목록에는 본문이 필요 없다
+            terms={dictionary.terms.map(({ slug, title, description, tags, date }) => ({ slug, title, description, tags, date }))}
+            tags={dictionary.tags}
+            initialTag={typeof tag === "string" ? tag : null}
+          />
+        </section>
       )}
     </div>
   );

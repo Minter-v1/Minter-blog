@@ -105,9 +105,38 @@ export async function readTextFile(path: string, ref: string): Promise<string | 
   }
 }
 
+export async function listDir(path: string, ref: string): Promise<string[]> {
+  const { owner, repo } = githubEnv();
+  try {
+    const entries = await gh<{ name: string; type: string }[]>(
+      `/repos/${owner}/${repo}/contents/${encodePath(path)}?ref=${ref}`,
+    );
+    return Array.isArray(entries) ? entries.filter((e) => e.type === "file").map((e) => e.name) : [];
+  } catch (e) {
+    if (e instanceof GitHubError && e.status === 404) return [];
+    throw e;
+  }
+}
+
+// 커밋 없이 blob만 만든다. 이미지를 넣는 즉시 올려두고, 저장할 때 커밋 하나로 묶는다.
+// (Vercel 요청 본문 4.5MB 한도를 이미지 1장 단위로 쪼개는 효과)
+export async function createBlob(base64: string): Promise<string> {
+  const { owner, repo } = githubEnv();
+  const blob = await gh<{ sha: string }>(`/repos/${owner}/${repo}/git/blobs`, {
+    method: "POST",
+    body: JSON.stringify({ content: base64, encoding: "base64" }),
+  });
+  return blob.sha;
+}
+
 // ---------- 쓰기: Git Data API로 여러 파일을 커밋 하나에 ----------
 
-export type CommitFile = { path: string } & ({ text: string } | { base64: string });
+export type CommitFile = { path: string } & (
+  | { text: string }
+  | { base64: string }
+  | { sha: string } // 미리 만들어 둔 blob
+  | { delete: true }
+);
 
 type Prepare = (ctx: { headSha: string }) => Promise<CommitFile[]>;
 
@@ -131,6 +160,8 @@ export async function commitFiles(message: string, prepare: Prepare): Promise<st
     const entries = await Promise.all(
       files.map(async (f) => {
         if ("text" in f) return { path: f.path, mode: "100644", type: "blob", content: f.text };
+        if ("sha" in f) return { path: f.path, mode: "100644", type: "blob", sha: f.sha };
+        if ("delete" in f) return { path: f.path, mode: "100644", type: "blob", sha: null };
         const blob = await gh<{ sha: string }>(`${base}/blobs`, {
           method: "POST",
           body: JSON.stringify({ content: f.base64, encoding: "base64" }),

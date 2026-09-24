@@ -46,3 +46,16 @@ export const ArrowUpRight = ({ className }: Props) => (
     <path d="M7 17 17 7M8 7h9v9" />
   </svg>
 );
+
+export const ChevronRight = ({ className }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base} strokeWidth={2.25}>
+    <path d="m9 6 6 6-6 6" />
+  </svg>
+);
+
+export const Search = ({ className }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <circle cx="11" cy="11" r="6.5" />
+    <path d="m20 20-4.2-4.2" />
+  </svg>
+);

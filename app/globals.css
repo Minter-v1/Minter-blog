@@ -68,3 +68,191 @@ body {
     transform: none;
   }
 }
+
+/* ---------- 상세 페이지 본문 (블로그 읽기용) ---------- */
+.article {
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--text);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.article > :first-child {
+  margin-top: 0;
+}
+.article h1,
+.article h2,
+.article h3,
+.article h4 {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.35;
+  color: var(--text);
+}
+.article h1 {
+  font-size: 28px;
+  margin: 2.2em 0 0.7em;
+}
+.article h2 {
+  font-size: 24px;
+  margin: 2em 0 0.6em;
+}
+.article h3 {
+  font-size: 20px;
+  margin: 1.8em 0 0.5em;
+}
+.article h4 {
+  font-size: 17px;
+  margin: 1.6em 0 0.4em;
+}
+.article p {
+  margin: 1em 0;
+}
+.article strong {
+  font-weight: 700;
+}
+.article a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--primary) 35%, transparent);
+}
+.article ul,
+.article ol {
+  margin: 1em 0;
+  padding-left: 1.4em;
+}
+.article ul {
+  list-style: disc;
+}
+.article ol {
+  list-style: decimal;
+}
+.article li {
+  margin: 0.35em 0;
+}
+.article li::marker {
+  color: var(--text-3);
+}
+.article blockquote {
+  margin: 1.4em 0;
+  padding: 14px 20px;
+  border-radius: 16px;
+  background: var(--fill);
+  color: var(--text-2);
+}
+.article blockquote p {
+  margin: 0.3em 0;
+}
+.article :not(pre) > code {
+  padding: 0.15em 0.4em;
+  border-radius: 6px;
+  background: var(--fill);
+  color: #d6336c;
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+}
+.article pre {
+  margin: 1.4em 0;
+  padding: 18px 22px;
+  border-radius: 16px;
+  background: #f7f8fa !important; /* shiki 테마 배경 대신 */
+  overflow-x: auto;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.article pre code {
+  font-family: var(--font-mono);
+}
+.article img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.6em auto;
+  border-radius: 16px;
+}
+.article hr {
+  margin: 2.4em 0;
+  border-color: var(--line);
+}
+.article table {
+  width: 100%;
+  margin: 1.4em 0;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.article th,
+.article td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+.article th {
+  font-weight: 600;
+  color: var(--text-2);
+  background: var(--fill);
+}
+.article input[type="checkbox"] {
+  margin-right: 0.4em;
+  accent-color: var(--primary);
+}
+
+/* ---------- 작성 페이지 BlockNote 테마 ---------- */
+.body-editor.bn-container[data-color-scheme] {
+  --bn-font-family: "Pretendard Variable", Pretendard, -apple-system, system-ui, sans-serif;
+  --bn-border-radius: 12px;
+  --bn-colors-editor-text: var(--text);
+  --bn-colors-editor-background: transparent;
+  --bn-colors-menu-text: var(--text);
+  --bn-colors-menu-background: #ffffff;
+  --bn-colors-tooltip-text: #ffffff;
+  --bn-colors-tooltip-background: var(--text);
+  --bn-colors-hovered-text: var(--text);
+  --bn-colors-hovered-background: var(--fill);
+  --bn-colors-selected-text: #ffffff;
+  --bn-colors-selected-background: var(--primary);
+  --bn-colors-border: var(--line);
+  --bn-colors-shadow: rgba(0, 23, 51, 0.08);
+  --bn-colors-side-menu: #b0b8c1;
+}
+.body-editor .bn-editor {
+  font-size: 16px;
+  line-height: 1.75;
+  letter-spacing: -0.01em;
+}
+/* 읽기 화면(.article)과 같은 크기·같은 코드 블록 톤으로 */
+.body-editor .bn-block-content[data-content-type="heading"] > * {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.body-editor .bn-block-content[data-content-type="heading"] > h1 {
+  font-size: 28px;
+}
+.body-editor .bn-block-content[data-content-type="heading"] > h2 {
+  font-size: 24px;
+}
+.body-editor .bn-block-content[data-content-type="heading"] > h3 {
+  font-size: 20px;
+}
+.body-editor .bn-block-content[data-content-type="codeBlock"] {
+  border-radius: 16px;
+  background: #f7f8fa;
+  color: var(--text);
+}
+.body-editor .bn-block-content[data-content-type="codeBlock"] code {
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+.body-editor .bn-block-content[data-content-type="codeBlock"] code span {
+  color: var(--shiki-light) !important;
+}
+.body-editor .bn-block-content[data-content-type="codeBlock"] select {
+  color: var(--text-3);
+  font-size: 12px;
+}
+.body-editor .bn-inline-content code {
+  color: #d6336c;
+  background: var(--fill);
+  border-radius: 6px;
+  padding: 0.1em 0.35em;
+}

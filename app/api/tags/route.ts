@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
+import { fail } from "@/lib/api";
 import { isAuthed } from "@/lib/auth";
 import { githubEnv } from "@/lib/env";
 import { commitFiles, ConflictError, readTextFile } from "@/lib/github";
 import { parseTags, serializeTags, validateTagName, type Tag } from "@/lib/tags";
 
-const fail = (error: string, status = 400) => NextResponse.json({ error }, { status });
 
 export async function POST(request: Request) {
   if (!(await isAuthed())) return fail("로그인이 필요해요.", 401);
