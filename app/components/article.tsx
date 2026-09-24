@@ -4,11 +4,13 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { resolveImageSrc } from "@/lib/paths";
-import { COLOR_NAMES } from "@/lib/rich-markdown";
+import { COLOR_NAMES, normalizeEmptyLines } from "@/lib/rich-markdown";
 
-// md 안의 HTML은 글자색·배경색 <span>만 통과시킨다 (그 외 태그·속성은 GitHub 기본 규칙대로 정리)
+// md 안의 HTML은 서식 태그(strong·em·del·u)와 글자색·배경색 <span>만 통과 (그 외는 GitHub 기본 규칙대로 정리)
 const schema = {
   ...defaultSchema,
+  // 밑줄(<u>)은 GitHub 기본 규칙에 없어 추가
+  tagNames: [...(defaultSchema.tagNames ?? []), "u"],
   attributes: {
     ...defaultSchema.attributes,
     span: [
@@ -43,7 +45,7 @@ export async function Article({ markdown, rawBase }: { markdown: string; rawBase
           ),
         }}
       >
-        {markdown}
+        {normalizeEmptyLines(markdown)}
       </MarkdownAsync>
     </div>
   );

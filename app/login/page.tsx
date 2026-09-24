@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SITE } from "@/lib/site";
+import { Spinner } from "../components/loaders";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -59,7 +60,10 @@ export default function LoginPage() {
           disabled={pending || !password}
           className="mt-4 h-14 w-full rounded-2xl bg-primary text-[17px] font-semibold text-white transition-colors hover:bg-primary-press active:scale-[0.99] disabled:bg-fill-strong disabled:text-text-3"
         >
-          {pending ? "확인 중…" : "확인"}
+          <span className="inline-flex items-center gap-2">
+            {pending && <Spinner />}
+            {pending ? "확인 중…" : "확인"}
+          </span>
         </button>
       </form>
     </div>

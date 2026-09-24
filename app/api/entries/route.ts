@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fail, handleError } from "@/lib/api";
+import { invalidateArchive } from "@/lib/archive";
 import { isAuthed } from "@/lib/auth";
 import { COLLECTIONS, isCollectionId } from "@/lib/collections";
 import { createEntry, parseEntryInput } from "@/lib/entry-store";
@@ -10,7 +11,9 @@ export async function POST(request: Request) {
     const body = (await request.json().catch(() => null)) as { collection?: unknown } | null;
     if (!isCollectionId(body?.collection)) return fail("알 수 없는 컬렉션이에요.");
     const input = parseEntryInput(COLLECTIONS[body.collection], body);
-    return NextResponse.json(await createEntry(body.collection, input));
+    const result = await createEntry(body.collection, input);
+    invalidateArchive();
+    return NextResponse.json(result);
   } catch (e) {
     return handleError(e);
   }

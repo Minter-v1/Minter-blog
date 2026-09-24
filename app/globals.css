@@ -49,6 +49,26 @@ body {
   line-height: 1;
 }
 
+/* 스켈레톤: 회색 틀 위로 빛이 천천히 지나간다 */
+.skeleton {
+  background: linear-gradient(90deg, #e9ecef 0%, #f3f4f6 45%, #e9ecef 90%);
+  background-size: 220% 100%;
+  animation: skeleton-shine 1.3s ease-in-out infinite;
+}
+@keyframes skeleton-shine {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
 ::selection {
   background: var(--primary-weak);
 }
@@ -76,9 +96,10 @@ body {
 }
 
 /* ---------- 상세 페이지 본문 (블로그 읽기용) ---------- */
+/* 간격은 작성 화면(BlockNote: 블록마다 위아래 3px, 제목 위 18px)과 맞춘다 — 쓴 모양 그대로 읽히도록 */
 .article {
   font-size: 17px;
-  line-height: 1.8;
+  line-height: 1.75;
   color: var(--text);
   word-break: keep-all;
   overflow-wrap: anywhere;
@@ -97,22 +118,22 @@ body {
 }
 .article h1 {
   font-size: 28px;
-  margin: 2.2em 0 0.7em;
+  margin: 24px 0 6px;
 }
 .article h2 {
   font-size: 24px;
-  margin: 2em 0 0.6em;
+  margin: 22px 0 6px;
 }
 .article h3 {
   font-size: 20px;
-  margin: 1.8em 0 0.5em;
+  margin: 20px 0 6px;
 }
 .article h4 {
   font-size: 17px;
-  margin: 1.6em 0 0.4em;
+  margin: 18px 0 6px;
 }
 .article p {
-  margin: 1em 0;
+  margin: 6px 0;
 }
 .article strong {
   font-weight: 700;
@@ -125,7 +146,7 @@ body {
 }
 .article ul,
 .article ol {
-  margin: 1em 0;
+  margin: 6px 0;
   padding-left: 1.4em;
 }
 .article ul {
@@ -135,7 +156,7 @@ body {
   list-style: decimal;
 }
 .article li {
-  margin: 0.35em 0;
+  margin: 3px 0;
 }
 .article li::marker {
   color: var(--text-3);

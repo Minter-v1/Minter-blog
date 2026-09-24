@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fail, handleError } from "@/lib/api";
+import { invalidateArchive } from "@/lib/archive";
 import { isAuthed } from "@/lib/auth";
 import { COLLECTIONS, isCollectionId } from "@/lib/collections";
 import { commitFiles, ConflictError, readTextFile } from "@/lib/github";
@@ -28,6 +29,7 @@ export async function POST(request: Request) {
       tags = [...tags, { name }];
       return [{ path, text: serializeTags(tags) }];
     });
+    invalidateArchive();
     return NextResponse.json({ tags });
   } catch (e) {
     return handleError(e);

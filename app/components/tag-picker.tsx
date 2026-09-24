@@ -4,6 +4,7 @@ import { useState } from "react";
 import { COLLECTIONS, type CollectionId } from "@/lib/collections";
 import type { Tag } from "@/lib/tags";
 import { Check, Plus } from "./icons";
+import { Spinner } from "./loaders";
 
 export function TagPicker(props: {
   collection: CollectionId;
@@ -129,7 +130,7 @@ function NewTagInput(props: { collection: CollectionId; label: string; onAdded: 
           disabled={pending || !value.trim()}
           className="h-7 rounded-full bg-primary px-3 text-[13px] font-semibold text-white disabled:bg-fill-strong disabled:text-text-3"
         >
-          {pending ? "추가 중" : "추가"}
+          {pending ? <Spinner className="size-3.5" /> : "추가"}
         </button>
       </div>
       {error && <p className="mt-1.5 px-1 text-[13px] text-danger">{error}</p>}
