@@ -132,7 +132,7 @@ export default async function EntryPage(props: Props) {
                   href={editHref}
                   className="mt-10 block rounded-2xl border-2 border-dashed border-fill-strong py-8 text-center text-[15px] font-medium text-text-3 transition-colors hover:border-primary hover:text-primary"
                 >
-                  아직 상세 설명이 없어요. 이어서 써 볼까요?
+                  + 상세 설명 쓰기
                 </Link>
               )
             )}

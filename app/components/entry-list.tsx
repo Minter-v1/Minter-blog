@@ -117,8 +117,7 @@ export function EntryList(props: {
   if (entries.length === 0) {
     return (
       <div className="py-16 text-center">
-        <p className="text-[17px] font-semibold">아직 등록된 {c.itemLabel}이(가) 없어요</p>
-        <p className="mt-1 text-[14px] text-text-3">이번 주 메모부터 옮겨 볼까요?</p>
+        <p className="text-[16px] font-semibold text-text-3">등록된 {c.itemLabel}이(가) 없어요</p>
       </div>
     );
   }

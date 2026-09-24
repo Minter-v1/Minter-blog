@@ -2,8 +2,10 @@
 export const SITE = {
   name: "Minter.log",
   author: "Minter",
-  headline: "배운 것을 내 말로 다시 쓰는 개발 기록",
-  bio: "공부하다 마주친 용어, 손에 익혀 가는 Git 명령어, 막혔다가 풀어낸 문제들을 모아 둡니다.",
+  // 홈 이름 아래 한 줄 소개. 직접 쓰면 표시되고, 비워 두면 표시하지 않는다
+  bio: "",
+  // 홈 "이번 주" 목표 개수 (컬렉션별 합이 주간 목표). 일요일 정리 루틴에 맞게 조정
+  weeklyGoal: { log: 1, terms: 5, git: 3, troubleshooting: 1 },
   links: [
     { label: "GitHub", href: "https://github.com/Minter-v1" },
     // { label: "Email", href: "mailto:you@example.com" },

@@ -43,6 +43,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* 이모지는 Tossface로 */
+.tossface {
+  font-family: Tossface, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  line-height: 1;
+}
+
 ::selection {
   background: var(--primary-weak);
 }

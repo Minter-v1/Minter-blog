@@ -19,8 +19,8 @@ export type Collection = {
   label: string; // "IT 용어 사전"
   shortLabel: string; // 좁은 곳(작성 화면 탭 등)에서 쓰는 이름
   itemLabel: string; // "용어" — "새 용어", "이미 등록된 용어예요"
-  intro: string; // 목록 상단·홈 카드 설명
-  color: string; // 홈 그래프·활동 차트에서 컬렉션을 구분하는 색
+  intro: string; // 목록 상단·홈 카드에 붙는 짧은 설명
+  emoji: string; // 컬렉션 표시용 이모지 (Tossface로 렌더링)
   listStyle: "date" | "cheatsheet"; // 목록을 날짜별로 묶을지, 분류별 치트시트로 볼지
   titleLabel: string;
   titlePlaceholder: string;
@@ -40,8 +40,8 @@ export const COLLECTIONS: Record<CollectionId, Collection> = {
     label: "학습 기록",
     shortLabel: "학습 기록",
     itemLabel: "글",
-    intro: "작업하고 공부한 과정을 글로 남겨요. 용어·명령어·트러블슈팅을 엮는 큰 이야기.",
-    color: "#3182f6",
+    intro: "작업과 공부 과정을 정리한 글",
+    emoji: "📝",
     listStyle: "date",
     titleLabel: "제목",
     titlePlaceholder: "예) 블로그를 GitHub 저장소 기반으로 만든 이유",
@@ -59,8 +59,8 @@ export const COLLECTIONS: Record<CollectionId, Collection> = {
     label: "IT 용어 사전",
     shortLabel: "용어",
     itemLabel: "용어",
-    intro: "공부하다 마주친 용어를 내 말로 다시 정리해요.",
-    color: "#00b8a3",
+    intro: "용어와 개념 정리",
+    emoji: "📖",
     listStyle: "date",
     titleLabel: "용어명",
     titlePlaceholder: "예) 폴백함수",
@@ -86,8 +86,8 @@ export const COLLECTIONS: Record<CollectionId, Collection> = {
     label: "Git 명령어",
     shortLabel: "Git",
     itemLabel: "명령어",
-    intro: "직접 써 본 Git 명령어를 옵션·예시와 함께 모아 둬요.",
-    color: "#ff8a3d",
+    intro: "명령어, 옵션, 예시",
+    emoji: "🌿",
     listStyle: "cheatsheet",
     titleLabel: "명령어",
     titlePlaceholder: "예) git rebase",
@@ -114,8 +114,8 @@ export const COLLECTIONS: Record<CollectionId, Collection> = {
     label: "트러블슈팅",
     shortLabel: "트러블슈팅",
     itemLabel: "트러블슈팅",
-    intro: "막혔던 문제와 해결 과정을 남겨요. 같은 실수를 두 번 하지 않도록.",
-    color: "#8b5cf6",
+    intro: "문제 상황, 원인, 해결",
+    emoji: "🛠️",
     listStyle: "date",
     titleLabel: "제목",
     titlePlaceholder: "예) rebase 중 충돌이 끝없이 반복됨",
