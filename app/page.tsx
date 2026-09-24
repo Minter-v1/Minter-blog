@@ -1,7 +1,7 @@
 import { buildActivity } from "@/lib/activity";
 import { loadArchive, type Archive } from "@/lib/archive";
 import { isAuthed } from "@/lib/auth";
-import { COLLECTION_IDS, type CollectionId } from "@/lib/collections";
+import { COLLECTION_IDS, entryHref, type CollectionId } from "@/lib/collections";
 import { SITE } from "@/lib/site";
 import { Activity } from "./components/home/activity";
 import { CollectionCards, type CardItem } from "./components/home/collection-cards";
@@ -54,9 +54,12 @@ export default async function Home() {
 
       <Hero
         counts={counts}
-        recent={entries
-          .slice(0, 16)
-          .map(({ collection, slug, title, description, date }) => ({ collection, slug, title, description, date }))}
+        terms={byCollection("terms")
+          .slice(0, 24)
+          .map((e) => ({ title: e.title, description: e.description, href: entryHref(e.collection, e.slug) }))}
+        commands={byCollection("git")
+          .slice(0, 24)
+          .map((e) => ({ title: e.title, usage: e.extra.usage ?? "", description: e.description }))}
       />
 
       <div className="mt-16 space-y-12">

@@ -8,11 +8,11 @@ import { useRef } from "react";
 import { COLLECTION_LIST, type CollectionId } from "@/lib/collections";
 import { SITE } from "@/lib/site";
 import { ArrowUpRight } from "../icons";
-import { EntryMarquee, type MarqueeItem } from "./entry-marquee";
+import { KeywordTrail, type TrailCommand, type TrailTerm } from "./keyword-trail";
 
 gsap.registerPlugin(useGSAP, SplitText);
 
-export function Hero(props: { counts: Record<CollectionId, number>; recent: MarqueeItem[] }) {
+export function Hero(props: { counts: Record<CollectionId, number>; terms: TrailTerm[]; commands: TrailCommand[] }) {
   const root = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -82,8 +82,8 @@ export function Hero(props: { counts: Record<CollectionId, number>; recent: Marq
         ))}
       </div>
 
-      <div className="mt-12">
-        <EntryMarquee items={props.recent} />
+      <div className="mt-6">
+        <KeywordTrail terms={props.terms} commands={props.commands} />
       </div>
     </section>
   );
