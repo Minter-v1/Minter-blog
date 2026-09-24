@@ -1,21 +1,29 @@
-// 용어 md 파일 포맷 (PRD 3.3)
+// 기록 md 파일 포맷 (모든 컬렉션 공통)
 //
 // ---
-// title: 폴백함수
-// tags: [아키텍처패턴, 운영모니터링]
+// title: git rebase
+// description: 커밋들을 다른 기준 위로 옮겨 다시 쌓는다
+// tags: [병합·리베이스]
+// related: [terms/커밋그래프, troubleshooting/rebase-충돌]   ← 있을 때만
+// usage: "git rebase -i <기준 커밋>"                          ← 컬렉션별 추가 필드(extra)
 // date: 2026-09-24
+// updated: 2026-09-30                                         ← 수정했을 때만
 // ---
 //
-// 설명
-//
-// ![폴백함수 1](images/폴백함수/1.jpg)
+// (상세 설명 마크다운. 이미지는 images/{slug}/1.jpg 처럼 컬렉션 폴더 기준 상대 경로)
 
-export type TermDoc = {
+export type EntryDoc = {
   title: string;
+  description: string;
   tags: string[];
+  related?: string[];
+  extra?: Record<string, string>;
   date: string;
+  updated?: string;
   body: string;
 };
+
+const RESERVED = new Set(["title", "description", "tags", "related", "date", "updated"]);
 
 const NEEDS_QUOTE = /[:#\[\]{},&*!|>'"%@`]|^\s|\s$|^[-?]/;
 
@@ -36,33 +44,28 @@ function unquote(value: string) {
   return v;
 }
 
-export function formatTerm(input: {
-  title: string;
-  tags: string[];
-  date: string;
-  description: string;
-  images: string[]; // terms 디렉토리 기준 상대 경로
-}): string {
+export function formatEntry(doc: EntryDoc): string {
   const lines = [
     "---",
-    `title: ${yamlScalar(input.title)}`,
-    `tags: [${input.tags.map(yamlScalar).join(", ")}]`,
-    `date: ${input.date}`,
+    `title: ${yamlScalar(doc.title)}`,
+    `description: ${yamlScalar(doc.description)}`,
+    `tags: [${doc.tags.map(yamlScalar).join(", ")}]`,
+    ...(doc.related?.length ? [`related: [${doc.related.map(yamlScalar).join(", ")}]`] : []),
+    ...Object.entries(doc.extra ?? {})
+      .filter(([k, v]) => !RESERVED.has(k) && v.trim())
+      .map(([k, v]) => `${k}: ${yamlScalar(v.replace(/\s*\n\s*/g, " ").trim())}`),
+    `date: ${doc.date}`,
+    ...(doc.updated && doc.updated !== doc.date ? [`updated: ${doc.updated}`] : []),
     "---",
-    "",
-    input.description.trim(),
   ];
-  const alt = input.title.replace(/[\[\]]/g, "");
-  input.images.forEach((path, i) => {
-    lines.push("", `![${alt} ${i + 1}](${path})`);
-  });
-  return lines.join("\n") + "\n";
+  const body = doc.body.trim();
+  return lines.join("\n") + "\n" + (body ? `\n${body}\n` : "");
 }
 
-export function parseTerm(source: string): TermDoc | null {
+export function parseEntry(source: string): EntryDoc | null {
   const match = source.replace(/^﻿/, "").match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) return null;
-  const [, front, body] = match;
+  const [, front, rawBody] = match;
 
   const meta: Record<string, string> = {};
   for (const line of front.split(/\r?\n/)) {
@@ -71,28 +74,38 @@ export function parseTerm(source: string): TermDoc | null {
     meta[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
   }
 
-  const rawTags = meta.tags ?? "";
-  const tags = rawTags.startsWith("[")
-    ? rawTags
-        .slice(1, -1)
-        .split(",")
-        .map(unquote)
-        .filter(Boolean)
-    : [];
+  const list = (raw = "") =>
+    raw.startsWith("[")
+      ? raw
+          .slice(1, -1)
+          .split(",")
+          .map(unquote)
+          .filter(Boolean)
+      : [];
+  const tags = list(meta.tags);
+
+  let description = unquote(meta.description ?? "");
+  let body = rawBody.trim();
+  if (!description) {
+    // 예전 형식: 본문 첫 문단이 한 줄 설명
+    const [first, ...rest] = body.split(/\n\s*\n/);
+    if (first && !first.trim().startsWith("![")) {
+      description = first.trim().replace(/\s*\n\s*/g, " ");
+      body = rest.join("\n\n").trim();
+    }
+  }
+
+  const extra: Record<string, string> = {};
+  for (const [k, v] of Object.entries(meta)) if (!RESERVED.has(k)) extra[k] = unquote(v);
 
   return {
     title: unquote(meta.title ?? ""),
+    description,
     tags,
+    related: list(meta.related).map((s) => s.normalize("NFC")),
+    extra,
     date: unquote(meta.date ?? ""),
-    body: body.trim(),
+    updated: meta.updated ? unquote(meta.updated) : undefined,
+    body,
   };
-}
-
-const IMAGE_LINE = /!\[([^\]]*)\]\(([^)\s]+)\)/g;
-
-// 본문을 설명 텍스트와 이미지 경로로 분리
-export function splitBody(body: string): { description: string; images: string[] } {
-  const images = [...body.matchAll(IMAGE_LINE)].map((m) => m[2]);
-  const description = body.replace(IMAGE_LINE, "").replace(/\n{3,}/g, "\n\n").trim();
-  return { description, images };
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { SITE } from "@/lib/site";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center px-6">
       <form onSubmit={onSubmit} className="w-full max-w-[400px] rounded-[28px] bg-surface p-8">
         <Link href="/" className="text-[14px] font-semibold text-text-3 hover:text-text-2">
-          IT 용어 사전
+          {SITE.name}
         </Link>
         <h1 className="mt-2 text-[24px] leading-snug font-bold tracking-[-0.03em]">
           비밀번호를

@@ -10,7 +10,6 @@ export function githubEnv() {
     owner: required("GITHUB_OWNER"),
     repo: required("GITHUB_REPO"),
     branch: process.env.GITHUB_BRANCH || "main",
-    dir: (process.env.TERMS_DIR || "terms").replace(/^\/+|\/+$/g, ""),
   };
 }
 

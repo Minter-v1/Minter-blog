@@ -36,12 +36,17 @@ async function gh<T>(path: string, init: RequestInit = {}): Promise<T> {
     try {
       message = ((await res.json()) as { message?: string }).message ?? message;
     } catch {}
+    if (res.status === 403) {
+      // 어느 repo에 거부됐는지 보여야 "설정이 엉뚱한 repo를 가리키는" 경우를 바로 알아챈다
+      const { owner, repo } = githubEnv();
+      message += ` — ${owner}/${repo}에 쓰기 권한이 없어요. 토큰의 Repository access와 GITHUB_REPO를 확인하세요.`;
+    }
     throw new GitHubError(res.status, `GitHub ${res.status}: ${message}`);
   }
   return res.json() as Promise<T>;
 }
 
-// ---------- 읽기: GraphQL 한 번으로 terms 디렉토리 전체 ----------
+// ---------- 읽기: GraphQL 한 번으로 컬렉션 폴더 전체 ----------
 
 type TreeEntry = {
   name: string;
@@ -51,45 +56,44 @@ type TreeEntry = {
 
 export type RepoSnapshot = {
   commitSha: string | null;
-  files: { name: string; text: string }[]; // terms 바로 아래 파일들
+  dirs: Record<string, { name: string; text: string }[]>; // 폴더 → 바로 아래 텍스트 파일들
 };
 
-export async function readTermsDir(): Promise<RepoSnapshot> {
-  const { owner, repo, branch, dir } = githubEnv();
+export async function readDirs(dirs: string[]): Promise<RepoSnapshot> {
+  const { owner, repo, branch } = githubEnv();
+  // 폴더마다 별칭(d0, d1, ...)을 붙여 한 번에 요청
+  const fields = dirs
+    .map(
+      (_, i) =>
+        `d${i}: object(expression: $e${i}) { ... on Tree { entries { name type object { ... on Blob { text } } } } }`,
+    )
+    .join("\n");
   const query = `
-    query($owner: String!, $name: String!, $qualifiedRef: String!, $expr: String!) {
+    query($owner: String!, $name: String!, $qualifiedRef: String!, ${dirs.map((_, i) => `$e${i}: String!`).join(", ")}) {
       repository(owner: $owner, name: $name) {
         ref(qualifiedName: $qualifiedRef) { target { oid } }
-        object(expression: $expr) {
-          ... on Tree { entries { name type object { ... on Blob { text } } } }
-        }
+        ${fields}
       }
     }`;
+  const variables: Record<string, string> = { owner, name: repo, qualifiedRef: `refs/heads/${branch}` };
+  dirs.forEach((dir, i) => (variables[`e${i}`] = `${branch}:${dir}`));
+
   const data = await gh<{
-    data?: {
-      repository: {
-        ref: { target: { oid: string } } | null;
-        object: { entries: TreeEntry[] } | null;
-      } | null;
-    };
+    data?: { repository: ({ ref: { target: { oid: string } } | null } & Record<string, unknown>) | null };
     errors?: { message: string }[];
-  }>("/graphql", {
-    method: "POST",
-    body: JSON.stringify({
-      query,
-      variables: { owner, name: repo, qualifiedRef: `refs/heads/${branch}`, expr: `${branch}:${dir}` },
-    }),
-  });
+  }>("/graphql", { method: "POST", body: JSON.stringify({ query, variables }) });
   if (data.errors?.length) throw new GitHubError(400, data.errors[0].message);
   const repository = data.data?.repository;
   if (!repository) throw new GitHubError(404, `${owner}/${repo} 저장소를 찾을 수 없습니다.`);
 
-  return {
-    commitSha: repository.ref?.target.oid ?? null,
-    files: (repository.object?.entries ?? [])
+  const result: RepoSnapshot["dirs"] = {};
+  dirs.forEach((dir, i) => {
+    const tree = repository[`d${i}`] as { entries: TreeEntry[] } | null;
+    result[dir] = (tree?.entries ?? [])
       .filter((e) => e.type === "blob" && typeof e.object?.text === "string")
-      .map((e) => ({ name: e.name, text: e.object!.text! })),
-  };
+      .map((e) => ({ name: e.name, text: e.object!.text! }));
+  });
+  return { commitSha: repository.ref?.target.oid ?? null, dirs: result };
 }
 
 export async function readTextFile(path: string, ref: string): Promise<string | null> {
@@ -105,9 +109,38 @@ export async function readTextFile(path: string, ref: string): Promise<string | 
   }
 }
 
+export async function listDir(path: string, ref: string): Promise<string[]> {
+  const { owner, repo } = githubEnv();
+  try {
+    const entries = await gh<{ name: string; type: string }[]>(
+      `/repos/${owner}/${repo}/contents/${encodePath(path)}?ref=${ref}`,
+    );
+    return Array.isArray(entries) ? entries.filter((e) => e.type === "file").map((e) => e.name) : [];
+  } catch (e) {
+    if (e instanceof GitHubError && e.status === 404) return [];
+    throw e;
+  }
+}
+
+// 커밋 없이 blob만 만든다. 이미지를 넣는 즉시 올려두고, 저장할 때 커밋 하나로 묶는다.
+// (Vercel 요청 본문 4.5MB 한도를 이미지 1장 단위로 쪼개는 효과)
+export async function createBlob(base64: string): Promise<string> {
+  const { owner, repo } = githubEnv();
+  const blob = await gh<{ sha: string }>(`/repos/${owner}/${repo}/git/blobs`, {
+    method: "POST",
+    body: JSON.stringify({ content: base64, encoding: "base64" }),
+  });
+  return blob.sha;
+}
+
 // ---------- 쓰기: Git Data API로 여러 파일을 커밋 하나에 ----------
 
-export type CommitFile = { path: string } & ({ text: string } | { base64: string });
+export type CommitFile = { path: string } & (
+  | { text: string }
+  | { base64: string }
+  | { sha: string } // 미리 만들어 둔 blob
+  | { delete: true }
+);
 
 type Prepare = (ctx: { headSha: string }) => Promise<CommitFile[]>;
 
@@ -131,6 +164,8 @@ export async function commitFiles(message: string, prepare: Prepare): Promise<st
     const entries = await Promise.all(
       files.map(async (f) => {
         if ("text" in f) return { path: f.path, mode: "100644", type: "blob", content: f.text };
+        if ("sha" in f) return { path: f.path, mode: "100644", type: "blob", sha: f.sha };
+        if ("delete" in f) return { path: f.path, mode: "100644", type: "blob", sha: null };
         const blob = await gh<{ sha: string }>(`${base}/blobs`, {
           method: "POST",
           body: JSON.stringify({ content: f.base64, encoding: "base64" }),
