@@ -1,4 +1,5 @@
 import "server-only";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { COLLECTION_LIST, parseRef, toRef, type CollectionId, type Ref } from "./collections";
 import { githubEnv } from "./env";
 import { readDirs } from "./github";
@@ -33,7 +34,7 @@ export type Archive = {
   rawBase: Record<CollectionId, string>; // 상대 경로 이미지 앞에 붙일 URL
 };
 
-export async function loadArchive(): Promise<Archive> {
+async function readArchive(): Promise<Archive> {
   const { owner, repo, branch } = githubEnv();
   const { commitSha, dirs } = await readDirs(COLLECTION_LIST.map((c) => c.dir));
   const repoUrl = `https://github.com/${owner}/${repo}`;
@@ -72,6 +73,16 @@ export async function loadArchive(): Promise<Archive> {
 
   entries.sort((a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title, "ko"));
   return { entries, tags, repoUrl, rawBase };
+}
+
+// GitHub에서 매번 읽으면 페이지마다 0.6~1초가 걸린다 → 캐시하고, 앱에서 쓰기가 일어나면 즉시 비운다.
+// GitHub 웹에서 직접 고친 경우를 위해 5분마다 저절로 갱신.
+export const ARCHIVE_TAG = "archive";
+export const loadArchive = unstable_cache(readArchive, ["archive"], { tags: [ARCHIVE_TAG], revalidate: 300 });
+
+/** 쓰기(등록·수정·삭제·태그 추가) 뒤에 호출: 다음 요청이 새 데이터를 읽도록 캐시를 바로 만료 */
+export function invalidateArchive() {
+  revalidateTag(ARCHIVE_TAG, { expire: 0 });
 }
 
 export function summarize(e: Entry): EntrySummary {

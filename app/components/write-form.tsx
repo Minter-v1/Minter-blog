@@ -10,6 +10,7 @@ import { COLLECTION_LIST, COLLECTIONS, entryHref, type CollectionId } from "@/li
 import type { Tag } from "@/lib/tags";
 import type { BodyEditorApi } from "./body-editor";
 import { Check } from "./icons";
+import { Spinner } from "./loaders";
 import { OutlinePopover } from "./outline";
 import { RelatedPicker, type RelatedCandidate } from "./related-picker";
 import { TagPicker } from "./tag-picker";
@@ -357,7 +358,10 @@ export function WriteForm(props: {
             disabled={!canSubmit}
             className="relative h-14 w-full rounded-2xl bg-primary text-[17px] font-semibold text-white transition-[background-color,transform] hover:bg-primary-press active:scale-[0.99] disabled:bg-fill-strong disabled:text-text-3 disabled:active:scale-100"
           >
-            {submitLabel}
+            <span className="inline-flex items-center gap-2">
+              {(submitting || pendingUploads > 0) && <Spinner />}
+              {submitLabel}
+            </span>
             <span className="absolute top-1/2 right-5 -translate-y-1/2 text-[13px] font-medium opacity-60">⌘↵</span>
           </button>
           {editing && (
@@ -367,7 +371,10 @@ export function WriteForm(props: {
               disabled={submitting || deleting}
               className="h-11 w-full rounded-2xl text-[14px] font-semibold text-danger transition-colors hover:bg-danger-weak disabled:opacity-40"
             >
-              {deleting ? "삭제하는 중…" : `이 ${c.itemLabel} 삭제`}
+              <span className="inline-flex items-center gap-2">
+                {deleting && <Spinner />}
+                {deleting ? "삭제하는 중…" : `이 ${c.itemLabel} 삭제`}
+              </span>
             </button>
           )}
         </div>
