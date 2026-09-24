@@ -8,7 +8,7 @@ import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import { useEffect, useRef } from "react";
 
-export type BodyEditorApi = { getMarkdown: () => string; focus: () => void; clear: () => void };
+export type BodyEditorApi = { getMarkdown: () => string; focus: () => void; reset: (markdown: string) => void };
 
 // ``` + 스페이스로 만든 코드 블록은 언어가 ""인데, BlockNote는 지원 목록에 없는 언어를 만나면
 // 렌더링 중에 예외를 던진다. ""를 text의 별칭으로 등록해 막는다.
@@ -79,10 +79,13 @@ export default function BodyEditor(props: {
     onReady({
       getMarkdown: () => editor.blocksToMarkdownLossy(),
       focus: () => editor.focus(),
-      clear: () => {
-        // 비우는 것 자체는 "수정"이 아니므로 onChange를 막아 둔다
+      reset: (markdown) => {
+        // 비우거나 템플릿을 다시 까는 것 자체는 "수정"이 아니므로 onChange를 막아 둔다
         loading.current = true;
-        editor.replaceBlocks(editor.document, [{ type: "paragraph" }]);
+        editor.replaceBlocks(
+          editor.document,
+          markdown.trim() ? editor.tryParseMarkdownToBlocks(normalizeFences(markdown)) : [{ type: "paragraph" }],
+        );
         setTimeout(() => (loading.current = false), 0);
       },
     });

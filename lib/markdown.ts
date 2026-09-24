@@ -1,25 +1,29 @@
-// 용어 md 파일 포맷
+// 기록 md 파일 포맷 (모든 컬렉션 공통)
 //
 // ---
-// title: 폴백함수
-// description: 주 기능이 실패했을 때 대신 실행되는 함수
-// tags: [아키텍처패턴, 운영모니터링]
-// related: [서킷브레이커, 멱등성]   ← 연관 용어 파일명(slug), 있을 때만
+// title: git rebase
+// description: 커밋들을 다른 기준 위로 옮겨 다시 쌓는다
+// tags: [병합·리베이스]
+// related: [terms/커밋그래프, troubleshooting/rebase-충돌]   ← 있을 때만
+// usage: "git rebase -i <기준 커밋>"                          ← 컬렉션별 추가 필드(extra)
 // date: 2026-09-24
-// updated: 2026-09-30        ← 수정했을 때만
+// updated: 2026-09-30                                         ← 수정했을 때만
 // ---
 //
-// (상세 설명 마크다운. 이미지는 images/폴백함수/1.jpg 처럼 terms 기준 상대 경로)
+// (상세 설명 마크다운. 이미지는 images/{slug}/1.jpg 처럼 컬렉션 폴더 기준 상대 경로)
 
-export type TermDoc = {
+export type EntryDoc = {
   title: string;
   description: string;
   tags: string[];
   related?: string[];
+  extra?: Record<string, string>;
   date: string;
   updated?: string;
   body: string;
 };
+
+const RESERVED = new Set(["title", "description", "tags", "related", "date", "updated"]);
 
 const NEEDS_QUOTE = /[:#\[\]{},&*!|>'"%@`]|^\s|\s$|^[-?]/;
 
@@ -40,13 +44,16 @@ function unquote(value: string) {
   return v;
 }
 
-export function formatTerm(doc: TermDoc): string {
+export function formatEntry(doc: EntryDoc): string {
   const lines = [
     "---",
     `title: ${yamlScalar(doc.title)}`,
     `description: ${yamlScalar(doc.description)}`,
     `tags: [${doc.tags.map(yamlScalar).join(", ")}]`,
     ...(doc.related?.length ? [`related: [${doc.related.map(yamlScalar).join(", ")}]`] : []),
+    ...Object.entries(doc.extra ?? {})
+      .filter(([k, v]) => !RESERVED.has(k) && v.trim())
+      .map(([k, v]) => `${k}: ${yamlScalar(v.replace(/\s*\n\s*/g, " ").trim())}`),
     `date: ${doc.date}`,
     ...(doc.updated && doc.updated !== doc.date ? [`updated: ${doc.updated}`] : []),
     "---",
@@ -55,7 +62,7 @@ export function formatTerm(doc: TermDoc): string {
   return lines.join("\n") + "\n" + (body ? `\n${body}\n` : "");
 }
 
-export function parseTerm(source: string): TermDoc | null {
+export function parseEntry(source: string): EntryDoc | null {
   const match = source.replace(/^﻿/, "").match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) return null;
   const [, front, rawBody] = match;
@@ -88,11 +95,15 @@ export function parseTerm(source: string): TermDoc | null {
     }
   }
 
+  const extra: Record<string, string> = {};
+  for (const [k, v] of Object.entries(meta)) if (!RESERVED.has(k)) extra[k] = unquote(v);
+
   return {
     title: unquote(meta.title ?? ""),
     description,
     tags,
     related: list(meta.related).map((s) => s.normalize("NFC")),
+    extra,
     date: unquote(meta.date ?? ""),
     updated: meta.updated ? unquote(meta.updated) : undefined,
     body,

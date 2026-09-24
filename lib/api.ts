@@ -1,7 +1,7 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { ConflictError } from "./github";
-import { ValidationError } from "./term-store";
+import { ValidationError } from "./entry-store";
 
 export const fail = (error: string, status = 400) => NextResponse.json({ error }, { status });
 

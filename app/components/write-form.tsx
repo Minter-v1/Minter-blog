@@ -6,11 +6,12 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { prepareImage } from "@/lib/prepare-image";
 import { toSlug } from "@/lib/slug";
-import { MAX_TAGS_PER_TERM, type Tag } from "@/lib/tags";
+import { COLLECTION_LIST, COLLECTIONS, entryHref, type CollectionId } from "@/lib/collections";
+import type { Tag } from "@/lib/tags";
 import type { BodyEditorApi } from "./body-editor";
 import { Check } from "./icons";
 import { OutlinePopover } from "./outline";
-import { RelatedPicker, type TermSummary } from "./related-picker";
+import { RelatedPicker, type RelatedCandidate } from "./related-picker";
 import { TagPicker } from "./tag-picker";
 
 const BodyEditor = dynamic(() => import("./body-editor"), {
@@ -18,18 +19,29 @@ const BodyEditor = dynamic(() => import("./body-editor"), {
   loading: () => <p className="px-[54px] text-[16px] text-text-3">에디터 불러오는 중…</p>,
 });
 
-type Initial = { title: string; description: string; tags: string[]; related: string[]; body: string };
+type Initial = {
+  title: string;
+  description: string;
+  tags: string[];
+  related: string[];
+  extra: Record<string, string>;
+  body: string;
+};
+
+const squash = (s: string) => s.replace(/\s+/g, " ").trim();
 
 export function WriteForm(props: {
+  collection: CollectionId;
   mode: "create" | "edit";
   slug?: string;
   initial: Initial;
   tags: Tag[];
-  existingSlugs: string[];
-  candidates: TermSummary[]; // 연관 용어로 고를 수 있는 기존 용어 (자기 자신 제외)
-  backlinks: { slug: string; title: string }[]; // 이 용어를 연결해 둔 다른 글
+  existingSlugs: string[]; // 같은 컬렉션의 파일명 (중복 확인용)
+  candidates: RelatedCandidate[]; // 연관 기록으로 고를 수 있는 전 컬렉션 기록 (자기 자신 제외)
+  backlinks: { ref: string; title: string }[]; // 이 기록을 연결해 둔 다른 글
 }) {
   const router = useRouter();
+  const c = COLLECTIONS[props.collection];
   const editing = props.mode === "edit";
   const titleRef = useRef<HTMLInputElement>(null);
   const editorApi = useRef<BodyEditorApi | null>(null);
@@ -40,6 +52,7 @@ export function WriteForm(props: {
   const [tags, setTags] = useState(props.tags);
   const [selected, setSelected] = useState(props.initial.tags);
   const [related, setRelated] = useState(props.initial.related);
+  const [extra, setExtra] = useState(props.initial.extra);
   const [pendingUploads, setPendingUploads] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -102,17 +115,21 @@ export function WriteForm(props: {
     if (!canSubmit || !editorApi.current) return;
     setSubmitting(true);
     setError(null);
+    const markdown = editorApi.current.getMarkdown();
     const payload = {
+      collection: c.id,
       title,
       description,
       tags: selected,
       related,
-      body: editorApi.current.getMarkdown(),
+      extra,
+      // 템플릿(## 상황 ## 원인 …)을 채우지 않았으면 본문 없음으로
+      body: c.bodyTemplate && squash(markdown) === squash(c.bodyTemplate) ? "" : markdown,
       images: [...uploads.current].map(([url, v]) => ({ url, ...v })),
     };
 
     try {
-      const res = await fetch(editing ? `/api/terms/${encodeURIComponent(slug)}` : "/api/terms", {
+      const res = await fetch(editing ? `/api/entries/${c.id}/${encodeURIComponent(slug)}` : "/api/entries", {
         method: editing ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -121,13 +138,13 @@ export function WriteForm(props: {
       if (!res.ok || !data.slug) throw new Error(data.error ?? `저장 실패 (${res.status})`);
 
       setDirty(false);
-      const href = `/terms/${encodeURIComponent(data.slug)}`;
+      const href = entryHref(c.id, data.slug);
       if (editing) {
         router.push(href);
         router.refresh();
         return;
       }
-      // 일요일 배치 정리: 저장하고 바로 다음 용어를 쓸 수 있게 비운다
+      // 일요일 배치 정리: 저장하고 바로 다음 기록을 쓸 수 있게 비운다
       setToast({ text: `‘${title.trim()}’ 등록했어요`, href });
       uploads.current.forEach((_, url) => URL.revokeObjectURL(url));
       uploads.current.clear();
@@ -135,7 +152,8 @@ export function WriteForm(props: {
       setDescription("");
       setSelected([]);
       setRelated([]);
-      editorApi.current.clear();
+      setExtra({});
+      editorApi.current.reset(c.bodyTemplate);
       setDirty(false);
       router.refresh();
       titleRef.current?.focus();
@@ -144,7 +162,7 @@ export function WriteForm(props: {
     } finally {
       setSubmitting(false);
     }
-  }, [canSubmit, title, description, selected, related, editing, slug, router]);
+  }, [canSubmit, c, title, description, selected, related, extra, editing, slug, router]);
 
   // ⌘Enter는 에디터 안에서도 저장
   useEffect(() => {
@@ -163,11 +181,11 @@ export function WriteForm(props: {
     setDeleting(true);
     setError(null);
     try {
-      const res = await fetch(`/api/terms/${encodeURIComponent(slug)}`, { method: "DELETE" });
+      const res = await fetch(`/api/entries/${c.id}/${encodeURIComponent(slug)}`, { method: "DELETE" });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? `삭제 실패 (${res.status})`);
       setDirty(false);
-      router.push("/");
+      router.push(`/${c.id}`);
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -186,22 +204,45 @@ export function WriteForm(props: {
   return (
     <div className="grid grid-cols-[340px_minmax(0,1fr)] items-start gap-6">
       <aside className="sticky top-6 space-y-7 rounded-[24px] bg-surface p-7">
-        <div className="flex items-baseline justify-between">
-          <h1 className="text-[20px] font-bold tracking-[-0.02em]">{editing ? "용어 수정" : "새 용어"}</h1>
-          {editing && (
-            <Link href={`/terms/${encodeURIComponent(slug)}`} className="text-[13px] font-medium text-text-3 hover:text-text-2">
+        {editing ? (
+          <div className="flex items-baseline justify-between">
+            <h1 className="text-[20px] font-bold tracking-[-0.02em]">{c.itemLabel} 수정</h1>
+            <Link href={entryHref(c.id, slug)} className="text-[13px] font-medium text-text-3 hover:text-text-2">
               취소
             </Link>
-          )}
-        </div>
+          </div>
+        ) : (
+          // 새로 쓸 때는 어느 컬렉션에 쓸지 고른다
+          <div className="grid grid-cols-3 gap-1 rounded-2xl bg-fill p-1" role="tablist" aria-label="컬렉션">
+            {COLLECTION_LIST.map((col) => (
+              <button
+                key={col.id}
+                type="button"
+                role="tab"
+                aria-selected={col.id === c.id}
+                onClick={() => {
+                  if (col.id === c.id) return;
+                  if (dirty && !window.confirm("작성 중인 내용이 사라져요. 다른 컬렉션으로 옮길까요?")) return;
+                  setDirty(false);
+                  router.push(`/write?c=${col.id}`);
+                }}
+                className={`h-9 rounded-xl text-[13px] font-semibold transition-colors ${
+                  col.id === c.id ? "bg-surface text-text shadow-sm" : "text-text-3 hover:text-text-2"
+                }`}
+              >
+                {col.shortLabel}
+              </button>
+            ))}
+          </div>
+        )}
 
-        <Field label="용어명" htmlFor="title">
+        <Field label={c.titleLabel} htmlFor="title">
           <input
             id="title"
             ref={titleRef}
             autoFocus={!editing}
             autoComplete="off"
-            placeholder="예) 폴백함수"
+            placeholder={c.titlePlaceholder}
             value={title}
             onChange={(e) => {
               setTitle(e.target.value);
@@ -217,25 +258,31 @@ export function WriteForm(props: {
           />
           {slug && (
             <p className={`mt-2 px-1 text-[13px] ${duplicate ? "text-danger" : "text-text-3"}`}>
-              {duplicate && "이미 등록된 용어예요 · "}
-              <span className="font-mono text-[12px]">terms/{slug}.md</span>
+              {duplicate && `이미 등록된 ${c.itemLabel}예요 · `}
+              <span className="font-mono text-[12px]">
+                {c.dir}/{slug}.md
+              </span>
               {editing && " · 파일명은 그대로 유지돼요"}
             </p>
           )}
         </Field>
 
-        <Field label="한 줄 정의" htmlFor="description" aside={<span className="tabular-nums">{description.length}</span>}>
+        <Field
+          label={c.descriptionLabel}
+          htmlFor="description"
+          aside={<span className="tabular-nums">{description.length}</span>}
+        >
           <textarea
             id="description"
             rows={3}
-            placeholder="목록에 보이는 짧은 정의"
+            placeholder={c.descriptionPlaceholder}
             value={description}
             onChange={(e) => {
               setDescription(e.target.value.replace(/\n/g, " "));
               setDirty(true);
             }}
             onKeyDown={(e) => {
-              // 한 줄 정의는 줄바꿈 없이. Enter는 상세 설명으로 이동
+              // 한 줄 설명은 줄바꿈 없이. Enter는 상세 설명으로 이동
               if (e.key === "Enter" && !e.metaKey && !e.ctrlKey && !e.nativeEvent.isComposing) {
                 e.preventDefault();
                 editorApi.current?.focus();
@@ -245,15 +292,33 @@ export function WriteForm(props: {
           />
         </Field>
 
+        {c.extraFields.map((f) => (
+          <Field key={f.key} label={f.label} htmlFor={`extra-${f.key}`}>
+            <input
+              id={`extra-${f.key}`}
+              autoComplete="off"
+              spellCheck={false}
+              placeholder={f.placeholder}
+              value={extra[f.key] ?? ""}
+              onChange={(e) => {
+                setExtra((prev) => ({ ...prev, [f.key]: e.target.value }));
+                setDirty(true);
+              }}
+              className={`${inputClass} h-11 ${f.mono ? "font-mono text-[13px]" : "text-[15px]"}`}
+            />
+          </Field>
+        ))}
+
         <Field
-          label="태그"
+          label={c.tagLabel}
           aside={
-            <span className={`tabular-nums ${selected.length === MAX_TAGS_PER_TERM ? "text-primary" : ""}`}>
-              {selected.length}/{MAX_TAGS_PER_TERM}
+            <span className={`tabular-nums ${selected.length === c.maxTags ? "text-primary" : ""}`}>
+              {selected.length}/{c.maxTags}
             </span>
           }
         >
           <TagPicker
+            collection={c.id}
             tags={tags}
             selected={selected}
             onChange={(s) => {
@@ -264,8 +329,9 @@ export function WriteForm(props: {
           />
         </Field>
 
-        <Field label="연관 용어" aside={related.length > 0 && <span className="tabular-nums">{related.length}</span>}>
+        <Field label="연관 기록" aside={related.length > 0 && <span className="tabular-nums">{related.length}</span>}>
           <RelatedPicker
+            collection={c.id}
             candidates={props.candidates}
             selected={related}
             onChange={(r) => {
@@ -276,7 +342,8 @@ export function WriteForm(props: {
           />
           {props.backlinks.length > 0 && (
             <p className="mt-2 px-1 text-[13px] leading-relaxed text-text-3">
-              {props.backlinks.map((b) => b.title).join(", ")}에서 이 용어를 연결했어요. 상세 화면에 자동으로 함께 보여요.
+              {props.backlinks.map((b) => b.title).join(", ")}에서 이 {c.itemLabel}을(를) 연결했어요. 상세 화면에 자동으로
+              함께 보여요.
             </p>
           )}
         </Field>
@@ -300,7 +367,7 @@ export function WriteForm(props: {
               disabled={submitting || deleting}
               className="h-11 w-full rounded-2xl text-[14px] font-semibold text-danger transition-colors hover:bg-danger-weak disabled:opacity-40"
             >
-              {deleting ? "삭제하는 중…" : "이 용어 삭제"}
+              {deleting ? "삭제하는 중…" : `이 ${c.itemLabel} 삭제`}
             </button>
           )}
         </div>

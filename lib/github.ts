@@ -41,7 +41,7 @@ async function gh<T>(path: string, init: RequestInit = {}): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-// ---------- 읽기: GraphQL 한 번으로 terms 디렉토리 전체 ----------
+// ---------- 읽기: GraphQL 한 번으로 컬렉션 폴더 전체 ----------
 
 type TreeEntry = {
   name: string;
@@ -51,45 +51,44 @@ type TreeEntry = {
 
 export type RepoSnapshot = {
   commitSha: string | null;
-  files: { name: string; text: string }[]; // terms 바로 아래 파일들
+  dirs: Record<string, { name: string; text: string }[]>; // 폴더 → 바로 아래 텍스트 파일들
 };
 
-export async function readTermsDir(): Promise<RepoSnapshot> {
-  const { owner, repo, branch, dir } = githubEnv();
+export async function readDirs(dirs: string[]): Promise<RepoSnapshot> {
+  const { owner, repo, branch } = githubEnv();
+  // 폴더마다 별칭(d0, d1, ...)을 붙여 한 번에 요청
+  const fields = dirs
+    .map(
+      (_, i) =>
+        `d${i}: object(expression: $e${i}) { ... on Tree { entries { name type object { ... on Blob { text } } } } }`,
+    )
+    .join("\n");
   const query = `
-    query($owner: String!, $name: String!, $qualifiedRef: String!, $expr: String!) {
+    query($owner: String!, $name: String!, $qualifiedRef: String!, ${dirs.map((_, i) => `$e${i}: String!`).join(", ")}) {
       repository(owner: $owner, name: $name) {
         ref(qualifiedName: $qualifiedRef) { target { oid } }
-        object(expression: $expr) {
-          ... on Tree { entries { name type object { ... on Blob { text } } } }
-        }
+        ${fields}
       }
     }`;
+  const variables: Record<string, string> = { owner, name: repo, qualifiedRef: `refs/heads/${branch}` };
+  dirs.forEach((dir, i) => (variables[`e${i}`] = `${branch}:${dir}`));
+
   const data = await gh<{
-    data?: {
-      repository: {
-        ref: { target: { oid: string } } | null;
-        object: { entries: TreeEntry[] } | null;
-      } | null;
-    };
+    data?: { repository: ({ ref: { target: { oid: string } } | null } & Record<string, unknown>) | null };
     errors?: { message: string }[];
-  }>("/graphql", {
-    method: "POST",
-    body: JSON.stringify({
-      query,
-      variables: { owner, name: repo, qualifiedRef: `refs/heads/${branch}`, expr: `${branch}:${dir}` },
-    }),
-  });
+  }>("/graphql", { method: "POST", body: JSON.stringify({ query, variables }) });
   if (data.errors?.length) throw new GitHubError(400, data.errors[0].message);
   const repository = data.data?.repository;
   if (!repository) throw new GitHubError(404, `${owner}/${repo} 저장소를 찾을 수 없습니다.`);
 
-  return {
-    commitSha: repository.ref?.target.oid ?? null,
-    files: (repository.object?.entries ?? [])
+  const result: RepoSnapshot["dirs"] = {};
+  dirs.forEach((dir, i) => {
+    const tree = repository[`d${i}`] as { entries: TreeEntry[] } | null;
+    result[dir] = (tree?.entries ?? [])
       .filter((e) => e.type === "blob" && typeof e.object?.text === "string")
-      .map((e) => ({ name: e.name, text: e.object!.text! })),
-  };
+      .map((e) => ({ name: e.name, text: e.object!.text! }));
+  });
+  return { commitSha: repository.ref?.target.oid ?? null, dirs: result };
 }
 
 export async function readTextFile(path: string, ref: string): Promise<string | null> {

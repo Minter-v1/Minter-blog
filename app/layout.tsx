@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { SITE } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "IT 용어 사전",
-  description: "공부하다 마주친 IT 용어를 정리하는 개인 사전",
+  title: { default: SITE.name, template: `%s · ${SITE.name}` },
+  description: SITE.bio,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { COLLECTIONS, type CollectionId } from "@/lib/collections";
 import { Close, Search } from "./icons";
 
-export type TermSummary = { slug: string; title: string; description: string; tags: string[] };
+// ref: "git/rebase"처럼 컬렉션을 포함한 식별자
+export type RelatedCandidate = { ref: string; collection: CollectionId; title: string; description: string; tags: string[] };
 
 /**
- * 연관 용어 고르기. 검색어가 없으면 전체 목록(고른 태그와 겹치는 용어를 맨 위에), 있으면 검색 결과.
+ * 연관 기록 고르기(컬렉션을 넘나든다). 검색어가 없으면 전체 목록(같은 컬렉션에서 태그가 겹치는 것을 맨 위에),
+ * 있으면 검색 결과.
  */
 export function RelatedPicker(props: {
-  candidates: TermSummary[];
+  collection: CollectionId;
+  candidates: RelatedCandidate[];
   selected: string[];
   onChange: (slugs: string[]) => void;
   contextTags: string[];
@@ -20,11 +24,11 @@ export function RelatedPicker(props: {
   const [cursor, setCursor] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const bySlug = useMemo(() => new Map(candidates.map((c) => [c.slug, c])), [candidates]);
+  const byRef = useMemo(() => new Map(candidates.map((c) => [c.ref, c])), [candidates]);
 
   // 드롭다운 그룹. 검색어가 없으면 같은 태그 추천 + 전체, 있으면 검색 결과
   const groups = useMemo(() => {
-    const pool = candidates.filter((c) => !selected.includes(c.slug));
+    const pool = candidates.filter((c) => !selected.includes(c.ref));
     const q = query.trim().toLowerCase();
     if (q) {
       const hits = pool
@@ -34,16 +38,19 @@ export function RelatedPicker(props: {
       return [{ heading: "검색 결과", items: hits }];
     }
     const suggested = pool
-      .map((c) => ({ c, score: c.tags.filter((t) => contextTags.includes(t)).length }))
+      .map((c) => ({
+        c,
+        score: c.collection === props.collection ? c.tags.filter((t) => contextTags.includes(t)).length : 0,
+      }))
       .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score)
       .map((x) => x.c);
     const rest = pool.filter((c) => !suggested.includes(c));
     return [
-      { heading: "같은 태그의 용어", items: suggested },
-      { heading: suggested.length ? "그 밖의 용어" : "전체", items: rest },
+      { heading: `같은 ${COLLECTIONS[props.collection].tagLabel}`, items: suggested },
+      { heading: suggested.length ? "그 밖의 기록" : "전체", items: rest },
     ].filter((g) => g.items.length > 0);
-  }, [candidates, selected, query, contextTags]);
+  }, [candidates, selected, query, contextTags, props.collection]);
 
   const options = groups.flatMap((g) => g.items);
   const listRef = useRef<HTMLDivElement>(null);
@@ -53,8 +60,8 @@ export function RelatedPicker(props: {
     listRef.current?.querySelector(`[data-index="${cursor}"]`)?.scrollIntoView({ block: "nearest" });
   }, [cursor]);
 
-  function add(slug: string) {
-    onChange([...selected, slug]);
+  function add(ref: string) {
+    onChange([...selected, ref]);
     setQuery("");
     setCursor(0);
     inputRef.current?.focus();
@@ -64,16 +71,16 @@ export function RelatedPicker(props: {
     <div>
       {selected.length > 0 && (
         <ul className="mb-2 flex flex-wrap gap-2">
-          {selected.map((slug) => (
+          {selected.map((ref) => (
             <li
-              key={slug}
+              key={ref}
               className="inline-flex h-9 items-center gap-1 rounded-full bg-primary-weak pr-1.5 pl-3.5 text-[14px] font-semibold text-primary"
             >
-              {bySlug.get(slug)?.title ?? slug}
+              {byRef.get(ref)?.title ?? ref}
               <button
                 type="button"
-                onClick={() => onChange(selected.filter((s) => s !== slug))}
-                aria-label={`${bySlug.get(slug)?.title ?? slug} 연결 해제`}
+                onClick={() => onChange(selected.filter((s) => s !== ref))}
+                aria-label={`${byRef.get(ref)?.title ?? ref} 연결 해제`}
                 className="flex size-6 items-center justify-center rounded-full transition-colors hover:bg-primary/15"
               >
                 <Close className="size-3" />
@@ -88,7 +95,7 @@ export function RelatedPicker(props: {
         <input
           ref={inputRef}
           value={query}
-          placeholder={candidates.length ? "연결할 용어 검색" : "아직 연결할 용어가 없어요"}
+          placeholder={candidates.length ? "연결할 기록 검색" : "아직 연결할 기록이 없어요"}
           disabled={candidates.length === 0}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -109,7 +116,7 @@ export function RelatedPicker(props: {
               setCursor((c) => Math.max(c - 1, 0));
             } else if (e.key === "Enter" && !e.metaKey && !e.ctrlKey) {
               e.preventDefault();
-              if (options[cursor]) add(options[cursor].slug);
+              if (options[cursor]) add(options[cursor].ref);
             } else if (e.key === "Escape") {
               setOpen(false);
             } else if (e.key === "Backspace" && !query && selected.length) {
@@ -123,7 +130,7 @@ export function RelatedPicker(props: {
           <div className="absolute top-full right-0 left-0 z-30 mt-2 animate-[fade-in_120ms_ease-out] rounded-2xl bg-surface p-1.5 shadow-[0_8px_30px_rgba(0,23,51,0.14)]">
             {options.length === 0 ? (
               <p className="px-2.5 py-3 text-[13px] text-text-3">
-                {query.trim() ? `‘${query.trim()}’에 맞는 용어가 없어요` : "모든 용어를 이미 연결했어요"}
+                {query.trim() ? `‘${query.trim()}’에 맞는 기록이 없어요` : "모든 기록을 이미 연결했어요"}
               </p>
             ) : (
               <div ref={listRef} className="max-h-[320px] overflow-y-auto">
@@ -137,18 +144,25 @@ export function RelatedPicker(props: {
                       {g.items.map((c) => {
                         const i = options.indexOf(c);
                         return (
-                          <li key={c.slug}>
+                          <li key={c.ref}>
                             <button
                               type="button"
                               data-index={i}
                               onMouseDown={(e) => e.preventDefault()} // 입력창 blur보다 먼저 선택되도록
                               onMouseEnter={() => setCursor(i)}
-                              onClick={() => add(c.slug)}
+                              onClick={() => add(c.ref)}
                               className={`block w-full rounded-xl px-2.5 py-2 text-left transition-colors ${
                                 i === cursor ? "bg-fill" : ""
                               }`}
                             >
-                              <span className="block truncate text-[14px] font-semibold">{c.title}</span>
+                              <span className="flex items-baseline gap-1.5">
+                                <span className="truncate text-[14px] font-semibold">{c.title}</span>
+                                {c.collection !== props.collection && (
+                                  <span className="shrink-0 text-[11px] font-semibold text-text-3">
+                                    {COLLECTIONS[c.collection].label}
+                                  </span>
+                                )}
+                              </span>
                               <span className="block truncate text-[12px] text-text-3">{c.description}</span>
                             </button>
                           </li>

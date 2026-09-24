@@ -1,23 +1,12 @@
 export type Tag = { name: string; hint?: string };
 
-export const MAX_TAGS_PER_TERM = 3;
-
-export const DEFAULT_TAGS: Tag[] = [
-  { name: "네트워크통신", hint: "CDN, DNS, 프로토콜, 로드밸런싱" },
-  { name: "데이터저장", hint: "Redis, cache, DB, 스트림" },
-  { name: "아키텍처패턴", hint: "폴백함수, 메시지큐, 이벤트, MSA" },
-  { name: "운영모니터링", hint: "로그, 알림, 트레이싱" },
-  { name: "도구실습", hint: "CLI, 프레임워크 사용법, k8s, terraform" },
-  { name: "CS기초", hint: "알고리즘, OS, 자료구조" },
-  { name: "채용", hint: "레쥬메, 면접, 인적성" },
-];
-
-// tags.json은 ["이름", ...] 또는 [{ "name": "이름", "hint": "예시" }, ...] 둘 다 허용
-export function parseTags(source: string | null): Tag[] {
-  if (!source) return DEFAULT_TAGS;
+// 컬렉션마다 {폴더}/tags.json. 파일이 없으면 컬렉션 기본 태그(lib/collections.ts)
+// ["이름", ...] 또는 [{ "name": "이름", "hint": "예시" }, ...] 둘 다 허용
+export function parseTags(source: string | null, defaults: Tag[]): Tag[] {
+  if (!source) return defaults;
   try {
     const data: unknown = JSON.parse(source);
-    if (!Array.isArray(data)) return DEFAULT_TAGS;
+    if (!Array.isArray(data)) return defaults;
     return data
       .map((item): Tag | null => {
         if (typeof item === "string") return { name: item };
@@ -28,7 +17,7 @@ export function parseTags(source: string | null): Tag[] {
       })
       .filter((t): t is Tag => t !== null);
   } catch {
-    return DEFAULT_TAGS;
+    return defaults;
   }
 }
 

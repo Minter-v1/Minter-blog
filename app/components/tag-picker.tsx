@@ -1,27 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { MAX_TAGS_PER_TERM, type Tag } from "@/lib/tags";
+import { COLLECTIONS, type CollectionId } from "@/lib/collections";
+import type { Tag } from "@/lib/tags";
 import { Check, Plus } from "./icons";
 
 export function TagPicker(props: {
+  collection: CollectionId;
   tags: Tag[];
   selected: string[];
   onChange: (selected: string[]) => void;
   onTagsChange: (tags: Tag[]) => void;
 }) {
   const { tags, selected, onChange } = props;
+  const { maxTags, tagLabel } = COLLECTIONS[props.collection];
 
   function toggle(name: string) {
     if (selected.includes(name)) onChange(selected.filter((t) => t !== name));
-    else if (selected.length < MAX_TAGS_PER_TERM) onChange([...selected, name]);
+    else if (selected.length < maxTags) onChange([...selected, name]);
   }
 
   return (
     <div className="flex flex-wrap gap-2">
       {tags.map((tag) => {
         const on = selected.includes(tag.name);
-        const full = !on && selected.length >= MAX_TAGS_PER_TERM;
+        const full = !on && selected.length >= maxTags;
         return (
           <button
             key={tag.name}
@@ -40,16 +43,19 @@ export function TagPicker(props: {
         );
       })}
       <NewTagInput
+        collection={props.collection}
+        label={tagLabel}
         onAdded={(next, name) => {
           props.onTagsChange(next);
-          if (selected.length < MAX_TAGS_PER_TERM) onChange([...selected, name]);
+          if (selected.length < maxTags) onChange([...selected, name]);
         }}
       />
     </div>
   );
 }
 
-function NewTagInput({ onAdded }: { onAdded: (tags: Tag[], name: string) => void }) {
+function NewTagInput(props: { collection: CollectionId; label: string; onAdded: (tags: Tag[], name: string) => void }) {
+  const { onAdded } = props;
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState("");
   const [pending, setPending] = useState(false);
@@ -64,7 +70,7 @@ function NewTagInput({ onAdded }: { onAdded: (tags: Tag[], name: string) => void
       const res = await fetch("/api/tags", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name, collection: props.collection }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string; tags?: Tag[] };
       if (!res.ok || !data.tags) throw new Error(data.error ?? `태그 추가 실패 (${res.status})`);
@@ -86,7 +92,7 @@ function NewTagInput({ onAdded }: { onAdded: (tags: Tag[], name: string) => void
         className="inline-flex h-9 items-center gap-1 rounded-full border border-dashed border-fill-strong px-3 text-[14px] font-medium text-text-3 transition-colors hover:border-text-3 hover:text-text-2"
       >
         <Plus className="size-3.5" />
-        태그 추가
+        {props.label} 추가
       </button>
     );
   }
@@ -113,7 +119,7 @@ function NewTagInput({ onAdded }: { onAdded: (tags: Tag[], name: string) => void
           onBlur={() => {
             if (!value.trim() && !pending) setEditing(false);
           }}
-          placeholder="새 태그 이름"
+          placeholder={`새 ${props.label} 이름`}
           disabled={pending}
           className="min-w-0 flex-1 bg-transparent text-[14px] font-medium outline-none placeholder:text-text-3"
         />
