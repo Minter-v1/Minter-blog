@@ -3,7 +3,7 @@ import { COLLECTION_LIST, type CollectionId } from "@/lib/collections";
 import { SITE } from "@/lib/site";
 import { LogoutButton } from "./logout-button";
 
-export function SiteHeader(props: { authed: boolean; active?: CollectionId; writeHref?: string }) {
+export function SiteHeader(props: { authed: boolean; active?: CollectionId | "about"; writeHref?: string }) {
   return (
     <header className="flex items-center justify-between gap-6 py-7">
       <div className="flex items-center gap-7">
@@ -23,6 +23,15 @@ export function SiteHeader(props: { authed: boolean; active?: CollectionId; writ
               {c.label}
             </Link>
           ))}
+          <Link
+            href="/about"
+            aria-current={props.active === "about" ? "page" : undefined}
+            className={`rounded-lg px-3 py-1.5 transition-colors ${
+              props.active === "about" ? "bg-fill-strong/70 text-text" : "text-text-3 hover:bg-fill-strong/50 hover:text-text"
+            }`}
+          >
+            About
+          </Link>
         </nav>
       </div>
       <div className="flex items-center gap-1 text-[14px] font-medium text-text-2">

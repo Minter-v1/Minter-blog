@@ -38,7 +38,7 @@ type GNode = SimulationNodeDatum & {
 type GLink = SimulationLinkDatum<GNode> & { related: boolean };
 
 const HEIGHT = 520;
-const POINTER_RADIUS = 110;
+const POINTER_RADIUS = 80;
 const BLUE = "#3182f6";
 const GREY = "#c5ccd3";
 
@@ -146,7 +146,8 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
         ),
       )
       .force("y", forceY<GNode>(HEIGHT / 2).strength(0.045))
-      // 마우스 근처의 점은 살짝 비켜난다
+      // 커서 주변의 "다른" 점들만 살짝 자리를 비켜 준다.
+      // 가리키려는 점(커서 바로 아래, 고정된 점)은 밀지 않는다 — 밀면 점이 도망가서 누를 수가 없다
       .force("pointer", () => {
         const p = pointer.current;
         if (!p) return;
@@ -155,8 +156,9 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
           const dx = n.x! - p.x;
           const dy = n.y! - p.y;
           const dist = Math.hypot(dx, dy) || 1;
+          if (dist < n.r + 18) continue;
           if (dist < POINTER_RADIUS) {
-            const push = ((POINTER_RADIUS - dist) / POINTER_RADIUS) * (n.hub ? 0.2 : 0.9);
+            const push = ((POINTER_RADIUS - dist) / POINTER_RADIUS) * (n.hub ? 0.08 : 0.3);
             n.vx! += (dx / dist) * push;
             n.vy! += (dy / dist) * push;
           }
@@ -235,6 +237,20 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
   );
 
   const drag = useRef<{ node: GNode; sx: number; sy: number; moved: boolean } | null>(null);
+
+  // 올려 둔 점은 그 자리에 고정한다(툴팁을 읽고 누를 수 있게). 떼면 다시 떠다닌다
+  useEffect(() => {
+    const n = hovered ? nodes.find((x) => x.id === hovered) : null;
+    if (!n) return;
+    n.fx = n.x;
+    n.fy = n.y;
+    return () => {
+      if (drag.current?.node !== n) {
+        n.fx = null;
+        n.fy = null;
+      }
+    };
+  }, [hovered, nodes]);
 
   function local(e: React.PointerEvent) {
     const rect = svgRef.current!.getBoundingClientRect();

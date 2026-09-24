@@ -6,7 +6,7 @@ export function rawBaseUrl(owner: string, repo: string, ref: string, dir: string
   return `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${encodePath(dir)}/`;
 }
 
-const RELATIVE_IMAGE = /(!\[[^\]]*\]\()(?!https?:|blob:|data:)(?:\.\/)?([^)\s]+)(\))/g;
+const RELATIVE_IMAGE = /(!\[[^\]]*\]\()(?!https?:|blob:|data:|\/)(?:\.\/)?([^)\s]+)(\))/g;
 
 // md 안의 상대 경로 이미지(images/폴백함수/1.jpg)를 브라우저가 열 수 있는 raw URL로
 export function absolutizeImages(markdown: string, rawBase: string) {
@@ -20,7 +20,8 @@ export function absolutizeImages(markdown: string, rawBase: string) {
 }
 
 export function resolveImageSrc(src: string, rawBase: string) {
-  if (/^(https?:|blob:|data:)/.test(src)) return src;
+  // 외부 URL, 미리보기, 사이트 절대 경로(/projects/...)는 그대로
+  if (/^(https?:|blob:|data:|\/)/.test(src)) return src;
   let decoded = src.replace(/^\.\//, "");
   try {
     decoded = decodeURIComponent(decoded);
