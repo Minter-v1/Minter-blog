@@ -26,7 +26,7 @@ export default async function AboutPage() {
   const byRef = new Map(entries.map((e) => [e.ref, e]));
 
   const stats = [
-    { emoji: "🚀", label: "프로젝트", value: PROFILE.projects.length },
+    { emoji: "🗂️", label: "프로젝트", value: PROFILE.projects.length },
     { emoji: "📜", label: "자격증", value: PROFILE.certifications.length },
     { emoji: "🏆", label: "수상", value: PROFILE.awards.length },
     { emoji: "📄", label: "제1저자 논문", value: PROFILE.papers.length },
@@ -41,7 +41,7 @@ export default async function AboutPage() {
         <section className="pt-10 pb-4">
           <div className="flex items-start justify-between gap-10">
             <div className="min-w-0">
-              <span className="inline-flex rounded-full bg-primary-weak px-3 py-1 text-[13px] font-semibold text-primary">
+              <span className="text-[16px] font-semibold text-primary">
                 {PROFILE.role}
               </span>
               <h1 className="mt-4 flex items-baseline gap-3">
@@ -105,7 +105,7 @@ export default async function AboutPage() {
         </section>
 
         {/* 프로젝트 */}
-        <Section emoji="🚀" title="프로젝트" id="projects">
+        <Section emoji="🗂️" title="프로젝트" id="projects">
           <div className="grid grid-cols-2 gap-4">
             {PROFILE.projects.map((p) => {
               const related = (p.related ?? []).map((r) => byRef.get(r)).filter((e): e is Entry => !!e);
