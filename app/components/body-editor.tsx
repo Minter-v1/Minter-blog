@@ -7,6 +7,7 @@ import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import { useEffect, useRef } from "react";
+import { decodeColors, encodeColors, htmlToTokens, tokensToHtml } from "@/lib/rich-markdown";
 
 export type BodyEditorApi = { getMarkdown: () => string; focus: () => void; reset: (markdown: string) => void };
 
@@ -72,19 +73,24 @@ export default function BodyEditor(props: {
   const { initialMarkdown, onReady } = props;
 
   useEffect(() => {
+    // md → 블록. 저장해 둔 <span data-*-color>를 다시 글자색·배경색으로 되살린다
+    const fromMarkdown = (markdown: string) =>
+      decodeColors(editor.tryParseMarkdownToBlocks(normalizeFences(htmlToTokens(markdown))));
+
     if (initialMarkdown.trim()) {
-      editor.replaceBlocks(editor.document, editor.tryParseMarkdownToBlocks(normalizeFences(initialMarkdown)));
+      editor.replaceBlocks(editor.document, fromMarkdown(initialMarkdown));
     }
     setTimeout(() => (loading.current = false), 0);
     onReady({
-      getMarkdown: () => editor.blocksToMarkdownLossy(),
+      // 글자색·배경색은 마크다운 문법이 없어 <span data-*-color>로 남긴다 (lib/rich-markdown.ts)
+      getMarkdown: () => tokensToHtml(editor.blocksToMarkdownLossy(encodeColors(editor.document))),
       focus: () => editor.focus(),
       reset: (markdown) => {
         // 비우거나 템플릿을 다시 까는 것 자체는 "수정"이 아니므로 onChange를 막아 둔다
         loading.current = true;
         editor.replaceBlocks(
           editor.document,
-          markdown.trim() ? editor.tryParseMarkdownToBlocks(normalizeFences(markdown)) : [{ type: "paragraph" }],
+          markdown.trim() ? fromMarkdown(markdown) : [{ type: "paragraph" }],
         );
         setTimeout(() => (loading.current = false), 0);
       },
