@@ -7,7 +7,7 @@ import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import { useEffect, useRef } from "react";
-import { decodeColors, encodeColors, htmlToTokens, tokensToHtml } from "@/lib/rich-markdown";
+import { decodeBlocks, encodeBlocks, htmlToTokens, tokensToHtml } from "@/lib/rich-markdown";
 
 export type BodyEditorApi = { getMarkdown: () => string; focus: () => void; reset: (markdown: string) => void };
 
@@ -73,17 +73,17 @@ export default function BodyEditor(props: {
   const { initialMarkdown, onReady } = props;
 
   useEffect(() => {
-    // md → 블록. 저장해 둔 <span data-*-color>를 다시 글자색·배경색으로 되살린다
+    // md → 블록. 저장해 둔 <span data-*-color>, <br>을 다시 글자색·배경색·빈 줄로 되살린다
     const fromMarkdown = (markdown: string) =>
-      decodeColors(editor.tryParseMarkdownToBlocks(normalizeFences(htmlToTokens(markdown))));
+      decodeBlocks(editor.tryParseMarkdownToBlocks(normalizeFences(htmlToTokens(markdown))));
 
     if (initialMarkdown.trim()) {
       editor.replaceBlocks(editor.document, fromMarkdown(initialMarkdown));
     }
     setTimeout(() => (loading.current = false), 0);
     onReady({
-      // 글자색·배경색은 마크다운 문법이 없어 <span data-*-color>로 남긴다 (lib/rich-markdown.ts)
-      getMarkdown: () => tokensToHtml(editor.blocksToMarkdownLossy(encodeColors(editor.document))),
+      // 글자색·배경색·빈 줄은 마크다운이 보존하지 못해 <span data-*-color>, <br>로 남긴다 (lib/rich-markdown.ts)
+      getMarkdown: () => tokensToHtml(editor.blocksToMarkdownLossy(encodeBlocks(editor.document))),
       focus: () => editor.focus(),
       reset: (markdown) => {
         // 비우거나 템플릿을 다시 까는 것 자체는 "수정"이 아니므로 onChange를 막아 둔다
