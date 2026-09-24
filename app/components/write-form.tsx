@@ -213,7 +213,7 @@ export function WriteForm(props: {
           </div>
         ) : (
           // 새로 쓸 때는 어느 컬렉션에 쓸지 고른다
-          <div className="grid grid-cols-3 gap-1 rounded-2xl bg-fill p-1" role="tablist" aria-label="컬렉션">
+          <div className="grid grid-cols-4 gap-1 rounded-2xl bg-fill p-1" role="tablist" aria-label="컬렉션">
             {COLLECTION_LIST.map((col) => (
               <button
                 key={col.id}

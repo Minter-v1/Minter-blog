@@ -17,7 +17,7 @@ export default async function CollectionPage(props: PageProps<"/[collection]">) 
   const { collection } = await props.params;
   if (!isCollectionId(collection)) notFound();
   const c = COLLECTIONS[collection];
-  const [authed, { tag }] = await Promise.all([isAuthed(), props.searchParams]);
+  const [authed, { tag, q }] = await Promise.all([isAuthed(), props.searchParams]);
 
   let archive: Archive | null = null;
   let loadError: string | null = null;
@@ -54,6 +54,7 @@ export default async function CollectionPage(props: PageProps<"/[collection]">) 
             entries={entries.map(summarize)}
             tags={archive.tags[collection]}
             initialTag={typeof tag === "string" ? tag : null}
+            initialQuery={typeof q === "string" ? q : ""}
           />
         </section>
       )}

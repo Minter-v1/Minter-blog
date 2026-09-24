@@ -38,6 +38,22 @@ export default async function EntryPage(props: Props) {
   const { entry, archive } = found;
   const c = COLLECTIONS[entry.collection];
   const related = relatedOf(entry, archive.entries);
+
+  // Git 명령어 화면: 이 명령어를 언급하거나 Git 분야인 트러블슈팅을 자동으로 보여준다 (연결 안 해 둬도)
+  const gitTroubles =
+    c.id === "git"
+      ? archive.entries
+          .filter((e) => e.collection === "troubleshooting" && !related.some((r) => r.ref === e.ref))
+          .map((e) => {
+            const text = [e.title, e.description, e.extra.error ?? "", e.body].join("\n").toLowerCase();
+            const mentions = text.includes(entry.title.toLowerCase());
+            return { e, score: mentions ? 2 : e.tags.includes("Git") ? 1 : 0 };
+          })
+          .filter((x) => x.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 5)
+          .map((x) => x.e)
+      : [];
   const editHref = `/write?c=${c.id}&edit=${encodeURIComponent(entry.slug)}`;
 
   return (
@@ -135,6 +151,30 @@ export default async function EntryPage(props: Props) {
                       href={entryHref(r.collection, r.slug)}
                       collection={r.collection}
                       showCollection={r.collection !== c.id}
+                      title={r.title}
+                      description={r.description}
+                      tags={r.tags}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {gitTroubles.length > 0 && (
+            <section className="mt-6 rounded-[28px] bg-surface px-8 pt-8 pb-6">
+              <h2 className="px-4 text-[17px] font-bold tracking-[-0.02em]">
+                Git 트러블슈팅
+                <span className="ml-1.5 text-primary tabular-nums">{gitTroubles.length}</span>
+              </h2>
+              <p className="mt-1 px-4 text-[13px] text-text-3">이 명령어를 언급했거나 Git 분야인 트러블슈팅이에요.</p>
+              <ul className="mt-3">
+                {gitTroubles.map((r) => (
+                  <li key={r.ref}>
+                    <RelatedRow
+                      href={entryHref(r.collection, r.slug)}
+                      collection={r.collection}
+                      showCollection={false}
                       title={r.title}
                       description={r.description}
                       tags={r.tags}

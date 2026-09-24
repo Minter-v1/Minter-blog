@@ -36,6 +36,11 @@ async function gh<T>(path: string, init: RequestInit = {}): Promise<T> {
     try {
       message = ((await res.json()) as { message?: string }).message ?? message;
     } catch {}
+    if (res.status === 403) {
+      // 어느 repo에 거부됐는지 보여야 "설정이 엉뚱한 repo를 가리키는" 경우를 바로 알아챈다
+      const { owner, repo } = githubEnv();
+      message += ` — ${owner}/${repo}에 쓰기 권한이 없어요. 토큰의 Repository access와 GITHUB_REPO를 확인하세요.`;
+    }
     throw new GitHubError(res.status, `GitHub ${res.status}: ${message}`);
   }
   return res.json() as Promise<T>;
