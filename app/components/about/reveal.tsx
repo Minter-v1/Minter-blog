@@ -23,6 +23,10 @@ export function Reveal({ children }: { children: React.ReactNode }) {
         const split = SplitText.create("[data-name]", { type: "chars", mask: "chars" });
         gsap.from(split.chars, { yPercent: 110, duration: 0.8, ease: "power3.out", stagger: 0.05 });
 
+        // 사진은 아래에서 위로 걷히듯 드러나며 살짝 줌아웃
+        gsap.from("[data-photo]", { clipPath: "inset(100% 0% 0% 0%)", duration: 1.1, ease: "power4.out", delay: 0.15 });
+        gsap.from("[data-photo] img", { scale: 1.15, duration: 1.4, ease: "power3.out", delay: 0.15 });
+
         gsap.utils.toArray<HTMLElement>("[data-count]").forEach((el) => {
           const obj = { v: 0 };
           gsap.to(obj, {

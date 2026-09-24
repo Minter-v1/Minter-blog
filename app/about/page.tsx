@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { loadArchive, type Entry } from "@/lib/archive";
 import { isAuthed } from "@/lib/auth";
@@ -38,36 +39,55 @@ export default async function AboutPage() {
       <Reveal>
         {/* 소개 */}
         <section className="pt-10 pb-4">
-          <span className="inline-flex rounded-full bg-primary-weak px-3 py-1 text-[13px] font-semibold text-primary">
-            {PROFILE.role}
-          </span>
-          <h1 className="mt-4 flex items-baseline gap-3">
-            <span data-name className="text-[52px] leading-none font-bold tracking-[-0.045em]">
-              {PROFILE.name}
-            </span>
-            <span className="text-[20px] font-semibold text-text-3">{PROFILE.nameEn}</span>
-          </h1>
-          <div className="mt-6 space-y-1 text-[18px] leading-[1.7] text-text-2">
-            {PROFILE.intro.map((line, i) => (
-              <p key={i}>
-                <Rich text={line} />
-              </p>
-            ))}
-          </div>
-          <div className="mt-7 flex flex-wrap gap-2">
-            {PROFILE.contacts.map((c) => (
-              <a
-                key={c.label}
-                href={c.href}
-                target={c.href.startsWith("http") ? "_blank" : undefined}
-                rel="noreferrer"
-                className="group inline-flex h-11 items-center gap-2 rounded-2xl bg-surface px-4 text-[14px] transition-colors hover:bg-fill-strong/60"
+          <div className="flex items-start justify-between gap-10">
+            <div className="min-w-0">
+              <span className="inline-flex rounded-full bg-primary-weak px-3 py-1 text-[13px] font-semibold text-primary">
+                {PROFILE.role}
+              </span>
+              <h1 className="mt-4 flex items-baseline gap-3">
+                <span data-name className="text-[52px] leading-none font-bold tracking-[-0.045em]">
+                  {PROFILE.name}
+                </span>
+                <span className="text-[20px] font-semibold text-text-3">{PROFILE.nameEn}</span>
+              </h1>
+              <div className="mt-6 space-y-1 text-[18px] leading-[1.7] text-text-2">
+                {PROFILE.intro.map((line, i) => (
+                  <p key={i}>
+                    <Rich text={line} />
+                  </p>
+                ))}
+              </div>
+              <div className="mt-7 flex flex-wrap gap-2">
+                {PROFILE.contacts.map((c) => (
+                  <a
+                    key={c.label}
+                    href={c.href}
+                    target={c.href.startsWith("http") ? "_blank" : undefined}
+                    rel="noreferrer"
+                    className="group inline-flex h-11 items-center gap-2 rounded-2xl bg-surface px-4 text-[14px] transition-colors hover:bg-fill-strong/60"
+                  >
+                    <span className="font-semibold text-text-3">{c.label}</span>
+                    <span className="font-semibold text-text">{c.text}</span>
+                    <ArrowUpRight className="size-3.5 text-text-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </a>
+                ))}
+              </div>
+            </div>
+            {PROFILE.photo && (
+              <div
+                data-photo
+                className="relative aspect-[3/4] w-[210px] shrink-0 overflow-hidden rounded-[28px] bg-fill"
               >
-                <span className="font-semibold text-text-3">{c.label}</span>
-                <span className="font-semibold text-text">{c.text}</span>
-                <ArrowUpRight className="size-3.5 text-text-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </a>
-            ))}
+                <Image
+                  src={PROFILE.photo}
+                  alt={`${PROFILE.name} 프로필 사진`}
+                  fill
+                  sizes="210px"
+                  priority
+                  className="object-cover"
+                />
+              </div>
+            )}
           </div>
 
           <div className="mt-10 grid grid-cols-4 gap-3">
@@ -96,7 +116,11 @@ export default async function AboutPage() {
                   className="group relative flex flex-col rounded-[24px] bg-surface p-6 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,23,51,0.08)]"
                 >
                   {/* 카드 전체가 상세 페이지 링크. 안쪽 링크(관련 기록)는 relative로 그 위에 */}
-                  <Link href={`/about/projects/${p.slug}`} className="absolute inset-0 rounded-[24px]" aria-label={`${p.name} 자세히`} />
+                  <Link
+                    href={`/about/projects/${p.slug}`}
+                    className="absolute inset-0 rounded-[24px]"
+                    aria-label={`${p.name} 자세히`}
+                  />
                   <p className="flex items-center justify-between text-[13px] font-medium text-text-3 tabular-nums">
                     {p.period}
                     <span className="inline-flex items-center gap-0.5 font-semibold transition-colors group-hover:text-primary">
@@ -124,7 +148,10 @@ export default async function AboutPage() {
                   </ul>
                   <div className="mt-auto flex flex-wrap gap-1.5 pt-5">
                     {p.stack.map((s) => (
-                      <span key={s} className="rounded-full border border-line px-2.5 py-1 text-[12px] font-medium text-text-2">
+                      <span
+                        key={s}
+                        className="rounded-full border border-line px-2.5 py-1 text-[12px] font-medium text-text-2"
+                      >
                         {s}
                       </span>
                     ))}

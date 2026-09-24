@@ -31,6 +31,8 @@ export const PROFILE = {
   name: "이민지",
   nameEn: "Minji Lee",
   role: "Cloud Engineer",
+  // 프로필 사진: public/about/profile.jpeg (세로 3:4 권장). 없애려면 null
+  photo: "/about/profile.jpeg" as string | null,
   intro: [
     "트래픽이 몰려도, 장애가 나도 [[멈추지 않는 인프라]]를 만드는 클라우드 엔지니어입니다.",
     "월말 6배로 몰리는 요청에는 **서버가 자동으로 늘어나도록**,",
