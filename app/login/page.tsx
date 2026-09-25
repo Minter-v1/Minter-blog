@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SITE } from "@/lib/site";
+import { setAuthed } from "../components/auth";
 import { Spinner } from "../components/loaders";
 
 export default function LoginPage() {
@@ -22,6 +23,7 @@ export default function LoginPage() {
       body: JSON.stringify({ password }),
     });
     if (res.ok) {
+      setAuthed(true);
       router.replace("/");
       router.refresh();
       return;

@@ -3,14 +3,23 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { decodeSlug } from "@/lib/api";
 import { findEntry, loadArchive, relatedOf } from "@/lib/archive";
-import { isAuthed } from "@/lib/auth";
 import { COLLECTIONS, entryHref, isCollectionId, type CollectionId } from "@/lib/collections";
 import { Article } from "../../components/article";
+import { AuthOnly } from "../../components/auth";
 import { ArrowUpRight, ChevronRight } from "../../components/icons";
 import { Outline } from "../../components/outline";
 import { SiteHeader } from "../../components/site-header";
 
 type Props = PageProps<"/[collection]/[slug]">;
+
+// 글은 계속 늘어나므로 빌드 때 미리 만들지 않고, 처음 방문할 때 만들어 캐시한다
+// 기존 글은 빌드 때 미리 만들고, 이후 새로 쓴 글은 첫 방문 때 만들어 캐시
+export async function generateStaticParams() {
+  const { entries } = await loadArchive();
+  return entries.map((e) => ({ collection: e.collection, slug: e.slug }));
+}
+// 공개 페이지: 미리 만들어 CDN에 캐시하고, 글을 쓰면 revalidateTag("archive")로 즉시 갱신 (그 외엔 5분마다)
+export const revalidate = 300;
 
 async function find(props: Props) {
   const { collection, slug } = await props.params;
@@ -33,7 +42,7 @@ function formatDate(iso: string) {
 }
 
 export default async function EntryPage(props: Props) {
-  const [found, authed] = await Promise.all([find(props), isAuthed()]);
+  const found = await find(props);
   if (!found) notFound();
   const { entry, archive } = found;
   const c = COLLECTIONS[entry.collection];
@@ -59,7 +68,7 @@ export default async function EntryPage(props: Props) {
   return (
     // 넓은 화면에서는 본문 오른쪽에 목차 칼럼
     <div className="mx-auto max-w-[760px] px-6 pb-24 xl:max-w-[1036px]">
-      <SiteHeader authed={authed} active={c.id} writeHref={`/write?c=${c.id}`} />
+      <SiteHeader active={c.id} writeHref={`/write?c=${c.id}`} />
 
       <div className="xl:grid xl:grid-cols-[760px_220px] xl:gap-8">
         <div>
@@ -79,14 +88,14 @@ export default async function EntryPage(props: Props) {
                   </Link>
                 ))}
               </div>
-              {authed && (
+              <AuthOnly>
                 <Link
                   href={editHref}
                   className="rounded-xl bg-fill px-3.5 py-2 text-[14px] font-semibold text-text-2 transition-colors hover:bg-fill-strong"
                 >
                   수정
                 </Link>
-              )}
+              </AuthOnly>
             </div>
 
             <h1
@@ -127,14 +136,14 @@ export default async function EntryPage(props: Props) {
                 <Article markdown={entry.body} rawBase={archive.rawBase[c.id]} />
               </>
             ) : (
-              authed && (
+              <AuthOnly>
                 <Link
                   href={editHref}
                   className="mt-10 block rounded-2xl border-2 border-dashed border-fill-strong py-8 text-center text-[15px] font-medium text-text-3 transition-colors hover:border-primary hover:text-primary"
                 >
                   + 상세 설명 쓰기
                 </Link>
-              )
+              </AuthOnly>
             )}
           </article>
 

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { loadArchive, type Entry } from "@/lib/archive";
-import { isAuthed } from "@/lib/auth";
 import { COLLECTIONS, entryHref } from "@/lib/collections";
 import { PROFILE, type TimelineItem } from "@/lib/profile";
 import { Reveal } from "../components/about/reveal";
@@ -15,9 +14,10 @@ export const metadata: Metadata = {
   description: `${PROFILE.name} · ${PROFILE.role}`,
 };
 
-export default async function AboutPage() {
-  const authed = await isAuthed();
+// 공개 페이지: 미리 만들어 CDN에 캐시하고, 글을 쓰면 revalidateTag("archive")로 즉시 갱신 (그 외엔 5분마다)
+export const revalidate = 300;
 
+export default async function AboutPage() {
   // 프로젝트 → 관련 블로그 기록 (저장소를 못 읽어도 About은 보여야 하니 실패는 무시)
   let entries: Entry[] = [];
   try {
@@ -34,7 +34,7 @@ export default async function AboutPage() {
 
   return (
     <div className="mx-auto max-w-[960px] px-6 pb-28">
-      <SiteHeader authed={authed} active="about" writeHref="/write" />
+      <SiteHeader active="about" writeHref="/write" />
 
       <Reveal>
         {/* 소개 */}
