@@ -28,7 +28,7 @@ export default async function WritePage(props: PageProps<"/write">) {
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 pb-16">
-      <SiteHeader authed active={collection} />
+      <SiteHeader active={collection} />
       <WriteForm
         // 컬렉션을 바꾸거나 다른 기록을 수정하러 오면 폼과 에디터를 새로 만든다
         key={`${collection}:${entry?.slug ?? "new"}`}

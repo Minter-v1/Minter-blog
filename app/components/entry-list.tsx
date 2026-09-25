@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { EntrySummary } from "@/lib/archive";
 import { COLLECTIONS, entryHref, type CollectionId } from "@/lib/collections";
 import type { Tag } from "@/lib/tags";
@@ -20,6 +20,31 @@ function matches(entry: EntrySummary, words: string[]) {
   if (words.length === 0) return true;
   const hay = [entry.title, entry.description, ...entry.tags, ...Object.values(entry.extra)].join("\n").toLowerCase();
   return words.every((w) => hay.includes(w));
+}
+
+// 필터·검색어는 주소(?tag= ?q=)를 그대로 상태로 쓴다.
+// 서버는 주소를 읽지 않아 페이지를 CDN에 캐시할 수 있고, 새로고침·공유해도 유지된다.
+const urlListeners = new Set<() => void>();
+function subscribeUrl(listener: () => void) {
+  urlListeners.add(listener);
+  window.addEventListener("popstate", listener);
+  return () => {
+    urlListeners.delete(listener);
+    window.removeEventListener("popstate", listener);
+  };
+}
+function useSearchString() {
+  return useSyncExternalStore(subscribeUrl, () => window.location.search, () => "");
+}
+function replaceUrlParams(update: Record<string, string | null>) {
+  const params = new URLSearchParams(window.location.search);
+  for (const [k, v] of Object.entries(update)) {
+    if (v) params.set(k, v);
+    else params.delete(k);
+  }
+  const qs = params.toString();
+  window.history.replaceState(window.history.state, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
+  urlListeners.forEach((l) => l());
 }
 
 function Highlight({ text, words }: { text: string; words: string[] }) {
@@ -44,13 +69,14 @@ export function EntryList(props: {
   collection: CollectionId;
   entries: EntrySummary[];
   tags: Tag[];
-  initialTag: string | null;
-  initialQuery: string;
 }) {
   const { entries, tags } = props;
   const c = COLLECTIONS[props.collection];
-  const [filter, setFilter] = useState<string | null>(props.initialTag);
-  const [query, setQuery] = useState(props.initialQuery);
+  const search = useSearchString();
+  const filter = new URLSearchParams(search).get("tag");
+  const query = new URLSearchParams(search).get("q") ?? "";
+  const setFilter = (tag: string | null) => replaceUrlParams({ tag });
+  const setQuery = (q: string) => replaceUrlParams({ q });
   const searchRef = useRef<HTMLInputElement>(null);
 
   const words = useMemo(() => query.trim().toLowerCase().split(/\s+/).filter(Boolean), [query]);
@@ -67,15 +93,6 @@ export function EntryList(props: {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-
-  // 새로고침·공유해도 필터와 검색어가 유지되도록 주소만 바꾼다 (서버 재요청 없음)
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (filter) params.set("tag", filter);
-    if (query.trim()) params.set("q", query.trim());
-    const qs = params.toString();
-    window.history.replaceState(null, "", qs ? `/${c.id}?${qs}` : `/${c.id}`);
-  }, [filter, query, c.id]);
 
   // tags.json 순서를 따르되, 파일에 없는 태그가 md에 쓰여 있으면 뒤에 붙인다
   const tagOrder = useMemo(() => {

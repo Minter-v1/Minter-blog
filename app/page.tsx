@@ -1,6 +1,5 @@
 import { buildActivity } from "@/lib/activity";
 import { loadArchive, type Archive } from "@/lib/archive";
-import { isAuthed } from "@/lib/auth";
 import { COLLECTION_IDS, type CollectionId } from "@/lib/collections";
 import { SITE } from "@/lib/site";
 import { Activity } from "./components/home/activity";
@@ -9,9 +8,10 @@ import { Hero } from "./components/home/hero";
 import { KnowledgeMap } from "./components/home/knowledge-map";
 import { SiteHeader } from "./components/site-header";
 
-export default async function Home() {
-  const authed = await isAuthed();
+// 공개 페이지: 미리 만들어 CDN에 캐시하고, 글을 쓰면 revalidateTag("archive")로 즉시 갱신 (그 외엔 5분마다)
+export const revalidate = 300;
 
+export default async function Home() {
   let archive: Archive | null = null;
   let loadError: string | null = null;
   try {
@@ -43,7 +43,7 @@ export default async function Home() {
 
   return (
     <div className="mx-auto max-w-[1120px] px-6 pb-24">
-      <SiteHeader authed={authed} writeHref="/write" />
+      <SiteHeader writeHref="/write" />
 
       {loadError && (
         <div className="mb-6 rounded-2xl bg-danger-weak px-5 py-4 text-[15px] text-danger">
