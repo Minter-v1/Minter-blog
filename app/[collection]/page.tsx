@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { loadArchive, summarize, type Archive } from "@/lib/archive";
-import { isAuthed } from "@/lib/auth";
-import { COLLECTIONS, isCollectionId } from "@/lib/collections";
+import { COLLECTION_IDS, COLLECTIONS, isCollectionId } from "@/lib/collections";
 import { EntryList } from "../components/entry-list";
 import { SiteHeader } from "../components/site-header";
+
+export function generateStaticParams() {
+  return COLLECTION_IDS.map((collection) => ({ collection }));
+}
+export const dynamicParams = false;
+// 공개 페이지: 미리 만들어 CDN에 캐시하고, 글을 쓰면 revalidateTag("archive")로 즉시 갱신 (그 외엔 5분마다)
+export const revalidate = 300;
 
 export async function generateMetadata(props: PageProps<"/[collection]">): Promise<Metadata> {
   const { collection } = await props.params;
@@ -17,7 +23,6 @@ export default async function CollectionPage(props: PageProps<"/[collection]">) 
   const { collection } = await props.params;
   if (!isCollectionId(collection)) notFound();
   const c = COLLECTIONS[collection];
-  const [authed, { tag, q }] = await Promise.all([isAuthed(), props.searchParams]);
 
   let archive: Archive | null = null;
   let loadError: string | null = null;
@@ -30,7 +35,7 @@ export default async function CollectionPage(props: PageProps<"/[collection]">) 
 
   return (
     <div className="mx-auto max-w-[760px] px-6 pb-24">
-      <SiteHeader authed={authed} active={collection} writeHref={`/write?c=${collection}`} />
+      <SiteHeader active={collection} writeHref={`/write?c=${collection}`} />
 
       <div className="mt-4 mb-6 px-1">
         <h1 className="text-[28px] font-bold tracking-[-0.035em]">
@@ -53,8 +58,6 @@ export default async function CollectionPage(props: PageProps<"/[collection]">) 
             collection={collection}
             entries={entries.map(summarize)}
             tags={archive.tags[collection]}
-            initialTag={typeof tag === "string" ? tag : null}
-            initialQuery={typeof q === "string" ? q : ""}
           />
         </section>
       )}

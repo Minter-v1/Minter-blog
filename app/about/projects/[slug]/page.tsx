@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { loadArchive, type Entry } from "@/lib/archive";
-import { isAuthed } from "@/lib/auth";
 import { COLLECTIONS, entryHref } from "@/lib/collections";
 import { PROFILE } from "@/lib/profile";
 import { readProjectBody } from "@/lib/projects";
@@ -19,6 +18,8 @@ export function generateStaticParams() {
   return PROFILE.projects.map((p) => ({ slug: p.slug }));
 }
 export const dynamicParams = false;
+// 공개 페이지: 미리 만들어 CDN에 캐시하고, 글을 쓰면 revalidateTag("archive")로 즉시 갱신 (그 외엔 5분마다)
+export const revalidate = 300;
 
 const find = (slug: string) => PROFILE.projects.findIndex((p) => p.slug === slug);
 
@@ -35,7 +36,7 @@ export default async function ProjectPage(props: Props) {
   const prev = PROFILE.projects[index - 1];
   const next = PROFILE.projects[index + 1];
 
-  const [authed, body] = await Promise.all([isAuthed(), readProjectBody(slug)]);
+  const body = await readProjectBody(slug);
 
   // 관련 블로그 기록 (저장소를 못 읽어도 페이지는 보이게)
   let related: Entry[] = [];
@@ -47,7 +48,7 @@ export default async function ProjectPage(props: Props) {
 
   return (
     <div className="mx-auto max-w-[760px] px-6 pb-24 xl:max-w-[1036px]">
-      <SiteHeader authed={authed} active="about" writeHref="/write" />
+      <SiteHeader active="about" writeHref="/write" />
 
       <Reveal>
         <div className="xl:grid xl:grid-cols-[760px_220px] xl:gap-8">
