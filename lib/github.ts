@@ -147,8 +147,9 @@ type Prepare = (ctx: { headSha: string }) => Promise<CommitFile[]>;
 /**
  * prepare는 현재 HEAD를 기준으로 커밋할 파일 목록을 만든다(존재 확인·기존 내용 병합 등).
  * 그 사이에 다른 커밋이 끼어들어 fast-forward가 실패하면 한 번 더 시도한다.
+ * message가 함수면 prepare가 끝난 뒤에 만든다 (기존 내용에 따라 메시지가 달라질 때).
  */
-export async function commitFiles(message: string, prepare: Prepare): Promise<string> {
+export async function commitFiles(message: string | (() => string), prepare: Prepare): Promise<string> {
   const { owner, repo, branch } = githubEnv();
   const base = `/repos/${owner}/${repo}/git`;
 
@@ -180,7 +181,11 @@ export async function commitFiles(message: string, prepare: Prepare): Promise<st
     });
     const commit = await gh<{ sha: string }>(`${base}/commits`, {
       method: "POST",
-      body: JSON.stringify({ message, tree: tree.sha, parents: [headSha] }),
+      body: JSON.stringify({
+        message: typeof message === "function" ? message() : message,
+        tree: tree.sha,
+        parents: [headSha],
+      }),
     });
 
     try {

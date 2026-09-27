@@ -26,6 +26,7 @@ type Initial = {
   tags: string[];
   related: string[];
   extra: Record<string, string>;
+  draft: boolean;
   body: string;
 };
 
@@ -54,18 +55,19 @@ export function WriteForm(props: {
   const [selected, setSelected] = useState(props.initial.tags);
   const [related, setRelated] = useState(props.initial.related);
   const [extra, setExtra] = useState(props.initial.extra);
+  const [done, setDone] = useState(!props.initial.draft); // 작성 완료 토글
   const [pendingUploads, setPendingUploads] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ text: string; href: string } | null>(null);
+  const [toast, setToast] = useState<{ text: string; href?: string; action?: string } | null>(null);
   const [outlineVersion, setOutlineVersion] = useState(0);
 
   const slug = editing ? props.slug! : toSlug(title);
   const duplicate = !editing && slug !== "" && props.existingSlugs.includes(slug);
   const canSubmit =
-    !submitting && !deleting && pendingUploads === 0 && title.trim() !== "" && description.trim() !== "" && !duplicate;
+    !submitting && !deleting && pendingUploads === 0 && title.trim() !== "" && (!done || description.trim() !== "") && !duplicate;
 
   useEffect(() => {
     if (!toast) return;
@@ -124,6 +126,7 @@ export function WriteForm(props: {
       tags: selected,
       related,
       extra,
+      draft: !done,
       // 템플릿(## 상황 ## 원인 …)을 채우지 않았으면 본문 없음으로
       body: c.bodyTemplate && squash(markdown) === squash(c.bodyTemplate) ? "" : markdown,
       images: [...uploads.current].map(([url, v]) => ({ url, ...v })),
@@ -139,14 +142,23 @@ export function WriteForm(props: {
       if (!res.ok || !data.slug) throw new Error(data.error ?? `저장 실패 (${res.status})`);
 
       setDirty(false);
-      const href = entryHref(c.id, data.slug);
+      const href = done ? entryHref(c.id, data.slug) : `/write?c=${c.id}&edit=${encodeURIComponent(data.slug)}`;
       if (editing) {
-        router.push(href);
+        if (done) {
+          router.push(href);
+        } else {
+          // 작성 중인 글은 공개 페이지가 없으니 그 자리에서 계속 쓴다
+          setToast({ text: "저장했어요" });
+        }
         router.refresh();
         return;
       }
-      // 일요일 배치 정리: 저장하고 바로 다음 기록을 쓸 수 있게 비운다
-      setToast({ text: `‘${title.trim()}’ 등록했어요`, href });
+      // 일요일 배치 정리: 저장하고 바로 다음 기록을 쓸 수 있게 비운다 (토픽을 연달아 적어둘 때도)
+      setToast(
+        done
+          ? { text: `‘${title.trim()}’ 등록했어요`, href, action: "보기" }
+          : { text: `‘${title.trim()}’ 작성 중으로 저장했어요`, href, action: "이어쓰기" },
+      );
       uploads.current.forEach((_, url) => URL.revokeObjectURL(url));
       uploads.current.clear();
       setTitle("");
@@ -163,7 +175,7 @@ export function WriteForm(props: {
     } finally {
       setSubmitting(false);
     }
-  }, [canSubmit, c, title, description, selected, related, extra, editing, slug, router]);
+  }, [canSubmit, c, title, description, selected, related, extra, done, editing, slug, router]);
 
   // ⌘Enter는 에디터 안에서도 저장
   useEffect(() => {
@@ -199,8 +211,12 @@ export function WriteForm(props: {
     : pendingUploads > 0
       ? "이미지 올리는 중…"
       : editing
-        ? "저장하기"
-        : "등록하기";
+        ? props.initial.draft && done
+          ? "공개하기"
+          : "저장하기"
+        : done
+          ? "등록하기"
+          : "임시 저장";
 
   return (
     <div className="grid grid-cols-[340px_minmax(0,1fr)] items-start gap-6">
@@ -208,7 +224,7 @@ export function WriteForm(props: {
         {editing ? (
           <div className="flex items-baseline justify-between">
             <h1 className="text-[20px] font-bold tracking-[-0.02em]">{c.itemLabel} 수정</h1>
-            <Link href={entryHref(c.id, slug)} className="text-[13px] font-medium text-text-3 hover:text-text-2">
+            <Link href={props.initial.draft ? `/write?c=${c.id}` : entryHref(c.id, slug)} className="text-[13px] font-medium text-text-3 hover:text-text-2">
               취소
             </Link>
           </div>
@@ -271,7 +287,11 @@ export function WriteForm(props: {
         <Field
           label={c.descriptionLabel}
           htmlFor="description"
-          aside={<span className="tabular-nums">{description.length}</span>}
+          aside={
+            <span className="tabular-nums">
+              {!done && description.length === 0 ? "작성 중엔 비워도 돼요" : description.length}
+            </span>
+          }
         >
           <textarea
             id="description"
@@ -354,6 +374,33 @@ export function WriteForm(props: {
         <div className="space-y-3">
           <button
             type="button"
+            role="switch"
+            aria-checked={done}
+            onClick={() => {
+              setDone((d) => !d);
+              setDirty(true);
+            }}
+            className="flex w-full items-center justify-between gap-4 rounded-2xl bg-fill px-4 py-3 text-left transition-colors hover:bg-fill-strong"
+          >
+            <span>
+              <span className="block text-[15px] font-semibold">작성 완료</span>
+              <span className="mt-0.5 block text-[13px] text-text-3">
+                {done ? "저장하면 블로그에 공개돼요" : "끄면 나만 볼 수 있어요"}
+              </span>
+            </span>
+            <span
+              aria-hidden
+              className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${done ? "bg-primary" : "bg-text-3/40"}`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 size-6 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                  done ? "translate-x-5" : ""
+                }`}
+              />
+            </span>
+          </button>
+          <button
+            type="button"
             onClick={submit}
             disabled={!canSubmit}
             className="relative h-14 w-full rounded-2xl bg-primary text-[17px] font-semibold text-white transition-[background-color,transform] hover:bg-primary-press active:scale-[0.99] disabled:bg-fill-strong disabled:text-text-3 disabled:active:scale-100"
@@ -412,9 +459,13 @@ export function WriteForm(props: {
             <Check className="size-3" />
           </span>
           {toast.text}
-          <Link href={toast.href} className="ml-2 rounded-full bg-white/15 px-3 py-1 text-[14px] hover:bg-white/25">
-            보기
-          </Link>
+          {toast.href ? (
+            <Link href={toast.href} className="ml-2 rounded-full bg-white/15 px-3 py-1 text-[14px] hover:bg-white/25">
+              {toast.action}
+            </Link>
+          ) : (
+            <span className="w-2" />
+          )}
         </div>
       )}
     </div>

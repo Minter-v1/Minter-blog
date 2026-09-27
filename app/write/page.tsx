@@ -5,6 +5,7 @@ import { findEntry, loadArchive } from "@/lib/archive";
 import { isAuthed } from "@/lib/auth";
 import { COLLECTIONS, isCollectionId } from "@/lib/collections";
 import { absolutizeImages } from "@/lib/paths";
+import { DraftTray } from "../components/draft-tray";
 import { SiteHeader } from "../components/site-header";
 import { WriteForm } from "../components/write-form";
 
@@ -21,14 +22,16 @@ export default async function WritePage(props: PageProps<"/write">) {
   const archive = await loadArchive();
 
   const editSlug = typeof edit === "string" ? decodeSlug(edit) : null;
-  const entry = editSlug ? findEntry(archive, collection, editSlug) : null;
+  const entry = editSlug ? findEntry(archive, collection, editSlug, true) : null;
   if (editSlug && !entry) notFound();
 
-  const refs = new Set(archive.entries.map((e) => e.ref));
+  const all = [...archive.entries, ...archive.drafts];
+  const refs = new Set(all.map((e) => e.ref));
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 pb-16">
       <SiteHeader active={collection} />
+      <DraftTray drafts={archive.drafts} current={entry?.ref} />
       <WriteForm
         // 컬렉션을 바꾸거나 다른 기록을 수정하러 오면 폼과 에디터를 새로 만든다
         key={`${collection}:${entry?.slug ?? "new"}`}
@@ -43,13 +46,14 @@ export default async function WritePage(props: PageProps<"/write">) {
                 tags: entry.tags,
                 related: entry.related.filter((r) => refs.has(r)),
                 extra: entry.extra,
+                draft: entry.draft,
                 // 에디터에서 이미지가 보이도록 상대 경로를 raw URL로
                 body: absolutizeImages(entry.body, archive.rawBase[collection]),
               }
-            : { title: "", description: "", tags: [], related: [], extra: {}, body: col.bodyTemplate }
+            : { title: "", description: "", tags: [], related: [], extra: {}, draft: true, body: col.bodyTemplate }
         }
         tags={archive.tags[collection]}
-        existingSlugs={archive.entries.filter((e) => e.collection === collection).map((e) => e.slug)}
+        existingSlugs={all.filter((e) => e.collection === collection).map((e) => e.slug)}
         candidates={archive.entries
           .filter((e) => e.ref !== entry?.ref)
           .map(({ ref, collection, title, description, tags }) => ({ ref, collection, title, description, tags }))}
