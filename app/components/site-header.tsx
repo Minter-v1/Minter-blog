@@ -2,10 +2,11 @@ import Link from "next/link";
 import { COLLECTION_LIST, type CollectionId } from "@/lib/collections";
 import { SITE } from "@/lib/site";
 import { AuthNav } from "./auth";
+import { DraftsLink } from "./drafts";
 import { NavScroller } from "./nav-scroller";
 
 // 로그인에 따라 바뀌는 오른쪽 버튼은 AuthNav가 브라우저에서 확인한다 (페이지를 CDN에 캐시할 수 있도록)
-export function SiteHeader(props: { active?: CollectionId | "about"; writeHref?: string }) {
+export function SiteHeader(props: { active?: CollectionId | "about" | "drafts"; writeHref?: string }) {
   return (
     <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pt-5 pb-4 lg:flex-nowrap lg:py-7">
       <div className="contents lg:flex lg:items-center lg:gap-7">
@@ -38,7 +39,7 @@ export function SiteHeader(props: { active?: CollectionId | "about"; writeHref?:
         </NavScroller>
       </div>
       <div className="flex items-center gap-1 text-[14px] font-medium text-text-2">
-        <AuthNav writeHref={props.writeHref} />
+        <AuthNav writeHref={props.writeHref} extra={<DraftsLink active={props.active === "drafts"} />} />
       </div>
     </header>
   );

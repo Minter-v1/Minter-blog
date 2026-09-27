@@ -9,6 +9,7 @@ import { toSlug } from "@/lib/slug";
 import { COLLECTION_LIST, COLLECTIONS, entryHref, type CollectionId } from "@/lib/collections";
 import type { Tag } from "@/lib/tags";
 import type { BodyEditorApi } from "./body-editor";
+import { refreshDrafts } from "./drafts";
 import { Check } from "./icons";
 import { Spinner } from "./loaders";
 import { OutlinePopover } from "./outline";
@@ -142,6 +143,7 @@ export function WriteForm(props: {
       if (!res.ok || !data.slug) throw new Error(data.error ?? `저장 실패 (${res.status})`);
 
       setDirty(false);
+      refreshDrafts();
       const href = done ? entryHref(c.id, data.slug) : `/write?c=${c.id}&edit=${encodeURIComponent(data.slug)}`;
       if (editing) {
         if (done) {
@@ -197,6 +199,7 @@ export function WriteForm(props: {
       const res = await fetch(`/api/entries/${c.id}/${encodeURIComponent(slug)}`, { method: "DELETE" });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? `삭제 실패 (${res.status})`);
+      refreshDrafts();
       setDirty(false);
       router.push(`/${c.id}`);
       router.refresh();
