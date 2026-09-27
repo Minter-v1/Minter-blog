@@ -34,11 +34,11 @@ export default async function CollectionPage(props: PageProps<"/[collection]">) 
   const entries = archive?.entries.filter((e) => e.collection === collection) ?? [];
 
   return (
-    <div className="mx-auto max-w-[760px] px-6 pb-24">
+    <div className="mx-auto max-w-[760px] px-4 sm:px-6 pb-24">
       <SiteHeader active={collection} writeHref={`/write?c=${collection}`} />
 
       <div className="mt-4 mb-6 px-1">
-        <h1 className="text-[28px] font-bold tracking-[-0.035em]">
+        <h1 className="text-[24px] font-bold sm:text-[28px] tracking-[-0.035em]">
           {c.label}
           {archive && <span className="ml-2 text-[20px] text-primary tabular-nums">{entries.length}</span>}
         </h1>
@@ -53,7 +53,7 @@ export default async function CollectionPage(props: PageProps<"/[collection]">) 
       )}
 
       {archive && (
-        <section className="rounded-[24px] bg-surface p-7">
+        <section className="rounded-[24px] bg-surface p-4 sm:p-7">
           <EntryList
             collection={collection}
             entries={entries.map(summarize)}

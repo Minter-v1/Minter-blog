@@ -122,7 +122,7 @@ function NewTagInput(props: { collection: CollectionId; label: string; onAdded: 
           }}
           placeholder={`새 ${props.label} 이름`}
           disabled={pending}
-          className="min-w-0 flex-1 bg-transparent text-[14px] font-medium outline-none placeholder:text-text-3"
+          className="min-w-0 flex-1 bg-transparent text-[16px] font-medium outline-none sm:text-[14px] placeholder:text-text-3"
         />
         <button
           type="button"

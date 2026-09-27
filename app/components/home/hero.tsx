@@ -39,12 +39,12 @@ export function Hero(props: { counts: Record<CollectionId, number>; recent: Marq
   );
 
   return (
-    <section ref={root} className="pt-10">
-      <h1 data-name className="text-[52px] leading-none font-bold tracking-[-0.045em]">
+    <section ref={root} className="pt-6 sm:pt-10">
+      <h1 data-name className="text-[40px] leading-none sm:text-[52px] font-bold tracking-[-0.045em]">
         {SITE.author}
       </h1>
       {SITE.bio && (
-        <p data-fade className="mt-4 max-w-[560px] text-[17px] leading-[1.7] text-text-2">
+        <p data-fade className="mt-4 max-w-[560px] text-[16px] sm:text-[17px] leading-[1.7] text-text-2">
           {SITE.bio}
         </p>
       )}
@@ -66,7 +66,7 @@ export function Hero(props: { counts: Record<CollectionId, number>; recent: Marq
             </span>
           </Link>
         ))}
-        <span data-fade className="mx-1 h-5 w-px bg-fill-strong" />
+        <span data-fade className="mx-1 hidden h-5 w-px bg-fill-strong sm:block" />
         {SITE.links.map((l) => (
           <a
             key={l.href}

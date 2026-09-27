@@ -357,3 +357,41 @@ body {
   border-radius: 4px;
   padding: 0 2px;
 }
+
+/* ---------- 휴대폰 ---------- */
+@media (max-width: 639px) {
+  .article {
+    font-size: 16px;
+  }
+  .article h1 {
+    font-size: 24px;
+  }
+  .article h2 {
+    font-size: 21px;
+  }
+  .article h3 {
+    font-size: 18px;
+  }
+  /* 코드 블록·표·인용은 카드 끝까지 넓혀서 한 줄에 더 많이 보이게 */
+  .article pre {
+    margin-inline: -20px;
+    padding: 14px 20px;
+    border-radius: 0;
+    font-size: 13px;
+  }
+  .article blockquote {
+    padding: 12px 16px;
+  }
+  .article table {
+    display: block;
+    overflow-x: auto;
+    font-size: 14px;
+  }
+  .article img {
+    border-radius: 12px;
+  }
+  /* 에디터: 블록 손잡이 자리(54px)를 줄여 본문 폭 확보 */
+  .body-editor .bn-editor {
+    padding-inline: 20px;
+  }
+}

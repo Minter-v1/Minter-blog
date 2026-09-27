@@ -17,7 +17,7 @@ import { TagPicker } from "./tag-picker";
 
 const BodyEditor = dynamic(() => import("./body-editor"), {
   ssr: false,
-  loading: () => <p className="px-[54px] text-[16px] text-text-3">에디터 불러오는 중…</p>,
+  loading: () => <p className="px-5 text-[16px] text-text-3 sm:px-[54px]">에디터 불러오는 중…</p>,
 });
 
 type Initial = {
@@ -219,8 +219,8 @@ export function WriteForm(props: {
           : "임시 저장";
 
   return (
-    <div className="grid grid-cols-[340px_minmax(0,1fr)] items-start gap-6">
-      <aside className="sticky top-6 space-y-7 rounded-[24px] bg-surface p-7">
+    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-6">
+      <aside className="space-y-7 rounded-[24px] bg-surface p-5 sm:p-7 lg:sticky lg:top-6">
         {editing ? (
           <div className="flex items-baseline justify-between">
             <h1 className="text-[20px] font-bold tracking-[-0.02em]">{c.itemLabel} 수정</h1>
@@ -309,7 +309,7 @@ export function WriteForm(props: {
                 editorApi.current?.focus();
               }
             }}
-            className={`${inputClass} resize-none py-3.5 text-[15px] leading-[1.6]`}
+            className={`${inputClass} resize-none py-3.5 text-[16px] leading-[1.6] sm:text-[15px]`}
           />
         </Field>
 
@@ -325,7 +325,7 @@ export function WriteForm(props: {
                 setExtra((prev) => ({ ...prev, [f.key]: e.target.value }));
                 setDirty(true);
               }}
-              className={`${inputClass} h-11 ${f.mono ? "font-mono text-[13px]" : "text-[15px]"}`}
+              className={`${inputClass} h-11 ${f.mono ? "font-mono text-[16px] sm:text-[13px]" : "text-[16px] sm:text-[15px]"}`}
             />
           </Field>
         ))}
@@ -409,7 +409,7 @@ export function WriteForm(props: {
               {(submitting || pendingUploads > 0) && <Spinner />}
               {submitLabel}
             </span>
-            <span className="absolute top-1/2 right-5 -translate-y-1/2 text-[13px] font-medium opacity-60">⌘↵</span>
+            <span className="absolute top-1/2 right-5 hidden -translate-y-1/2 text-[13px] font-medium opacity-60 sm:inline">⌘↵</span>
           </button>
           {editing && (
             <button
@@ -427,12 +427,12 @@ export function WriteForm(props: {
         </div>
       </aside>
 
-      <section className="min-h-[calc(100vh-140px)] rounded-[24px] bg-surface pb-24">
+      <section className="min-h-[60vh] rounded-[24px] bg-surface pb-24 lg:min-h-[calc(100vh-140px)]">
         {/* 긴 글을 쓰며 내려가도 목차 버튼이 따라오도록 */}
-        <div className="sticky top-0 z-20 mb-2 flex items-center justify-between gap-4 rounded-t-[24px] bg-surface/90 px-[54px] pt-6 pb-3 backdrop-blur">
+        <div className="sticky top-0 z-20 mb-2 flex items-center justify-between gap-4 rounded-t-[24px] bg-surface/90 px-5 pt-5 pb-3 backdrop-blur sm:px-[54px] sm:pt-6">
           <h2 className="text-[14px] font-semibold text-text-2">상세 설명</h2>
           <div className="flex items-center gap-3">
-            <p className="text-[13px] text-text-3">
+            <p className="hidden text-[13px] text-text-3 md:block">
               <Kbd>/</Kbd> 블록 · <Kbd>⋮⋮</Kbd> 끌어서 순서 변경 · 이미지 붙여넣기·드래그
             </p>
             <OutlinePopover
@@ -452,7 +452,7 @@ export function WriteForm(props: {
       {toast && (
         <div
           role="status"
-          className="fixed bottom-8 left-1/2 z-50 flex animate-[toast-in_200ms_ease-out] items-center gap-2 rounded-full bg-text/90 py-3 pr-2 pl-4 text-[15px] font-medium text-white shadow-lg backdrop-blur"
+          className="fixed bottom-8 left-1/2 z-50 flex max-w-[calc(100%-2rem)] animate-[toast-in_200ms_ease-out] items-center gap-2 rounded-full bg-text/90 py-3 pr-2 pl-4 text-[15px] font-medium text-white shadow-lg backdrop-blur"
           style={{ transform: "translateX(-50%)" }}
         >
           <span className="flex size-5 items-center justify-center rounded-full bg-primary">

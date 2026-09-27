@@ -37,7 +37,6 @@ type GNode = SimulationNodeDatum & {
 };
 type GLink = SimulationLinkDatum<GNode> & { related: boolean };
 
-const HEIGHT = 520;
 const POINTER_RADIUS = 80;
 const BLUE = "#3182f6";
 const GREY = "#c5ccd3";
@@ -113,12 +112,18 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
     const svg = svgRef.current!;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let width = wrap.clientWidth;
+    let height = wrap.clientHeight;
+    const narrow = () => width < 640;
 
-    // 허브는 가로로 넓게 퍼져서, 기록은 자기 허브 근처에서 출발
-    const hubPos = (i: number) => ({
-      x: width * (0.14 + (i / (COLLECTION_LIST.length - 1)) * 0.72),
-      y: HEIGHT / 2 + (i % 2 === 0 ? -1 : 1) * HEIGHT * 0.12,
-    });
+    // 허브는 가로로 넓게 퍼져서(휴대폰은 2×2로), 기록은 자기 허브 근처에서 출발
+    const hubPos = (i: number) =>
+      narrow()
+        ? { x: width * (i % 2 === 0 ? 0.27 : 0.73), y: height * (i < 2 ? 0.28 : 0.7) }
+        : {
+            x: width * (0.14 + (i / (COLLECTION_LIST.length - 1)) * 0.72),
+            y: height / 2 + (i % 2 === 0 ? -1 : 1) * height * 0.12,
+          };
+    const hubIndex = (d: GNode) => COLLECTION_LIST.findIndex((c) => c.id === d.collection);
     nodes.forEach((n) => {
       const i = COLLECTION_LIST.findIndex((c) => c.id === n.collection);
       const p = hubPos(i);
@@ -136,16 +141,14 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
           .distance((l) => (l.related ? 110 : 78))
           .strength((l) => (l.related ? 0.3 : 0.5)),
       )
-      .force("charge", forceManyBody<GNode>().strength((d) => (d.hub ? -700 : -90)))
+      .force("charge", forceManyBody<GNode>().strength((d) => (d.hub ? (narrow() ? -300 : -700) : narrow() ? -50 : -90)))
       .force("collide", forceCollide<GNode>((d) => d.r + (d.hub ? 22 : 5)))
       // 허브는 자기 자리(가로로 펼친 위치) 쪽으로 당겨서 지도가 한쪽으로 뭉치지 않게
       .force(
         "x",
-        forceX<GNode>((d) => hubPos(COLLECTION_LIST.findIndex((c) => c.id === d.collection)).x).strength((d) =>
-          d.hub ? 0.12 : 0.02,
-        ),
+        forceX<GNode>((d) => hubPos(hubIndex(d)).x).strength((d) => (d.hub ? 0.12 : 0.02)),
       )
-      .force("y", forceY<GNode>(HEIGHT / 2).strength(0.045))
+      .force("y", forceY<GNode>((d) => (narrow() ? hubPos(hubIndex(d)).y : height / 2)).strength((d) => (d.hub && narrow() ? 0.12 : 0.045)))
       // 커서 주변의 "다른" 점들만 살짝 자리를 비켜 준다.
       // 가리키려는 점(커서 바로 아래, 고정된 점)은 밀지 않는다 — 밀면 점이 도망가서 누를 수가 없다
       .force("pointer", () => {
@@ -183,7 +186,7 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
     sim.on("tick", () => {
       for (const n of nodes) {
         n.x = Math.max(n.r + 6, Math.min(width - n.r - 6, n.x!));
-        n.y = Math.max(n.r + 6, Math.min(HEIGHT - n.r - (n.hub ? 30 : 6), n.y!));
+        n.y = Math.max(n.r + 6, Math.min(height - n.r - (n.hub ? 30 : 6), n.y!));
       }
       groups.forEach((g, i) => {
         const n = nodes[i];
@@ -201,7 +204,7 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
       });
       const hov = hoveredRef.current && nodes.find((n) => n.id === hoveredRef.current);
       if (hov && tipRef.current) {
-        const left = Math.min(Math.max(hov.x! + 18, 8), width - 278);
+        const left = Math.max(8, Math.min(hov.x! + 18, width - 278));
         tipRef.current.style.transform = `translate(${left}px, ${Math.max(hov.y! - 24, 8)}px)`;
       }
     });
@@ -210,6 +213,10 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
     io.observe(wrap);
     const ro = new ResizeObserver(() => {
       width = wrap.clientWidth;
+      height = wrap.clientHeight;
+      // 폭이 바뀌면(회전 등) 허브 자리 계산을 다시 하도록 힘을 새로 건다
+      sim.force<ReturnType<typeof forceX<GNode>>>("x")?.x((d) => hubPos(hubIndex(d)).x);
+      sim.force<ReturnType<typeof forceY<GNode>>>("y")?.y((d) => (narrow() ? hubPos(hubIndex(d)).y : height / 2));
       sim.alpha(0.3).restart();
     });
     ro.observe(wrap);
@@ -275,9 +282,9 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
 
   return (
     <section ref={sectionRef}>
-      <div className="mb-4 flex items-end justify-between px-1">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-x-4 gap-y-1 px-1">
         <h2 className="text-[20px] font-bold tracking-[-0.03em]">연결 지도</h2>
-        <p className="flex items-center gap-4 text-[13px] font-medium text-text-3">
+        <p className="flex items-center gap-3 text-[13px] font-medium text-text-3 sm:gap-4">
           <span className="flex items-center gap-1.5">
             <span className="size-2.5 rounded-full" style={{ background: BLUE }} />
             연결됨 <b className="font-semibold text-text-2 tabular-nums">{linkedCount}</b>
@@ -294,8 +301,9 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
 
       <div
         ref={wrapRef}
-        className="relative w-full touch-none overflow-hidden rounded-[28px] bg-surface select-none"
-        style={{ height: HEIGHT, cursor: hovered ? "pointer" : "default" }}
+        // 휴대폰에선 지도 위에서도 세로 스크롤이 되도록 (점은 탭하면 열린다)
+        className="relative h-[420px] w-full touch-pan-y overflow-hidden rounded-[28px] bg-surface select-none sm:h-[520px]"
+        style={{ cursor: hovered ? "pointer" : "default" }}
         onPointerMove={(e) => {
           const p = local(e);
           const d = drag.current;
@@ -312,6 +320,17 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
         onPointerLeave={() => {
           pointer.current = null;
           setHovered(null);
+        }}
+        onPointerCancel={() => {
+          // 터치로 스크롤을 시작하면 브라우저가 포인터를 가져간다 → 끌던 점을 놓아 준다
+          const d = drag.current;
+          drag.current = null;
+          pointer.current = null;
+          if (d) {
+            d.node.fx = null;
+            d.node.fy = null;
+            simRef.current?.alphaTarget(0.02);
+          }
         }}
         onPointerDown={(e) => {
           const p = local(e);

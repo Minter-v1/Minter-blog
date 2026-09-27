@@ -67,12 +67,12 @@ export default async function EntryPage(props: Props) {
 
   return (
     // 넓은 화면에서는 본문 오른쪽에 목차 칼럼
-    <div className="mx-auto max-w-[760px] px-6 pb-24 xl:max-w-[1036px]">
+    <div className="mx-auto max-w-[760px] px-4 sm:px-6 pb-24 xl:max-w-[1036px]">
       <SiteHeader active={c.id} writeHref={`/write?c=${c.id}`} />
 
       <div className="xl:grid xl:grid-cols-[760px_220px] xl:gap-8">
         <div>
-          <article className="rounded-[28px] bg-surface px-12 pt-12 pb-16">
+          <article className="rounded-[24px] bg-surface px-5 pt-7 pb-10 sm:rounded-[28px] sm:px-12 sm:pt-12 sm:pb-16">
             <div className="flex items-center justify-between">
               <div className="flex flex-wrap items-center gap-1.5">
                 <Link href={`/${c.id}`} className="mr-1 text-[13px] font-semibold text-text-3 hover:text-text-2">
@@ -100,12 +100,12 @@ export default async function EntryPage(props: Props) {
 
             <h1
               className={`mt-5 leading-tight font-bold tracking-[-0.035em] ${
-                c.id === "git" ? "font-mono text-[32px]" : "text-[36px]"
+                c.id === "git" ? "font-mono text-[24px] break-all sm:text-[32px]" : "text-[28px] sm:text-[36px]"
               }`}
             >
               {entry.title}
             </h1>
-            <p className="mt-4 text-[19px] leading-[1.6] font-medium tracking-[-0.02em] text-text-2">
+            <p className="mt-4 text-[17px] leading-[1.6] sm:text-[19px] font-medium tracking-[-0.02em] text-text-2">
               {entry.description}
             </p>
 
@@ -116,7 +116,7 @@ export default async function EntryPage(props: Props) {
                 <div key={f.key} className="mt-5">
                   <p className="mb-1.5 text-[13px] font-semibold text-text-3">{f.label}</p>
                   <pre
-                    className={`overflow-x-auto rounded-2xl px-5 py-3.5 font-mono text-[14px] leading-relaxed ${
+                    className={`overflow-x-auto rounded-2xl px-4 py-3 font-mono text-[13px] sm:px-5 sm:py-3.5 sm:text-[14px] leading-relaxed ${
                       f.key === "error" ? "bg-danger-weak text-danger" : "bg-[#f7f8fa] text-text"
                     }`}
                   >
@@ -148,7 +148,7 @@ export default async function EntryPage(props: Props) {
           </article>
 
           {related.length > 0 && (
-            <section className="mt-6 rounded-[28px] bg-surface px-8 pt-8 pb-6">
+            <section className="mt-6 rounded-[24px] bg-surface px-2 pt-6 pb-4 sm:rounded-[28px] sm:px-8 sm:pt-8 sm:pb-6">
               <h2 className="px-4 text-[17px] font-bold tracking-[-0.02em]">
                 연관 기록
                 <span className="ml-1.5 text-primary tabular-nums">{related.length}</span>
@@ -171,7 +171,7 @@ export default async function EntryPage(props: Props) {
           )}
 
           {gitTroubles.length > 0 && (
-            <section className="mt-6 rounded-[28px] bg-surface px-8 pt-8 pb-6">
+            <section className="mt-6 rounded-[24px] bg-surface px-2 pt-6 pb-4 sm:rounded-[28px] sm:px-8 sm:pt-8 sm:pb-6">
               <h2 className="px-4 text-[17px] font-bold tracking-[-0.02em]">
                 Git 트러블슈팅
                 <span className="ml-1.5 text-primary tabular-nums">{gitTroubles.length}</span>
@@ -194,7 +194,7 @@ export default async function EntryPage(props: Props) {
             </section>
           )}
 
-          <div className="mt-6 flex items-center justify-between px-2 text-[14px] font-medium text-text-3">
+          <div className="mt-6 flex items-center justify-between gap-4 px-2 text-[14px] font-medium text-text-3">
             <Link href={`/${c.id}`} className="hover:text-text-2">
               ← {c.label}
             </Link>
@@ -250,7 +250,7 @@ function RelatedRow(props: {
         </p>
         <p className="mt-0.5 truncate text-[14px] text-text-3">{props.description}</p>
       </div>
-      <span className="flex shrink-0 gap-1">
+      <span className="hidden shrink-0 gap-1 sm:flex">
         {props.tags.map((t) => (
           <span
             key={t}

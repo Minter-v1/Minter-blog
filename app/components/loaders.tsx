@@ -16,10 +16,10 @@ export function Spinner({ className = "size-4" }: { className?: string }) {
 // 페이지 스켈레톤 공통 머리 (로고·메뉴는 실제와 같은 자리)
 export function HeaderSkeleton() {
   return (
-    <div className="flex items-center justify-between py-7" aria-hidden>
-      <div className="flex items-center gap-7">
+    <div className="flex flex-wrap items-center justify-between gap-y-4 pt-5 pb-4 lg:flex-nowrap lg:py-7" aria-hidden>
+      <div className="contents lg:flex lg:items-center lg:gap-7">
         <span className="text-[20px] font-bold tracking-[-0.03em]">Minter.log</span>
-        <div className="flex gap-3">
+        <div className="order-last flex w-full gap-3 overflow-hidden lg:order-none lg:w-auto">
           {[64, 84, 72, 72, 44].map((w, i) => (
             <Bone key={i} className="h-5 rounded-lg" width={w} />
           ))}

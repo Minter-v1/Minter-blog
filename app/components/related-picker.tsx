@@ -123,7 +123,7 @@ export function RelatedPicker(props: {
               onChange(selected.slice(0, -1));
             }
           }}
-          className="h-11 w-full rounded-2xl bg-fill pr-4 pl-10 text-[14px] outline-none transition-shadow placeholder:text-text-3 focus:bg-surface focus:ring-2 focus:ring-primary disabled:opacity-60"
+          className="h-11 w-full rounded-2xl bg-fill pr-4 pl-10 text-[16px] outline-none sm:text-[14px] transition-shadow placeholder:text-text-3 focus:bg-surface focus:ring-2 focus:ring-primary disabled:opacity-60"
         />
 
         {open && (

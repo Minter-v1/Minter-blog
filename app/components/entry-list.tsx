@@ -152,7 +152,7 @@ export function EntryList(props: {
           placeholder={
             c.listStyle === "cheatsheet" ? "명령어, 옵션, 설명으로 검색" : `${c.itemLabel} 검색 — 제목, 설명, ${c.tagLabel}`
           }
-          className="h-12 w-full rounded-2xl bg-fill pr-20 pl-11 text-[15px] outline-none transition-shadow placeholder:text-text-3 focus:bg-surface focus:ring-2 focus:ring-primary [&::-webkit-search-cancel-button]:hidden"
+          className="h-12 w-full rounded-2xl bg-fill pr-20 pl-11 text-[16px] outline-none sm:text-[15px] transition-shadow placeholder:text-text-3 focus:bg-surface focus:ring-2 focus:ring-primary [&::-webkit-search-cancel-button]:hidden"
         />
         {query ? (
           <button
@@ -167,7 +167,7 @@ export function EntryList(props: {
             <Close className="size-3" />
           </button>
         ) : (
-          <kbd className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 rounded-md bg-surface px-2 py-0.5 text-[12px] font-semibold text-text-3">
+          <kbd className="pointer-events-none absolute top-1/2 right-4 hidden -translate-y-1/2 rounded-md bg-surface px-2 py-0.5 text-[12px] font-semibold text-text-3 sm:block">
             /
           </kbd>
         )}
@@ -230,7 +230,7 @@ function DateRow({ entry, words }: { entry: EntrySummary; words: string[] }) {
             <Highlight text={entry.description} words={words} />
           </p>
         </div>
-        <span className="flex shrink-0 gap-1">
+        <span className="hidden shrink-0 gap-1 sm:flex">
           {entry.tags.map((t) => (
             <span
               key={t}

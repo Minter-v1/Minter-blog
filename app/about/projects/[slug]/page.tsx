@@ -47,7 +47,7 @@ export default async function ProjectPage(props: Props) {
   } catch {}
 
   return (
-    <div className="mx-auto max-w-[760px] px-6 pb-24 xl:max-w-[1036px]">
+    <div className="mx-auto max-w-[760px] px-4 sm:px-6 pb-24 xl:max-w-[1036px]">
       <SiteHeader active="about" writeHref="/write" />
 
       <Reveal>
@@ -61,9 +61,9 @@ export default async function ProjectPage(props: Props) {
               프로젝트
             </Link>
 
-            <article className="rounded-[28px] bg-surface px-12 pt-11 pb-14">
+            <article className="rounded-[24px] bg-surface px-5 pt-7 pb-10 sm:rounded-[28px] sm:px-12 sm:pt-11 sm:pb-14">
               <p className="text-[14px] font-medium text-text-3 tabular-nums">{p.period}</p>
-              <h1 data-name className="mt-2 text-[34px] leading-tight font-bold tracking-[-0.035em]">
+              <h1 data-name className="mt-2 text-[28px] leading-tight sm:text-[34px] font-bold tracking-[-0.035em]">
                 {p.name}
               </h1>
               {p.tagline && <p className="mt-1 text-[18px] font-semibold text-text-3">{p.tagline}</p>}
@@ -106,7 +106,7 @@ export default async function ProjectPage(props: Props) {
             </article>
 
             {related.length > 0 && (
-              <section data-reveal className="mt-6 rounded-[28px] bg-surface px-8 pt-8 pb-6">
+              <section data-reveal className="mt-6 rounded-[24px] bg-surface px-2 pt-6 pb-4 sm:rounded-[28px] sm:px-8 sm:pt-8 sm:pb-6">
                 <h2 className="px-4 text-[17px] font-bold tracking-[-0.02em]">
                   관련 기록
                   <span className="ml-1.5 text-primary tabular-nums">{related.length}</span>
@@ -132,7 +132,7 @@ export default async function ProjectPage(props: Props) {
             )}
 
             {/* 이전·다음 프로젝트 */}
-            <nav data-reveal className="mt-6 grid grid-cols-2 gap-4">
+            <nav data-reveal className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
               {prev ? (
                 <ProjectNav href={`/about/projects/${prev.slug}`} dir="이전 프로젝트" name={prev.name} />
               ) : (
@@ -159,7 +159,7 @@ function ProjectNav(props: { href: string; dir: string; name: string; alignRight
   return (
     <Link
       href={props.href}
-      className={`group rounded-[22px] bg-surface p-5 transition-[translate,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(0,23,51,0.08)] ${
+      className={`group min-w-0 rounded-[22px] bg-surface p-4 sm:p-5 transition-[translate,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(0,23,51,0.08)] ${
         props.alignRight ? "text-right" : ""
       }`}
     >

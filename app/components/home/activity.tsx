@@ -41,7 +41,7 @@ export function Activity(props: { data: ActivityData; goals: Record<CollectionId
   const hovered = hover != null ? weeks[hover] : null;
 
   return (
-    <section ref={root} className="grid grid-cols-[280px_minmax(0,1fr)] gap-12 rounded-[28px] bg-surface p-8">
+    <section ref={root} className="grid grid-cols-1 gap-10 rounded-[28px] bg-surface p-6 sm:p-8 md:grid-cols-[280px_minmax(0,1fr)] md:gap-12">
       <div>
         <p className="text-[15px] font-semibold text-text-3">이번 주 기록</p>
         <p className="mt-1 flex items-baseline gap-1">
@@ -79,7 +79,7 @@ export function Activity(props: { data: ActivityData; goals: Record<CollectionId
       <div className="min-w-0">
         <p className="text-[15px] font-semibold text-text-3">최근 26주</p>
         <div className="relative mt-8" onPointerLeave={() => setHover(null)}>
-          <div className="flex items-end gap-[6px]" style={{ height: BAR_HEIGHT }}>
+          <div className="flex items-end gap-[3px] sm:gap-[6px]" style={{ height: BAR_HEIGHT }}>
             {weeks.map((w, i) => {
               const h = w.total === 0 ? 6 : Math.max(12, (w.total / maxTotal) * BAR_HEIGHT);
               const color =
@@ -102,11 +102,12 @@ export function Activity(props: { data: ActivityData; goals: Record<CollectionId
               );
             })}
           </div>
-          <div className="mt-2 flex gap-[6px]">
+          <div className="mt-2 flex gap-[3px] sm:gap-[6px]">
             {weeks.map((w, i) => (
               <span
                 key={w.start}
-                className={`flex-1 overflow-visible text-[11px] whitespace-nowrap ${i === current ? "font-semibold text-primary" : "text-text-3"}`}
+                // 마지막(이번 주) 라벨은 왼쪽으로 넘치게 — 오른쪽 끝을 벗어나 가로 스크롤이 생기지 않도록
+                className={`flex min-w-0 flex-1 text-[11px] whitespace-nowrap ${i === current ? "justify-end font-semibold text-primary" : "text-text-3"}`}
               >
                 {i === current ? "이번 주" : w.monthLabel}
               </span>
