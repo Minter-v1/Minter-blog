@@ -9,6 +9,7 @@ import { COLLECTION_LIST, type CollectionId } from "@/lib/collections";
 import { SITE } from "@/lib/site";
 import { ArrowUpRight } from "../icons";
 import { EntryMarquee, type MarqueeItem } from "./entry-marquee";
+import { CollectionIcon } from "../collection-icon";
 
 gsap.registerPlugin(useGSAP, SplitText);
 
@@ -57,9 +58,7 @@ export function Hero(props: { counts: Record<CollectionId, number>; recent: Marq
             href={`/${c.id}`}
             className="group inline-flex h-11 items-center gap-2 rounded-full bg-surface pr-4 pl-2 transition-colors hover:bg-fill-strong/60"
           >
-            <span className="tossface flex size-7 items-center justify-center rounded-full bg-fill text-[16px] transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">
-              {c.emoji}
-            </span>
+            <CollectionIcon id={c.id} className="flex size-7 items-center justify-center rounded-full bg-fill text-[16px] transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" />
             <span className="text-[14px] font-semibold text-text-2">{c.label}</span>
             <span data-count={props.counts[c.id]} className="text-[14px] font-bold text-primary tabular-nums">
               {props.counts[c.id]}

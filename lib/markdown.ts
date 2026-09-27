@@ -7,6 +7,7 @@
 // related: [terms/커밋그래프, troubleshooting/rebase-충돌]   ← 있을 때만
 // usage: "git rebase -i <기준 커밋>"                          ← 컬렉션별 추가 필드(extra)
 // date: 2026-09-24
+// created: "2026-09-24T14:03:12"                            ← 처음 등록한 시각(KST). 같은 날 글의 순서용
 // updated: 2026-09-30                                         ← 수정했을 때만
 // draft: true                                                 ← 작성 중일 때만 (공개 화면에서 숨김)
 // ---
@@ -20,12 +21,13 @@ export type EntryDoc = {
   related?: string[];
   extra?: Record<string, string>;
   date: string;
+  created?: string;
   updated?: string;
   draft?: boolean;
   body: string;
 };
 
-const RESERVED = new Set(["title", "description", "tags", "related", "date", "updated", "draft"]);
+const RESERVED = new Set(["title", "description", "tags", "related", "date", "created", "updated", "draft"]);
 
 const NEEDS_QUOTE = /[:#\[\]{},&*!|>'"%@`]|^\s|\s$|^[-?]/;
 
@@ -57,6 +59,7 @@ export function formatEntry(doc: EntryDoc): string {
       .filter(([k, v]) => !RESERVED.has(k) && v.trim())
       .map(([k, v]) => `${k}: ${yamlScalar(v.replace(/\s*\n\s*/g, " ").trim())}`),
     `date: ${doc.date}`,
+    ...(doc.created ? [`created: ${yamlScalar(doc.created)}`] : []),
     ...(doc.updated && doc.updated !== doc.date ? [`updated: ${doc.updated}`] : []),
     ...(doc.draft ? ["draft: true"] : []),
     "---",
@@ -108,6 +111,7 @@ export function parseEntry(source: string): EntryDoc | null {
     related: list(meta.related).map((s) => s.normalize("NFC")),
     extra,
     date: unquote(meta.date ?? ""),
+    created: meta.created ? unquote(meta.created) : undefined,
     updated: meta.updated ? unquote(meta.updated) : undefined,
     draft: unquote(meta.draft ?? "") === "true",
     body,

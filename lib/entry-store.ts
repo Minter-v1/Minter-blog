@@ -63,6 +63,22 @@ function todayInSeoul() {
   }).format(new Date());
 }
 
+// 처음 등록한 시각 (KST, 초 단위). 같은 날 적어둔 글을 적은 순서대로 늘어놓는 데 쓴다
+function nowInSeoul() {
+  return new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  })
+    .format(new Date())
+    .replace(" ", "T");
+}
+
 // 커밋 메시지: add term: 폴백함수 / add git: git rebase / add troubleshooting: ...
 const noun = (c: Collection) => (c.id === "terms" ? "term" : c.id);
 // 작성 중인 글은 커밋 메시지에서도 구분: draft term: … / 작성 완료로 바꾸면 publish term: …
@@ -128,6 +144,7 @@ export async function createEntry(collectionId: CollectionId, input: EntryInput)
       related: input.related.filter((r) => r !== self),
       body: markdown,
       date: todayInSeoul(),
+      created: nowInSeoul(),
     });
     return [{ path: mdPath, text: doc }, ...files];
   });
@@ -158,6 +175,7 @@ export async function updateEntry(collectionId: CollectionId, slug: string, inpu
       related: input.related.filter((r) => r !== self),
       body: markdown,
       date: publishing ? today : prev.date,
+      created: prev.created,
       updated: publishing ? undefined : today,
     });
     return [{ path: mdPath, text: doc }, ...files];

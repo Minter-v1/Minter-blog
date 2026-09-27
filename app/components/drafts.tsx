@@ -7,6 +7,7 @@ import { COLLECTION_LIST, COLLECTIONS, type CollectionId } from "@/lib/collectio
 import { useAuthed } from "./auth";
 import { Highlight } from "./highlight";
 import { ChevronRight, Close, Search } from "./icons";
+import { CollectionIcon } from "./collection-icon";
 
 // 작성 중인 글(나만 보임)을 브라우저에서 한 번 불러와 헤더·목록이 나눠 쓴다.
 // 공개 페이지는 CDN 캐시라서 서버가 그려 줄 수 없다.
@@ -98,9 +99,7 @@ export function DraftRow({ entry, words, showCollection }: { entry: EntrySummary
         className="group flex items-center gap-3 rounded-2xl px-3 py-3 transition-[background-color,transform] duration-150 hover:bg-fill active:scale-[0.99] sm:gap-4"
       >
         {showCollection && (
-          <span className="tossface flex size-9 shrink-0 items-center justify-center rounded-xl bg-fill text-[18px]" title={c.label}>
-            {c.emoji}
-          </span>
+          <CollectionIcon id={c.id} className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-fill text-[18px]" title={c.label} />
         )}
         <div className="min-w-0 flex-1">
           <p
@@ -187,7 +186,7 @@ export function DraftBoard(props: { drafts: EntrySummary[] }) {
               onClick={() => setFilter(filter === col.id ? null : col.id)}
               label={
                 <>
-                  <span className="tossface mr-1">{col.emoji}</span>
+                  <CollectionIcon id={col.id} className="mr-1" />
                   {col.label}
                 </>
               }
