@@ -8,6 +8,7 @@
 // usage: "git rebase -i <기준 커밋>"                          ← 컬렉션별 추가 필드(extra)
 // date: 2026-09-24
 // updated: 2026-09-30                                         ← 수정했을 때만
+// draft: true                                                 ← 작성 중일 때만 (공개 화면에서 숨김)
 // ---
 //
 // (상세 설명 마크다운. 이미지는 images/{slug}/1.jpg 처럼 컬렉션 폴더 기준 상대 경로)
@@ -20,10 +21,11 @@ export type EntryDoc = {
   extra?: Record<string, string>;
   date: string;
   updated?: string;
+  draft?: boolean;
   body: string;
 };
 
-const RESERVED = new Set(["title", "description", "tags", "related", "date", "updated"]);
+const RESERVED = new Set(["title", "description", "tags", "related", "date", "updated", "draft"]);
 
 const NEEDS_QUOTE = /[:#\[\]{},&*!|>'"%@`]|^\s|\s$|^[-?]/;
 
@@ -56,6 +58,7 @@ export function formatEntry(doc: EntryDoc): string {
       .map(([k, v]) => `${k}: ${yamlScalar(v.replace(/\s*\n\s*/g, " ").trim())}`),
     `date: ${doc.date}`,
     ...(doc.updated && doc.updated !== doc.date ? [`updated: ${doc.updated}`] : []),
+    ...(doc.draft ? ["draft: true"] : []),
     "---",
   ];
   const body = doc.body.trim();
@@ -86,8 +89,8 @@ export function parseEntry(source: string): EntryDoc | null {
 
   let description = unquote(meta.description ?? "");
   let body = rawBody.trim();
-  if (!description) {
-    // 예전 형식: 본문 첫 문단이 한 줄 설명
+  if (!("description" in meta)) {
+    // 예전 형식(description 줄 자체가 없음): 본문 첫 문단이 한 줄 설명. 작성 중인 글은 설명이 비어 있을 수 있다
     const [first, ...rest] = body.split(/\n\s*\n/);
     if (first && !first.trim().startsWith("![")) {
       description = first.trim().replace(/\s*\n\s*/g, " ");
@@ -106,6 +109,7 @@ export function parseEntry(source: string): EntryDoc | null {
     extra,
     date: unquote(meta.date ?? ""),
     updated: meta.updated ? unquote(meta.updated) : undefined,
+    draft: unquote(meta.draft ?? "") === "true",
     body,
   };
 }

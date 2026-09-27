@@ -15,6 +15,7 @@ export type EntryInput = {
   tags: string[];
   related: Ref[];
   extra: Record<string, string>;
+  draft: boolean; // 작성 중이면 한 줄 설명 없이 제목만으로도 저장할 수 있다
   body: string; // 에디터가 만든 마크다운. 새 이미지는 blob: URL, 기존 이미지는 raw URL
   images: UploadedImage[];
 };
@@ -44,11 +45,12 @@ export function parseEntryInput(collection: Collection, raw: unknown): EntryInpu
   );
 
   if (!title) throw new ValidationError(`${collection.titleLabel}을(를) 입력해 주세요.`);
-  if (!description) throw new ValidationError(`${collection.descriptionLabel}을(를) 입력해 주세요.`);
+  const draft = r.draft === true;
+  if (!description && !draft) throw new ValidationError(`${collection.descriptionLabel}을(를) 입력해 주세요.`);
   if (tags.length > collection.maxTags) {
     throw new ValidationError(`${collection.tagLabel}는 최대 ${collection.maxTags}개까지 고를 수 있어요.`);
   }
-  return { title, description, tags, related, extra, body: str(r.body), images };
+  return { title, description, tags, related, extra, draft, body: str(r.body), images };
 }
 
 function todayInSeoul() {
@@ -63,6 +65,7 @@ function todayInSeoul() {
 
 // 커밋 메시지: add term: 폴백함수 / add git: git rebase / add troubleshooting: ...
 const noun = (c: Collection) => (c.id === "terms" ? "term" : c.id);
+// 작성 중인 글은 커밋 메시지에서도 구분: draft term: … / 작성 완료로 바꾸면 publish term: …
 
 function escapeRegExp(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -114,7 +117,8 @@ export async function createEntry(collectionId: CollectionId, input: EntryInput)
   const mdPath = `${c.dir}/${slug}.md`;
   const self = toRef(c.id, slug);
 
-  const sha = await commitFiles(`add ${noun(c)}: ${input.title}`, async ({ headSha }) => {
+  const verb = input.draft ? "draft" : "add";
+  const sha = await commitFiles(`${verb} ${noun(c)}: ${input.title}`, async ({ headSha }) => {
     if ((await readTextFile(mdPath, headSha)) !== null) {
       throw new ConflictError(`이미 등록된 ${c.itemLabel}예요: ${mdPath}`);
     }
@@ -136,7 +140,8 @@ export async function updateEntry(collectionId: CollectionId, slug: string, inpu
   const mdPath = `${c.dir}/${slug}.md`;
   const self = toRef(c.id, slug);
 
-  const sha = await commitFiles(`update ${noun(c)}: ${input.title}`, async ({ headSha }) => {
+  let verb = "update";
+  const sha = await commitFiles(() => `${verb} ${noun(c)}: ${input.title}`, async ({ headSha }) => {
     const [current, existingFiles] = await Promise.all([
       readTextFile(mdPath, headSha),
       listDir(`${c.dir}/images/${slug}`, headSha),
@@ -144,12 +149,16 @@ export async function updateEntry(collectionId: CollectionId, slug: string, inpu
     const prev = current ? parseEntry(current) : null;
     if (!prev) throw new ConflictError(`${c.itemLabel}을(를) 찾을 수 없어요: ${mdPath}`);
     const { markdown, files } = resolveImages(c.dir, input.body, slug, input.images, existingFiles);
+    // 작성 중 → 작성 완료: 날짜를 공개한 날로 (토픽만 적어둔 날이 아니라)
+    const publishing = prev.draft && !input.draft;
+    if (publishing) verb = "publish";
+    const today = todayInSeoul();
     const doc = formatEntry({
       ...input,
       related: input.related.filter((r) => r !== self),
       body: markdown,
-      date: prev.date,
-      updated: todayInSeoul(),
+      date: publishing ? today : prev.date,
+      updated: publishing ? undefined : today,
     });
     return [{ path: mdPath, text: doc }, ...files];
   });

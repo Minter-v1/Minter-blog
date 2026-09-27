@@ -18,6 +18,7 @@ export type Entry = {
   extra: Record<string, string>; // 컬렉션별 추가 필드 (git: usage, troubleshooting: error)
   date: string;
   updated?: string;
+  draft: boolean; // 작성 중: 공개 화면(목록·상세·홈)에서 빠지고 작성 페이지에서만 보인다
   body: string; // 이미지 경로는 컬렉션 폴더 기준 상대 경로 그대로
   sourceUrl: string;
 };
@@ -28,7 +29,8 @@ export type EntrySummary = Pick<Entry, "collection" | "slug" | "ref" | "title" |
 };
 
 export type Archive = {
-  entries: Entry[]; // 전 컬렉션, 최신순
+  entries: Entry[]; // 작성 완료된 글, 전 컬렉션, 최신순
+  drafts: Entry[]; // 작성 중인 글 (작성 페이지 전용)
   tags: Record<CollectionId, Tag[]>;
   repoUrl: string;
   rawBase: Record<CollectionId, string>; // 상대 경로 이미지 앞에 붙일 URL
@@ -39,7 +41,7 @@ async function readArchive(): Promise<Archive> {
   const { commitSha, dirs } = await readDirs(COLLECTION_LIST.map((c) => c.dir));
   const repoUrl = `https://github.com/${owner}/${repo}`;
 
-  const entries: Entry[] = [];
+  const all: Entry[] = [];
   const tags = {} as Archive["tags"];
   const rawBase = {} as Archive["rawBase"];
 
@@ -54,7 +56,7 @@ async function readArchive(): Promise<Archive> {
       const doc = parseEntry(file.text);
       if (!doc) continue;
       const slug = file.name.slice(0, -3).normalize("NFC");
-      entries.push({
+      all.push({
         collection: c.id,
         slug,
         ref: toRef(c.id, slug),
@@ -65,14 +67,15 @@ async function readArchive(): Promise<Archive> {
         extra: doc.extra ?? {},
         date: doc.date,
         updated: doc.updated,
+        draft: doc.draft ?? false,
         body: doc.body,
         sourceUrl: `${repoUrl}/blob/${encodeURIComponent(branch)}/${encodePath(`${c.dir}/${file.name}`)}`,
       });
     }
   }
 
-  entries.sort((a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title, "ko"));
-  return { entries, tags, repoUrl, rawBase };
+  all.sort((a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title, "ko"));
+  return { entries: all.filter((e) => !e.draft), drafts: all.filter((e) => e.draft), tags, repoUrl, rawBase };
 }
 
 // GitHub에서 매번 읽으면 페이지마다 0.6~1초가 걸린다 → 캐시하고, 앱에서 쓰기가 일어나면 즉시 비운다.
@@ -90,8 +93,10 @@ export function summarize(e: Entry): EntrySummary {
   return { collection, slug, ref, title, description, tags, date, extra };
 }
 
-export function findEntry(archive: Archive, collection: CollectionId, slug: string) {
-  return archive.entries.find((e) => e.collection === collection && e.slug === slug) ?? null;
+/** 공개된 글에서 찾는다. 작성 페이지처럼 작성 중인 글까지 찾으려면 withDrafts */
+export function findEntry(archive: Archive, collection: CollectionId, slug: string, withDrafts = false) {
+  const pool = withDrafts ? [...archive.entries, ...archive.drafts] : archive.entries;
+  return pool.find((e) => e.collection === collection && e.slug === slug) ?? null;
 }
 
 /**
