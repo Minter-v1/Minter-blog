@@ -47,7 +47,7 @@ export function AuthOnly({ children }: { children: React.ReactNode }) {
 }
 
 /** 헤더 오른쪽: 로그인 / 로그아웃 · 작성 */
-export function AuthNav({ writeHref }: { writeHref?: string }) {
+export function AuthNav({ writeHref, extra }: { writeHref?: string; extra?: React.ReactNode }) {
   const value = useAuthed();
   if (value === null) return <span className="h-9 w-20" aria-hidden />;
   if (!value) {
@@ -69,6 +69,7 @@ export function AuthNav({ writeHref }: { writeHref?: string }) {
       >
         로그아웃
       </button>
+      {extra}
       {writeHref && (
         <Link
           href={writeHref}

@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { EntrySummary } from "@/lib/archive";
 import { COLLECTIONS, entryHref, type CollectionId } from "@/lib/collections";
 import type { Tag } from "@/lib/tags";
-import { useAuthed } from "./auth";
+import { DraftRow, draftHref, useDrafts } from "./drafts";
+import { Highlight } from "./highlight";
 import { Check, ChevronRight, Close, Search } from "./icons";
 
 function formatDate(iso: string) {
@@ -48,45 +49,9 @@ function replaceUrlParams(update: Record<string, string | null>) {
   urlListeners.forEach((l) => l());
 }
 
-// 로그인했으면 작성 중인 글도 불러온다 (나만 보임)
-function useDrafts(collection: CollectionId) {
-  const authed = useAuthed();
-  const [drafts, setDrafts] = useState<EntrySummary[]>([]);
-  useEffect(() => {
-    if (!authed) return;
-    let alive = true;
-    fetch(`/api/drafts?c=${collection}`, { cache: "no-store" })
-      .then((r) => (r.ok ? (r.json() as Promise<{ drafts: EntrySummary[] }>) : { drafts: [] }))
-      .then((d) => alive && setDrafts(d.drafts))
-      .catch(() => {});
-    return () => {
-      alive = false;
-    };
-  }, [authed, collection]);
-  return authed ? drafts : [];
-}
-
 // 작성 중인 글은 공개 상세가 없으니 이어 쓰는 화면으로
-const rowHref = (e: EntrySummary) =>
-  e.draft ? `/write?c=${e.collection}&edit=${encodeURIComponent(e.slug)}` : entryHref(e.collection, e.slug);
+const rowHref = (e: EntrySummary) => (e.draft ? draftHref(e) : entryHref(e.collection, e.slug));
 
-function Highlight({ text, words }: { text: string; words: string[] }) {
-  if (words.length === 0) return <>{text}</>;
-  const pattern = new RegExp(`(${words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
-  return (
-    <>
-      {text.split(pattern).map((part, i) =>
-        i % 2 === 1 ? (
-          <mark key={i} className="rounded-[3px] bg-[#fff3c4] text-inherit">
-            {part}
-          </mark>
-        ) : (
-          <Fragment key={i}>{part}</Fragment>
-        ),
-      )}
-    </>
-  );
-}
 
 export function EntryList(props: {
   collection: CollectionId;
@@ -95,8 +60,11 @@ export function EntryList(props: {
 }) {
   const { tags } = props;
   const c = COLLECTIONS[props.collection];
-  const drafts = useDrafts(props.collection);
-  const entries = useMemo(() => [...drafts, ...props.entries], [drafts, props.entries]);
+  const allDrafts = useDrafts();
+  const entries = useMemo(
+    () => [...(allDrafts ?? []).filter((d) => d.collection === props.collection), ...props.entries],
+    [allDrafts, props.collection, props.entries],
+  );
   const search = useSearchString();
   const filter = new URLSearchParams(search).get("tag");
   const query = new URLSearchParams(search).get("q") ?? "";
@@ -258,43 +226,19 @@ function DraftSection({ drafts, words }: { drafts: EntrySummary[]; words: string
           작성 중<span className="ml-1.5 text-primary tabular-nums">{drafts.length}</span>
         </h3>
         <span className="ml-auto text-[12px] font-medium text-text-3">나만 보여요</span>
+        <Link href="/drafts" className="-mr-1 rounded-lg px-2 py-1 text-[12px] font-semibold text-text-2 hover:bg-fill">
+          전체 보기
+        </Link>
       </div>
       <ul>
         {drafts.map((e) => (
-          <li key={e.ref}>
-            <Link
-              href={rowHref(e)}
-              className="group flex items-center gap-4 rounded-2xl px-3 py-3 transition-[background-color,transform] duration-150 hover:bg-fill active:scale-[0.99]"
-            >
-              <div className="min-w-0 flex-1">
-                <p
-                  className={`truncate text-[16px] font-semibold tracking-[-0.02em] text-text-2 transition-colors group-hover:text-text ${
-                    e.collection === "git" ? "font-mono text-[15px]" : ""
-                  }`}
-                >
-                  <Highlight text={e.title} words={words} />
-                </p>
-                <p className="mt-0.5 truncate text-[14px] text-text-3">
-                  {e.description ? <Highlight text={e.description} words={words} /> : "한 줄 요약은 아직이에요"}
-                </p>
-              </div>
-              <span className="hidden shrink-0 text-[12px] text-text-3 tabular-nums sm:block">{formatShortDate(e.date)} 적어둠</span>
-              <span className="inline-flex shrink-0 items-center gap-0.5 text-[13px] font-semibold text-primary">
-                이어 쓰기
-                <ChevronRight className="size-3.5 transition-transform duration-150 group-hover:translate-x-0.5" />
-              </span>
-            </Link>
-          </li>
+          <DraftRow key={e.ref} entry={e} words={words} />
         ))}
       </ul>
     </section>
   );
 }
 
-function formatShortDate(iso: string) {
-  const [, m, d] = iso.split("-").map(Number);
-  return m && d ? `${m}월 ${d}일` : "";
-}
 
 function DateRow({ entry, words }: { entry: EntrySummary; words: string[] }) {
   return (
