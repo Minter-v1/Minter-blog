@@ -5,6 +5,7 @@ import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore } 
 import type { EntrySummary } from "@/lib/archive";
 import { COLLECTIONS, entryHref, type CollectionId } from "@/lib/collections";
 import type { Tag } from "@/lib/tags";
+import { useAuthed } from "./auth";
 import { Check, ChevronRight, Close, Search } from "./icons";
 
 function formatDate(iso: string) {
@@ -47,6 +48,30 @@ function replaceUrlParams(update: Record<string, string | null>) {
   urlListeners.forEach((l) => l());
 }
 
+// 로그인했으면 작성 중인 글도 불러온다 (나만 보임)
+function useDrafts(collection: CollectionId) {
+  const authed = useAuthed();
+  const [drafts, setDrafts] = useState<EntrySummary[]>([]);
+  useEffect(() => {
+    if (!authed) return;
+    let alive = true;
+    fetch(`/api/drafts?c=${collection}`, { cache: "no-store" })
+      .then((r) => (r.ok ? (r.json() as Promise<{ drafts: EntrySummary[] }>) : { drafts: [] }))
+      .then((d) => alive && setDrafts(d.drafts))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [authed, collection]);
+  return authed ? drafts : [];
+}
+
+// 작성 중인 글은 공개 상세가 없으니 이어 쓰는 화면으로
+const rowHref = (e: EntrySummary) =>
+  e.draft ? `/write?c=${e.collection}&edit=${encodeURIComponent(e.slug)}` : entryHref(e.collection, e.slug);
+
+const DRAFT_GROUP = "\u0000작성 중";
+
 function Highlight({ text, words }: { text: string; words: string[] }) {
   if (words.length === 0) return <>{text}</>;
   const pattern = new RegExp(`(${words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
@@ -70,8 +95,10 @@ export function EntryList(props: {
   entries: EntrySummary[];
   tags: Tag[];
 }) {
-  const { entries, tags } = props;
+  const { tags } = props;
   const c = COLLECTIONS[props.collection];
+  const drafts = useDrafts(props.collection);
+  const entries = useMemo(() => [...drafts, ...props.entries], [drafts, props.entries]);
   const search = useSearchString();
   const filter = new URLSearchParams(search).get("tag");
   const query = new URLSearchParams(search).get("q") ?? "";
@@ -115,18 +142,23 @@ export function EntryList(props: {
   // 날짜별(주 1회 몰아서 정리) 또는 분류별(치트시트)로 묶는다
   const groups = useMemo(() => {
     const map = new Map<string, EntrySummary[]>();
+    // 작성 중인 글은 맨 위에 따로 모은다
+    const draftItems = visible.filter((e) => e.draft);
+    if (draftItems.length) map.set(DRAFT_GROUP, draftItems);
     if (c.listStyle === "cheatsheet") {
       for (const t of [...tagOrder, "기타"]) map.set(t, []);
       for (const e of visible) {
+        if (e.draft) continue;
         const key = e.tags.find((t) => !filter || t === filter) ?? "기타";
         map.get(key)!.push(e);
       }
       for (const [k, v] of map) {
+        if (k === DRAFT_GROUP) continue;
         if (v.length === 0) map.delete(k);
         else v.sort((a, b) => a.title.localeCompare(b.title));
       }
     } else {
-      for (const e of visible) map.set(e.date, [...(map.get(e.date) ?? []), e]);
+      for (const e of visible) if (!e.draft) map.set(e.date, [...(map.get(e.date) ?? []), e]);
     }
     return [...map];
   }, [visible, c.listStyle, tagOrder, filter]);
@@ -195,15 +227,15 @@ export function EntryList(props: {
           {groups.map(([group, items]) => (
             <section key={group}>
               <h3 className="mb-1 px-3 text-[13px] font-semibold text-text-3">
-                {c.listStyle === "cheatsheet" ? group : formatDate(group)}
+                {group === DRAFT_GROUP ? "작성 중 · 나만 보여요" : c.listStyle === "cheatsheet" ? group : formatDate(group)}
                 <span className="ml-1.5 tabular-nums">{items.length}</span>
               </h3>
               <ul>
                 {items.map((e) =>
                   c.listStyle === "cheatsheet" ? (
-                    <CheatRow key={e.slug} entry={e} words={words} />
+                    <CheatRow key={e.ref} entry={e} words={words} />
                   ) : (
-                    <DateRow key={e.slug} entry={e} words={words} />
+                    <DateRow key={e.ref} entry={e} words={words} />
                   ),
                 )}
               </ul>
@@ -219,7 +251,7 @@ function DateRow({ entry, words }: { entry: EntrySummary; words: string[] }) {
   return (
     <li>
       <Link
-        href={entryHref(entry.collection, entry.slug)}
+        href={rowHref(entry)}
         className="group flex items-center gap-4 rounded-2xl px-3 py-3.5 transition-[background-color,transform] duration-150 hover:bg-fill active:scale-[0.99] active:bg-fill-strong"
       >
         <div className="min-w-0 flex-1">
@@ -227,7 +259,7 @@ function DateRow({ entry, words }: { entry: EntrySummary; words: string[] }) {
             <Highlight text={entry.title} words={words} />
           </p>
           <p className="mt-0.5 truncate text-[14px] text-text-3">
-            <Highlight text={entry.description} words={words} />
+            {entry.draft && !entry.description ? "한 줄 요약 없음" : <Highlight text={entry.description} words={words} />}
           </p>
         </div>
         <span className="hidden shrink-0 gap-1 sm:flex">
@@ -254,7 +286,7 @@ function CheatRow({ entry, words }: { entry: EntrySummary; words: string[] }) {
   return (
     <li className="group relative rounded-2xl px-3 py-3 transition-colors hover:bg-fill">
       {/* 줄 전체를 누르면 상세로. 복사 버튼은 그 위에 따로 */}
-      <Link href={entryHref(entry.collection, entry.slug)} className="absolute inset-0 rounded-2xl" aria-label={entry.title} />
+      <Link href={rowHref(entry)} className="absolute inset-0 rounded-2xl" aria-label={entry.title} />
       <div className="flex items-baseline gap-3">
         <span className="shrink-0 font-mono text-[15px] font-semibold transition-colors group-hover:text-primary">
           <Highlight text={entry.title} words={words} />

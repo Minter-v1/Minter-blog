@@ -26,6 +26,7 @@ export type Entry = {
 // 목록·연관 선택기처럼 본문이 필요 없는 곳에 넘기는 요약
 export type EntrySummary = Pick<Entry, "collection" | "slug" | "ref" | "title" | "description" | "tags" | "date"> & {
   extra: Record<string, string>;
+  draft?: true; // 로그인했을 때 목록에 섞어 보여 주는 작성 중인 글
 };
 
 export type Archive = {
