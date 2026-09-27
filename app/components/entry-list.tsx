@@ -70,8 +70,6 @@ function useDrafts(collection: CollectionId) {
 const rowHref = (e: EntrySummary) =>
   e.draft ? `/write?c=${e.collection}&edit=${encodeURIComponent(e.slug)}` : entryHref(e.collection, e.slug);
 
-const DRAFT_GROUP = "\u0000작성 중";
-
 function Highlight({ text, words }: { text: string; words: string[] }) {
   if (words.length === 0) return <>{text}</>;
   const pattern = new RegExp(`(${words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
@@ -140,11 +138,14 @@ export function EntryList(props: {
   );
 
   // 날짜별(주 1회 몰아서 정리) 또는 분류별(치트시트)로 묶는다
+  // 작성 중인 글은 목록 맨 위 점선 상자에 따로 모은다. 오래 묵은 것부터 정리하도록 오래된 순
+  const visibleDrafts = useMemo(
+    () => visible.filter((e) => e.draft).sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title, "ko")),
+    [visible],
+  );
+
   const groups = useMemo(() => {
     const map = new Map<string, EntrySummary[]>();
-    // 작성 중인 글은 맨 위에 따로 모은다
-    const draftItems = visible.filter((e) => e.draft);
-    if (draftItems.length) map.set(DRAFT_GROUP, draftItems);
     if (c.listStyle === "cheatsheet") {
       for (const t of [...tagOrder, "기타"]) map.set(t, []);
       for (const e of visible) {
@@ -153,7 +154,6 @@ export function EntryList(props: {
         map.get(key)!.push(e);
       }
       for (const [k, v] of map) {
-        if (k === DRAFT_GROUP) continue;
         if (v.length === 0) map.delete(k);
         else v.sort((a, b) => a.title.localeCompare(b.title));
       }
@@ -224,10 +224,11 @@ export function EntryList(props: {
         </p>
       ) : (
         <div className="mt-6 space-y-7">
+          {visibleDrafts.length > 0 && <DraftSection drafts={visibleDrafts} words={words} />}
           {groups.map(([group, items]) => (
             <section key={group}>
               <h3 className="mb-1 px-3 text-[13px] font-semibold text-text-3">
-                {group === DRAFT_GROUP ? "작성 중 · 나만 보여요" : c.listStyle === "cheatsheet" ? group : formatDate(group)}
+                {c.listStyle === "cheatsheet" ? group : formatDate(group)}
                 <span className="ml-1.5 tabular-nums">{items.length}</span>
               </h3>
               <ul>
@@ -247,6 +248,54 @@ export function EntryList(props: {
   );
 }
 
+// 작성 중: 점선 상자 + 흐린 제목 + 늘 보이는 '이어 쓰기' — 공개된 글과 한눈에 구분되도록
+function DraftSection({ drafts, words }: { drafts: EntrySummary[]; words: string[] }) {
+  return (
+    <section aria-label="작성 중인 글" className="rounded-[20px] border-2 border-dashed border-fill-strong p-1.5">
+      <div className="flex items-center gap-2 px-3 pt-2.5 pb-1">
+        <span className="tossface text-[16px]">✏️</span>
+        <h3 className="text-[14px] font-bold text-text">
+          작성 중<span className="ml-1.5 text-primary tabular-nums">{drafts.length}</span>
+        </h3>
+        <span className="ml-auto text-[12px] font-medium text-text-3">나만 보여요</span>
+      </div>
+      <ul>
+        {drafts.map((e) => (
+          <li key={e.ref}>
+            <Link
+              href={rowHref(e)}
+              className="group flex items-center gap-4 rounded-2xl px-3 py-3 transition-[background-color,transform] duration-150 hover:bg-fill active:scale-[0.99]"
+            >
+              <div className="min-w-0 flex-1">
+                <p
+                  className={`truncate text-[16px] font-semibold tracking-[-0.02em] text-text-2 transition-colors group-hover:text-text ${
+                    e.collection === "git" ? "font-mono text-[15px]" : ""
+                  }`}
+                >
+                  <Highlight text={e.title} words={words} />
+                </p>
+                <p className="mt-0.5 truncate text-[14px] text-text-3">
+                  {e.description ? <Highlight text={e.description} words={words} /> : "한 줄 요약은 아직이에요"}
+                </p>
+              </div>
+              <span className="hidden shrink-0 text-[12px] text-text-3 tabular-nums sm:block">{formatShortDate(e.date)} 적어둠</span>
+              <span className="inline-flex shrink-0 items-center gap-0.5 text-[13px] font-semibold text-primary">
+                이어 쓰기
+                <ChevronRight className="size-3.5 transition-transform duration-150 group-hover:translate-x-0.5" />
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function formatShortDate(iso: string) {
+  const [, m, d] = iso.split("-").map(Number);
+  return m && d ? `${m}월 ${d}일` : "";
+}
+
 function DateRow({ entry, words }: { entry: EntrySummary; words: string[] }) {
   return (
     <li>
@@ -259,7 +308,7 @@ function DateRow({ entry, words }: { entry: EntrySummary; words: string[] }) {
             <Highlight text={entry.title} words={words} />
           </p>
           <p className="mt-0.5 truncate text-[14px] text-text-3">
-            {entry.draft && !entry.description ? "한 줄 요약 없음" : <Highlight text={entry.description} words={words} />}
+            <Highlight text={entry.description} words={words} />
           </p>
         </div>
         <span className="hidden shrink-0 gap-1 sm:flex">
