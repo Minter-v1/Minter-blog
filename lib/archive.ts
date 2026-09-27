@@ -2,6 +2,7 @@ import "server-only";
 import { revalidateTag, unstable_cache } from "next/cache";
 import { COLLECTION_LIST, parseRef, toRef, type CollectionId, type Ref } from "./collections";
 import { githubEnv } from "./env";
+import { oldestFirst } from "./draft-order";
 import { readDirs } from "./github";
 import { parseEntry } from "./markdown";
 import { encodePath, rawBaseUrl } from "./paths";
@@ -17,6 +18,7 @@ export type Entry = {
   related: Ref[]; // 이 글에서 직접 연결한 기록
   extra: Record<string, string>; // 컬렉션별 추가 필드 (git: usage, troubleshooting: error)
   date: string;
+  created?: string; // 처음 등록한 시각 (예전 글엔 없음)
   updated?: string;
   draft: boolean; // 작성 중: 공개 화면(목록·상세·홈)에서 빠지고 작성 페이지에서만 보인다
   body: string; // 이미지 경로는 컬렉션 폴더 기준 상대 경로 그대로
@@ -24,7 +26,7 @@ export type Entry = {
 };
 
 // 목록·연관 선택기처럼 본문이 필요 없는 곳에 넘기는 요약
-export type EntrySummary = Pick<Entry, "collection" | "slug" | "ref" | "title" | "description" | "tags" | "date"> & {
+export type EntrySummary = Pick<Entry, "collection" | "slug" | "ref" | "title" | "description" | "tags" | "date" | "created"> & {
   extra: Record<string, string>;
   draft?: true; // 로그인했을 때 목록에 섞어 보여 주는 작성 중인 글
 };
@@ -67,6 +69,7 @@ async function readArchive(): Promise<Archive> {
         related: (doc.related ?? []).map((r) => parseRef(r, c.id)),
         extra: doc.extra ?? {},
         date: doc.date,
+        created: doc.created,
         updated: doc.updated,
         draft: doc.draft ?? false,
         body: doc.body,
@@ -76,10 +79,13 @@ async function readArchive(): Promise<Archive> {
   }
 
   all.sort((a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title, "ko"));
-  return { entries: all.filter((e) => !e.draft), drafts: all
-      .filter((e) => e.draft)
-      .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title, "ko")),
-    tags, repoUrl, rawBase };
+  return {
+    entries: all.filter((e) => !e.draft),
+    drafts: all.filter((e) => e.draft).sort(oldestFirst),
+    tags,
+    repoUrl,
+    rawBase,
+  };
 }
 
 // GitHub에서 매번 읽으면 페이지마다 0.6~1초가 걸린다 → 캐시하고, 앱에서 쓰기가 일어나면 즉시 비운다.
@@ -93,8 +99,8 @@ export function invalidateArchive() {
 }
 
 export function summarize(e: Entry): EntrySummary {
-  const { collection, slug, ref, title, description, tags, date, extra } = e;
-  return { collection, slug, ref, title, description, tags, date, extra };
+  const { collection, slug, ref, title, description, tags, date, created, extra } = e;
+  return { collection, slug, ref, title, description, tags, date, created, extra };
 }
 
 /** 공개된 글에서 찾는다. 작성 페이지처럼 작성 중인 글까지 찾으려면 withDrafts */

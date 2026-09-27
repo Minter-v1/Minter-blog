@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRef } from "react";
 import { COLLECTION_LIST, entryHref, type CollectionId } from "@/lib/collections";
 import { ChevronRight } from "../icons";
+import { CollectionIcon } from "../collection-icon";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -51,9 +52,7 @@ export function CollectionCards(props: { counts: Record<CollectionId, number>; r
           >
             <Link href={`/${c.id}`} className="absolute inset-0 rounded-[24px]" aria-label={c.label} />
             <div className="flex items-start justify-between">
-              <span data-emoji className="tossface flex size-12 items-center justify-center rounded-2xl bg-fill text-[26px]">
-                {c.emoji}
-              </span>
+              <CollectionIcon id={c.id} className="flex size-12 items-center justify-center rounded-2xl bg-fill text-[26px]" data-emoji />
               <span className="text-[24px] font-bold tracking-[-0.03em] tabular-nums">{props.counts[c.id]}</span>
             </div>
             <h3 className="mt-4 text-[17px] font-bold tracking-[-0.02em]">{c.label}</h3>

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRef } from "react";
 import { COLLECTIONS, entryHref, type CollectionId } from "@/lib/collections";
 import { horizontalLoop } from "@/lib/gsap-loop";
+import { CollectionIcon } from "../collection-icon";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -119,9 +120,7 @@ export function EntryMarquee({ items }: { items: MarqueeItem[] }) {
                 className="group flex w-[264px] shrink-0 sm:w-[296px] flex-col rounded-[24px] bg-surface p-5 transition-shadow duration-300 hover:shadow-[0_12px_32px_rgba(0,23,51,0.1)]"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="tossface flex size-10 items-center justify-center rounded-[14px] bg-fill text-[22px]">
-                    {c.emoji}
-                  </span>
+                  <CollectionIcon id={c.id} className="flex size-10 items-center justify-center rounded-[14px] bg-fill text-[22px]" />
                   <span className="text-[13px] font-semibold text-text-3">{c.label}</span>
                   <span className="ml-auto text-[12px] text-text-3 tabular-nums">{formatDate(e.date)}</span>
                 </div>

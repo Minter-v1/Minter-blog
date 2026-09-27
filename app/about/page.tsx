@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { loadArchive, type Entry } from "@/lib/archive";
-import { COLLECTIONS, entryHref } from "@/lib/collections";
+import { entryHref } from "@/lib/collections";
 import { PROFILE, type TimelineItem } from "@/lib/profile";
 import { Reveal } from "../components/about/reveal";
 import { Rich } from "../components/about/rich";
 import { ArrowUpRight, ChevronRight } from "../components/icons";
 import { SiteHeader } from "../components/site-header";
+import { CollectionIcon } from "../components/collection-icon";
 
 export const metadata: Metadata = {
   title: "About",
@@ -166,7 +167,7 @@ export default async function AboutPage() {
                               href={entryHref(e.collection, e.slug)}
                               className="-mx-2 flex items-center gap-2 rounded-lg px-2 py-1.5 text-[13px] font-medium hover:bg-fill"
                             >
-                              <span className="tossface text-[14px]">{COLLECTIONS[e.collection].emoji}</span>
+                              <CollectionIcon id={e.collection} className="text-[14px]" />
                               <span className="truncate">{e.title}</span>
                             </Link>
                           </li>

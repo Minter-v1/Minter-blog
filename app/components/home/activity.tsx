@@ -6,7 +6,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import type { Activity as ActivityData } from "@/lib/activity";
-import { COLLECTION_LIST, COLLECTIONS, type CollectionId } from "@/lib/collections";
+import { COLLECTION_LIST, type CollectionId } from "@/lib/collections";
+import { CollectionIcon } from "../collection-icon";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -58,7 +59,7 @@ export function Activity(props: { data: ActivityData; goals: Record<CollectionId
         <ul className="mt-6 space-y-2.5">
           {COLLECTION_LIST.map((c) => (
             <li key={c.id} className="flex items-center gap-2.5 text-[14px]">
-              <span className="tossface text-[18px]">{c.emoji}</span>
+              <CollectionIcon id={c.id} className="text-[18px]" />
               <span className="flex-1 font-medium text-text-2">{c.label}</span>
               <span className="font-semibold tabular-nums">
                 {thisWeek[c.id]}
@@ -128,7 +129,7 @@ export function Activity(props: { data: ActivityData; goals: Record<CollectionId
                     {hovered.items.slice(0, 5).map((it, k) => (
                       <li key={`${it.href}-${k}`}>
                         <Link href={it.href} className="flex items-center gap-2 py-0.5 text-[13px] font-medium hover:underline">
-                          <span className="tossface text-[13px]">{COLLECTIONS[it.collection].emoji}</span>
+                          <CollectionIcon id={it.collection} className="text-[13px]" />
                           <span className={`truncate ${it.collection === "git" ? "font-mono text-[12px]" : ""}`}>{it.title}</span>
                         </Link>
                       </li>

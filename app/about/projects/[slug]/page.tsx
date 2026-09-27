@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { loadArchive, type Entry } from "@/lib/archive";
-import { COLLECTIONS, entryHref } from "@/lib/collections";
+import { entryHref } from "@/lib/collections";
 import { PROFILE } from "@/lib/profile";
 import { readProjectBody } from "@/lib/projects";
 import { Reveal } from "../../../components/about/reveal";
@@ -11,6 +11,7 @@ import { Article } from "../../../components/article";
 import { ChevronRight } from "../../../components/icons";
 import { Outline } from "../../../components/outline";
 import { SiteHeader } from "../../../components/site-header";
+import { CollectionIcon } from "../../../components/collection-icon";
 
 type Props = PageProps<"/about/projects/[slug]">;
 
@@ -118,7 +119,7 @@ export default async function ProjectPage(props: Props) {
                         href={entryHref(e.collection, e.slug)}
                         className="group flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-colors hover:bg-fill"
                       >
-                        <span className="tossface text-[20px]">{COLLECTIONS[e.collection].emoji}</span>
+                        <CollectionIcon id={e.collection} className="text-[20px]" />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-[15px] font-semibold group-hover:text-primary">{e.title}</p>
                           <p className="truncate text-[13px] text-text-3">{e.description}</p>

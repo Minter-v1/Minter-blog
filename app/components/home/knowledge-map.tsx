@@ -17,6 +17,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { COLLECTION_LIST, COLLECTIONS, entryHref, type CollectionId } from "@/lib/collections";
+import { CollectionIcon, GIT_LOGO_PATH, GIT_ORANGE } from "../collection-icon";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -377,9 +378,13 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
               {n.hub ? (
                 <>
                   <circle r={n.r} fill="#fff" stroke="#e5e8eb" strokeWidth={1.5} />
-                  <text textAnchor="middle" dy="0.36em" className="tossface text-[24px]">
-                    {COLLECTIONS[n.collection].emoji}
-                  </text>
+                  {n.collection === "git" ? (
+                    <path d={GIT_LOGO_PATH} fill={GIT_ORANGE} transform="translate(-11 -11) scale(0.239)" />
+                  ) : (
+                    <text textAnchor="middle" dy="0.36em" className="tossface text-[24px]">
+                      {COLLECTIONS[n.collection].emoji}
+                    </text>
+                  )}
                   <text textAnchor="middle" y={n.r + 20} className="fill-text-2 text-[13px] font-semibold">
                     {COLLECTIONS[n.collection].shortLabel}
                     <tspan className="fill-text-3 font-medium"> {n.count}</tspan>
@@ -408,7 +413,7 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
           {hoveredNode && (
             <>
               <p className="flex items-center gap-1.5 text-[12px] font-semibold text-text-3">
-                <span className="tossface text-[14px]">{COLLECTIONS[hoveredNode.collection].emoji}</span>
+                <CollectionIcon id={hoveredNode.collection} className="text-[14px]" />
                 {hoveredNode.hub
                   ? `${hoveredNode.count}개`
                   : `${COLLECTIONS[hoveredNode.collection].label} · 연결 ${neighbors.get(hoveredNode.id)!.size - 1}개`}

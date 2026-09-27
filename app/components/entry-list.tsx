@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { EntrySummary } from "@/lib/archive";
+import { oldestFirst } from "@/lib/draft-order";
 import { COLLECTIONS, entryHref, type CollectionId } from "@/lib/collections";
 import type { Tag } from "@/lib/tags";
 import { DraftRow, draftHref, useDrafts } from "./drafts";
@@ -108,7 +109,7 @@ export function EntryList(props: {
   // 날짜별(주 1회 몰아서 정리) 또는 분류별(치트시트)로 묶는다
   // 작성 중인 글은 목록 맨 위 점선 상자에 따로 모은다. 오래 묵은 것부터 정리하도록 오래된 순
   const visibleDrafts = useMemo(
-    () => visible.filter((e) => e.draft).sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title, "ko")),
+    () => visible.filter((e) => e.draft).sort(oldestFirst),
     [visible],
   );
 

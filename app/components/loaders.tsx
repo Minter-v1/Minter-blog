@@ -16,7 +16,7 @@ export function Spinner({ className = "size-4" }: { className?: string }) {
 // 페이지 스켈레톤 공통 머리 (로고·메뉴는 실제와 같은 자리)
 export function HeaderSkeleton() {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-y-4 pt-5 pb-4 lg:flex-nowrap lg:py-7" aria-hidden>
+    <div className="flex flex-wrap items-center justify-between gap-y-4 pt-5 pb-4 lg:flex-nowrap lg:py-7 lg:relative lg:left-1/2 lg:w-[max(100%,min(1072px,calc(100vw-3rem)))] lg:-translate-x-1/2" aria-hidden>
       <div className="contents lg:flex lg:items-center lg:gap-7">
         <span className="text-[20px] font-bold tracking-[-0.03em]">Minter.log</span>
         <div className="order-last flex w-full gap-3 overflow-hidden lg:order-none lg:w-auto">
