@@ -6,7 +6,7 @@ import type { Entry } from "@/lib/archive";
 export function DraftTray(props: { drafts: Entry[]; current?: string }) {
   if (props.drafts.length === 0) return null;
   return (
-    <nav aria-label="작성 중인 글" className="mb-6 flex items-center gap-4 rounded-[20px] bg-surface py-3 pr-3 pl-6">
+    <nav aria-label="작성 중인 글" className="mb-4 flex items-center gap-3 rounded-[20px] bg-surface py-3 pr-3 pl-4 sm:mb-6 sm:gap-4 sm:pl-6">
       <p className="shrink-0 text-[14px] font-semibold text-text-2">
         작성 중 <span className="ml-0.5 text-primary tabular-nums">{props.drafts.length}</span>
       </p>

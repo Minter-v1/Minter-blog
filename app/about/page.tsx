@@ -33,24 +33,24 @@ export default async function AboutPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-[960px] px-6 pb-28">
+    <div className="mx-auto max-w-[960px] px-4 sm:px-6 pb-28">
       <SiteHeader active="about" writeHref="/write" />
 
       <Reveal>
         {/* 소개 */}
-        <section className="pt-10 pb-4">
-          <div className="flex items-start justify-between gap-10">
+        <section className="pt-6 pb-4 sm:pt-10">
+          <div className="flex flex-col-reverse items-start justify-between gap-8 sm:flex-row sm:gap-10">
             <div className="min-w-0">
               <span className="text-[16px] font-semibold text-primary">
                 {PROFILE.role}
               </span>
-              <h1 className="mt-4 flex items-baseline gap-3">
-                <span data-name className="text-[52px] leading-none font-bold tracking-[-0.045em]">
+              <h1 className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <span data-name className="text-[40px] leading-none font-bold tracking-[-0.045em] sm:text-[52px]">
                   {PROFILE.name}
                 </span>
                 <span className="text-[20px] font-semibold text-text-3">{PROFILE.nameEn}</span>
               </h1>
-              <div className="mt-6 space-y-1 text-[18px] leading-[1.7] text-text-2">
+              <div className="mt-6 space-y-1 text-[16px] leading-[1.7] text-text-2 sm:text-[18px]">
                 {PROFILE.intro.map((line, i) => (
                   <p key={i}>
                     <Rich text={line} />
@@ -76,7 +76,7 @@ export default async function AboutPage() {
             {PROFILE.photo && (
               <div
                 data-photo
-                className="relative aspect-[3/4] w-[210px] shrink-0 overflow-hidden rounded-[28px] bg-fill"
+                className="relative aspect-[3/4] w-[132px] shrink-0 overflow-hidden rounded-[24px] bg-fill sm:w-[210px] sm:rounded-[28px]"
               >
                 <Image
                   src={PROFILE.photo}
@@ -90,7 +90,7 @@ export default async function AboutPage() {
             )}
           </div>
 
-          <div className="mt-10 grid grid-cols-4 gap-3">
+          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {stats.map((s) => (
               <div key={s.label} className="rounded-[22px] bg-surface p-5">
                 <span className="tossface text-[26px]">{s.emoji}</span>
@@ -106,7 +106,7 @@ export default async function AboutPage() {
 
         {/* 프로젝트 */}
         <Section emoji="🗂️" title="프로젝트" id="projects">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
             {PROFILE.projects.map((p) => {
               const related = (p.related ?? []).map((r) => byRef.get(r)).filter((e): e is Entry => !!e);
               return (
@@ -184,11 +184,11 @@ export default async function AboutPage() {
           <Timeline items={PROFILE.experience} />
         </Section>
 
-        <div className="grid grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
           <Section emoji="🛠️" title="기술 스택">
             <div data-reveal className="space-y-4 rounded-[24px] bg-surface p-6">
               {PROFILE.skills.map((g) => (
-                <div key={g.group} className="grid grid-cols-[108px_minmax(0,1fr)] items-baseline gap-3">
+                <div key={g.group} className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[108px_minmax(0,1fr)] sm:gap-3">
                   <p className="text-[13px] font-semibold text-text-3">{g.group}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {g.items.map((s) => (
@@ -227,7 +227,7 @@ export default async function AboutPage() {
         <Section emoji="📄" title="논문">
           <ul data-reveal className="rounded-[24px] bg-surface p-3">
             {PROFILE.papers.map((p) => (
-              <li key={p.title} className="grid grid-cols-[96px_minmax(0,1fr)] gap-4 rounded-2xl px-3 py-3.5">
+              <li key={p.title} className="grid grid-cols-1 gap-1 rounded-2xl px-3 py-3.5 sm:grid-cols-[96px_minmax(0,1fr)] sm:gap-4">
                 <span className="text-[13px] font-medium text-text-3 tabular-nums">{p.date}</span>
                 <div>
                   <p className="text-[15px] leading-snug font-bold">{p.title}</p>
@@ -248,7 +248,7 @@ export default async function AboutPage() {
 
 function Section(props: { emoji: string; title: string; id?: string; children: React.ReactNode }) {
   return (
-    <section id={props.id} className="mt-14 scroll-mt-6">
+    <section id={props.id} className="mt-12 scroll-mt-6 sm:mt-14">
       <h2 data-reveal className="mb-4 flex items-center gap-2 px-1 text-[22px] font-bold tracking-[-0.03em]">
         <span className="tossface text-[24px]">{props.emoji}</span>
         {props.title}
@@ -265,7 +265,7 @@ function Timeline({ items }: { items: TimelineItem[] }) {
         <li
           key={it.title + it.period}
           data-reveal
-          className="grid grid-cols-[132px_minmax(0,1fr)] gap-4 px-3 py-4"
+          className="grid grid-cols-1 gap-1 px-3 py-4 sm:grid-cols-[132px_minmax(0,1fr)] sm:gap-4"
         >
           <span className="pt-0.5 text-[13px] font-medium text-text-3 tabular-nums">{it.period}</span>
           <div>

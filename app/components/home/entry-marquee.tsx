@@ -96,7 +96,7 @@ export function EntryMarquee({ items }: { items: MarqueeItem[] }) {
   return (
     <div
       ref={root}
-      className="relative -mx-6 space-y-4 overflow-hidden py-2 motion-reduce:overflow-x-auto"
+      className={`relative -mx-4 space-y-4 py-2 sm:-mx-6 ${flow ? "overflow-hidden motion-reduce:overflow-x-auto" : "overflow-x-auto [scrollbar-width:none]"}`}
       // 흐를 때만 양끝을 배경색으로 흐리게
       style={
         flow
@@ -108,7 +108,7 @@ export function EntryMarquee({ items }: { items: MarqueeItem[] }) {
       }
     >
       {rows.map((row, r) => (
-        <div key={r} data-row className="flex gap-4 px-6">
+        <div key={r} data-row className="flex w-max gap-3 px-4 sm:gap-4 sm:px-6">
           {row.map((e, i) => {
             const c = COLLECTIONS[e.collection];
             return (
@@ -116,7 +116,7 @@ export function EntryMarquee({ items }: { items: MarqueeItem[] }) {
                 key={`${e.collection}/${e.slug}/${i}`}
                 data-card
                 href={entryHref(e.collection, e.slug)}
-                className="group flex w-[296px] shrink-0 flex-col rounded-[24px] bg-surface p-5 transition-shadow duration-300 hover:shadow-[0_12px_32px_rgba(0,23,51,0.1)]"
+                className="group flex w-[264px] shrink-0 sm:w-[296px] flex-col rounded-[24px] bg-surface p-5 transition-shadow duration-300 hover:shadow-[0_12px_32px_rgba(0,23,51,0.1)]"
               >
                 <div className="flex items-center gap-2.5">
                   <span className="tossface flex size-10 items-center justify-center rounded-[14px] bg-fill text-[22px]">

@@ -29,7 +29,7 @@ export default async function WritePage(props: PageProps<"/write">) {
   const refs = new Set(all.map((e) => e.ref));
 
   return (
-    <div className="mx-auto max-w-[1440px] px-6 pb-16">
+    <div className="mx-auto max-w-[1440px] px-4 sm:px-6 pb-16">
       <SiteHeader active={collection} />
       <DraftTray drafts={archive.drafts} current={entry?.ref} />
       <WriteForm

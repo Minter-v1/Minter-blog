@@ -3,10 +3,10 @@ import { Bone, HeaderSkeleton } from "../../components/loaders";
 // 글 상세 이동 중
 export default function Loading() {
   return (
-    <div className="mx-auto max-w-[760px] px-6 pb-24 xl:max-w-[1036px]" aria-busy>
+    <div className="mx-auto max-w-[760px] px-4 sm:px-6 pb-24 xl:max-w-[1036px]" aria-busy>
       <HeaderSkeleton />
       <div className="xl:grid xl:grid-cols-[760px_220px] xl:gap-8">
-        <div className="rounded-[28px] bg-surface px-12 pt-12 pb-16">
+        <div className="rounded-[24px] bg-surface px-5 pt-7 pb-10 sm:rounded-[28px] sm:px-12 sm:pt-12 sm:pb-16">
           <div className="flex gap-2">
             <Bone className="h-6 w-20 rounded-full" />
             <Bone className="h-6 w-16 rounded-full" />

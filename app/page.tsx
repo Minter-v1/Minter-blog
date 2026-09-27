@@ -42,7 +42,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="mx-auto max-w-[1120px] px-6 pb-24">
+    <div className="mx-auto max-w-[1120px] px-4 sm:px-6 pb-24">
       <SiteHeader writeHref="/write" />
 
       {loadError && (

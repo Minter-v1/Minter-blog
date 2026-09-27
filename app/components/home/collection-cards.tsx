@@ -42,7 +42,7 @@ export function CollectionCards(props: { counts: Record<CollectionId, number>; r
   return (
     <section ref={root}>
       <h2 className="mb-4 px-1 text-[20px] font-bold tracking-[-0.03em]">컬렉션</h2>
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         {COLLECTION_LIST.map((c) => (
           <div
             key={c.id}
