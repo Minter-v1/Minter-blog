@@ -31,7 +31,7 @@ export type EntrySummary = Pick<Entry, "collection" | "slug" | "ref" | "title" |
 
 export type Archive = {
   entries: Entry[]; // 작성 완료된 글, 전 컬렉션, 최신순
-  drafts: Entry[]; // 작성 중인 글 (작성 페이지 전용)
+  drafts: Entry[]; // 작성 중인 글, 오래된 순 (먼저 적어둔 것부터 정리하도록)
   tags: Record<CollectionId, Tag[]>;
   repoUrl: string;
   rawBase: Record<CollectionId, string>; // 상대 경로 이미지 앞에 붙일 URL
@@ -76,7 +76,10 @@ async function readArchive(): Promise<Archive> {
   }
 
   all.sort((a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title, "ko"));
-  return { entries: all.filter((e) => !e.draft), drafts: all.filter((e) => e.draft), tags, repoUrl, rawBase };
+  return { entries: all.filter((e) => !e.draft), drafts: all
+      .filter((e) => e.draft)
+      .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title, "ko")),
+    tags, repoUrl, rawBase };
 }
 
 // GitHub에서 매번 읽으면 페이지마다 0.6~1초가 걸린다 → 캐시하고, 앱에서 쓰기가 일어나면 즉시 비운다.
