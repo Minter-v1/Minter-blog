@@ -51,7 +51,7 @@ async function readArchive(): Promise<Archive> {
   for (const c of COLLECTION_LIST) {
     const files = dirs[c.dir] ?? [];
     // 커밋 SHA로 고정한 raw URL은 CDN 캐시 지연이 없다
-    rawBase[c.id] = rawBaseUrl(owner, repo, commitSha ?? branch, c.dir);
+    rawBase[c.id] = rawBaseUrl(commitSha ?? branch, c.dir);
     tags[c.id] = parseTags(files.find((f) => f.name === "tags.json")?.text ?? null, c.defaultTags);
 
     for (const file of files) {
