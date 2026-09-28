@@ -7,6 +7,8 @@ import { CollectionCards, type CardItem } from "./components/home/collection-car
 import { Hero } from "./components/home/hero";
 import { KnowledgeMap } from "./components/home/knowledge-map";
 import { SiteHeader } from "./components/site-header";
+import { TodaySection } from "./components/home/today";
+import { entriesOfDay, seoulToday } from "@/lib/today";
 
 // 공개 페이지: 미리 만들어 CDN에 캐시하고, 글을 쓰면 revalidateTag("archive")로 즉시 갱신 (그 외엔 5분마다)
 export const revalidate = 300;
@@ -60,6 +62,15 @@ export default async function Home() {
       />
 
       <div className="mt-16 space-y-12">
+        <TodaySection
+          items={entriesOfDay(entries, seoulToday()).map(({ entry: e, kind }) => ({
+            collection: e.collection,
+            slug: e.slug,
+            title: e.title,
+            description: e.description,
+            kind,
+          }))}
+        />
         <KnowledgeMap
           entries={entries.map(({ ref, collection, slug, title, description }) => ({ ref, collection, slug, title, description }))}
           links={links}

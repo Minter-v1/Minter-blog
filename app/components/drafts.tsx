@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { EntrySummary } from "@/lib/archive";
 import { COLLECTION_LIST, COLLECTIONS, type CollectionId } from "@/lib/collections";
+import { seoulToday } from "@/lib/today";
 import { useAuthed } from "./auth";
 import { Highlight } from "./highlight";
 import { ChevronRight, Close, Search } from "./icons";
@@ -56,15 +57,10 @@ export function useDrafts(): EntrySummary[] | null {
 export const draftHref = (e: Pick<EntrySummary, "collection" | "slug">) =>
   `/write?c=${e.collection}&edit=${encodeURIComponent(e.slug)}`;
 
-function todayInSeoul() {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(
-    new Date(),
-  );
-}
 
 /** 적어둔 지 얼마나 됐는지: 오늘 / 2일째 / 15일째 */
 export function draftAge(date: string) {
-  const days = Math.round((Date.parse(todayInSeoul()) - Date.parse(date)) / 86_400_000);
+  const days = Math.round((Date.parse(seoulToday()) - Date.parse(date)) / 86_400_000);
   if (!Number.isFinite(days)) return "";
   return days <= 0 ? "오늘" : `${days + 1}일째`;
 }
