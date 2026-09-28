@@ -404,12 +404,13 @@ export function ImageEditButtons(props: {
           key={s.id}
           type="button"
           onClick={() => setEditing(s)}
-          className={`absolute z-10 inline-flex h-8 -translate-x-full items-center gap-1 rounded-xl bg-surface/95 px-3 text-[13px] font-semibold text-text-2 shadow-[0_4px_14px_rgba(0,23,51,0.16)] backdrop-blur transition-[opacity,background-color] hover:bg-surface hover:text-text pointer-coarse:opacity-100 ${
+          className={`absolute z-10 inline-flex h-8 items-center gap-1 rounded-xl whitespace-nowrap bg-surface/95 px-3 text-[13px] font-semibold text-text-2 shadow-[0_4px_14px_rgba(0,23,51,0.16)] backdrop-blur transition-[opacity,background-color] hover:bg-surface hover:text-text pointer-coarse:opacity-100 ${
             hovered === s.id ? "opacity-100" : "pointer-events-none opacity-0 pointer-coarse:pointer-events-auto"
           }`}
-          style={{ top: s.top + 10, left: s.right - 10 }}
+          // 오른쪽 끝 기준 — left로 두면 남은 폭이 좁아 '편/집'이 세로로 꺾인다
+          style={{ top: s.top + 10, right: (root?.clientWidth ?? 0) - s.right + 10 }}
         >
-          <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <svg viewBox="0 0 24 24" className="size-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
           </svg>
           편집
