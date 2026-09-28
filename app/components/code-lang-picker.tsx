@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, Search } from "./icons";
+import { Mermaid } from "./mermaid";
 
 // BlockNote 코드 블록의 기본 <select>(언어 50개가 한 줄로)를 숨기고, 그 자리에 검색되는 언어 선택기를 띄운다.
 // 고르면 원래 <select>에 값을 넣고 change 이벤트를 보내서 BlockNote가 블록을 갱신하게 한다.
@@ -28,13 +29,26 @@ function applyLanguage(select: HTMLSelectElement, id: string) {
   select.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
+type Slot = {
+  select: HTMLSelectElement;
+  top: number; // 선택기 자리 (root 기준)
+  left: number;
+  blockId: string;
+  bottom: number; // 코드 블록 아래끝 (root 기준) — Mermaid 미리보기 자리
+  blockLeft: number;
+  width: number;
+  mermaid: string | null; // 언어가 Mermaid면 코드 원문
+};
+
 /**
- * 에디터 안의 코드 블록 <select> 자리에 선택기를 겹쳐 띄운다.
+ * 에디터 안 코드 블록마다: 언어 선택기를 <select> 자리에 겹쳐 띄우고, Mermaid 블록이면 아래에 그림 미리보기를 붙인다.
  * 에디터 DOM 안에는 아무것도 넣지 않는다 — ProseMirror가 바뀐 DOM을 보고 블록을 다시 그리면서 무한 반복에 빠진다.
  * 그래서 에디터 바깥(root 기준 absolute)에 두고, 에디터가 바뀔 때마다 위치만 다시 잰다.
+ * 미리보기가 들어갈 공간은 에디터 바깥 <style>로 그 블록에 margin-bottom을 줘서 확보한다.
  */
-export function CodeLangPickers({ root }: { root: HTMLElement | null }) {
-  const [slots, setSlots] = useState<{ select: HTMLSelectElement; top: number; left: number }[]>([]);
+export function CodeBlockOverlays({ root }: { root: HTMLElement | null }) {
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [heights, setHeights] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const editor = root?.querySelector<HTMLElement>(".bn-container");
@@ -44,13 +58,26 @@ export function CodeLangPickers({ root }: { root: HTMLElement | null }) {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const base = root.getBoundingClientRect();
-        const next = [...editor.querySelectorAll<HTMLSelectElement>('[data-content-type="codeBlock"] select')].map((select) => {
-          const r = select.getBoundingClientRect();
-          return { select, top: Math.round(r.top - base.top), left: Math.round(r.left - base.left) };
-        });
+        const next = [...editor.querySelectorAll<HTMLSelectElement>('[data-content-type="codeBlock"] select')].map(
+          (select): Slot => {
+            const r = select.getBoundingClientRect();
+            const block = select.closest<HTMLElement>('[data-content-type="codeBlock"]')!;
+            const b = block.getBoundingClientRect();
+            return {
+              select,
+              top: Math.round(r.top - base.top),
+              left: Math.round(r.left - base.left),
+              blockId: select.closest<HTMLElement>("[data-id]")?.dataset.id ?? "",
+              bottom: Math.round(b.bottom - base.top),
+              blockLeft: Math.round(b.left - base.left),
+              width: Math.round(b.width),
+              mermaid: select.value === "mermaid" ? (block.querySelector("code")?.textContent ?? "") : null,
+            };
+          },
+        );
         setSlots((prev) =>
           prev.length === next.length &&
-          prev.every((p, i) => p.select === next[i].select && p.top === next[i].top && p.left === next[i].left)
+          prev.every((p, i) => (Object.keys(p) as (keyof Slot)[]).every((k) => p[k] === next[i][k]))
             ? prev
             : next,
         );
@@ -68,14 +95,56 @@ export function CodeLangPickers({ root }: { root: HTMLElement | null }) {
     };
   }, [root]);
 
+  const previewIds = slots.filter((s) => s.mermaid !== null && s.blockId).map((s) => s.blockId);
+  const css = previewIds
+    .map((id) => `[data-id="${CSS.escape(id)}"] > .bn-block > [data-content-type="codeBlock"]{margin-bottom:${(heights[id] ?? 160) + 20}px}`)
+    .join("\n");
+
   return (
     <>
-      {slots.map(({ select, top, left }, i) => (
-        <div key={i} className="absolute z-10" style={{ top, left }}>
-          <Picker key={select.value + i} select={select} />
-        </div>
+      {css && <style>{css}</style>}
+      {slots.map((slot, i) => (
+        <Fragment key={i}>
+          <div className="absolute z-10" style={{ top: slot.top, left: slot.left }}>
+            <Picker key={slot.select.value + i} select={slot.select} />
+          </div>
+          {slot.mermaid !== null && slot.blockId && (
+            <MermaidPreview
+              code={slot.mermaid}
+              style={{ top: slot.bottom + 8, left: slot.blockLeft, width: slot.width }}
+              onHeight={(h) => setHeights((prev) => (prev[slot.blockId] === h ? prev : { ...prev, [slot.blockId]: h }))}
+            />
+          )}
+        </Fragment>
       ))}
     </>
+  );
+}
+
+// 작성 중 Mermaid 미리보기: 입력이 잠깐 멈추면(0.4초) 다시 그린다
+function MermaidPreview(props: { code: string; style: React.CSSProperties; onHeight: (h: number) => void }) {
+  const { onHeight } = props;
+  const [code, setCode] = useState(props.code);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setCode(props.code), 400);
+    return () => clearTimeout(t);
+  }, [props.code]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => onHeight(Math.ceil(el.getBoundingClientRect().height)));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [onHeight]);
+
+  return (
+    <div ref={ref} className="editor-mermaid article absolute" style={props.style} contentEditable={false}>
+      <p className="editor-mermaid-label">미리보기</p>
+      {code.trim() ? <Mermaid code={code} /> : <p className="editor-mermaid-empty">코드를 입력하면 여기에 그려져요</p>}
+    </div>
   );
 }
 
@@ -88,6 +157,7 @@ function Picker({ select }: { select: HTMLSelectElement }) {
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
 
   // 되돌리기 등으로 BlockNote가 값을 바꿔도 따라가도록
   useEffect(() => {
@@ -118,11 +188,15 @@ function Picker({ select }: { select: HTMLSelectElement }) {
   }, [langs, query]);
   const options = results.flatMap((g) => g.items);
 
-  function show() {
+  function place() {
     const r = buttonRef.current!.getBoundingClientRect();
     // 화면 아래가 모자라면 위로
     const top = window.innerHeight - r.bottom < 340 ? Math.max(8, r.top - 336) : r.bottom + 6;
-    setPos({ top, left: Math.min(r.left, window.innerWidth - 248) });
+    return { top, left: Math.min(r.left, window.innerWidth - 248) };
+  }
+
+  function show() {
+    setPos(place());
     setQuery("");
     setCursor(0);
     setOpen(true);
@@ -136,11 +210,15 @@ function Picker({ select }: { select: HTMLSelectElement }) {
 
   useEffect(() => {
     if (!open) return;
+    const follow = (e: Event) => {
+      if (popRef.current?.contains(e.target as Node)) return; // 언어 목록 안 스크롤
+      setPos(place());
+    };
     const close = () => setOpen(false);
-    window.addEventListener("scroll", close, true);
+    window.addEventListener("scroll", follow, true);
     window.addEventListener("resize", close);
     return () => {
-      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("scroll", follow, true);
       window.removeEventListener("resize", close);
     };
   }, [open]);
@@ -169,6 +247,7 @@ function Picker({ select }: { select: HTMLSelectElement }) {
           <>
             <div className="fixed inset-0 z-40" onMouseDown={() => setOpen(false)} />
             <div
+              ref={popRef}
               className="fixed z-50 w-60 animate-[fade-in_120ms_ease-out] rounded-2xl bg-surface p-2 shadow-[0_8px_30px_rgba(0,23,51,0.16)]"
               style={{ top: pos.top, left: pos.left }}
             >

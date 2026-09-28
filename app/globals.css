@@ -432,3 +432,34 @@ body {
     padding: 16px;
   }
 }
+
+/* 작성 화면: Mermaid 코드 블록 아래 미리보기 (code-lang-picker.tsx) */
+.editor-mermaid {
+  font-size: 14px;
+}
+.editor-mermaid .editor-mermaid-label {
+  margin: 0 0 6px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+}
+.editor-mermaid .mermaid-block {
+  margin: 0;
+  background: #fff;
+  border: 1px dashed var(--fill-strong);
+}
+.editor-mermaid .editor-mermaid-empty {
+  margin: 0;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px dashed var(--fill-strong);
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-3);
+}
+@media (max-width: 639px) {
+  .editor-mermaid .mermaid-block {
+    margin-inline: 0;
+    border-radius: 16px;
+  }
+}
