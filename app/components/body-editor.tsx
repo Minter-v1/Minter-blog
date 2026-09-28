@@ -7,7 +7,7 @@ import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import { useEffect, useRef, useState } from "react";
-import { CodeLangPickers } from "./code-lang-picker";
+import { CodeBlockOverlays } from "./code-lang-picker";
 import { decodeBlocks, encodeBlocks, htmlToTokens, tokensToHtml } from "@/lib/rich-markdown";
 
 export type BodyEditorApi = { getMarkdown: () => string; focus: () => void; reset: (markdown: string) => void };
@@ -115,7 +115,7 @@ export default function BodyEditor(props: {
           if (!loading.current) props.onChange();
         }}
       />
-      <CodeLangPickers root={root} />
+      <CodeBlockOverlays root={root} />
     </div>
   );
 }
