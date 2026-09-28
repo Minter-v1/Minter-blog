@@ -6,26 +6,33 @@ import { codeBlockOptions, syntaxHighlighter } from "@blocknote/code-block";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { CodeLangPickers } from "./code-lang-picker";
 import { decodeBlocks, encodeBlocks, htmlToTokens, tokensToHtml } from "@/lib/rich-markdown";
 
 export type BodyEditorApi = { getMarkdown: () => string; focus: () => void; reset: (markdown: string) => void };
 
+// 새 코드 블록의 기본 언어는 bash(Shell).
 // ``` + 스페이스로 만든 코드 블록은 언어가 ""인데, BlockNote는 지원 목록에 없는 언어를 만나면
-// 렌더링 중에 예외를 던진다. ""를 text의 별칭으로 등록해 막는다.
+// 렌더링 중에 예외를 던진다. ""를 Shell의 별칭으로 등록해 막으면서 기본 언어도 맞춘다.
+const DEFAULT_LANGUAGE = "shellscript";
 const supportedLanguages = {
   ...codeBlockOptions.supportedLanguages,
-  text: {
-    ...codeBlockOptions.supportedLanguages.text,
-    aliases: [...(codeBlockOptions.supportedLanguages.text.aliases ?? []), ""],
+  [DEFAULT_LANGUAGE]: {
+    ...codeBlockOptions.supportedLanguages[DEFAULT_LANGUAGE],
+    aliases: [...(codeBlockOptions.supportedLanguages[DEFAULT_LANGUAGE].aliases ?? []), ""],
   },
 };
 
 const schema = BlockNoteSchema.create().extend({
-  blockSpecs: { codeBlock: createCodeBlockSpec({ ...codeBlockOptions, supportedLanguages }) },
+  blockSpecs: {
+    codeBlock: createCodeBlockSpec({ ...codeBlockOptions, supportedLanguages, defaultLanguage: DEFAULT_LANGUAGE }),
+  },
 });
 
 function languageId(lang: string) {
+  // 이미 저장된 글의 언어 없는 코드 블록(```)은 그대로 일반 텍스트로 (기본값 bash로 바뀌지 않게)
+  if (!lang) return "text";
   const l = lang.toLowerCase();
   const hit = Object.entries(supportedLanguages).find(
     ([id, { aliases }]) => id === l || (aliases ?? []).some((a) => a.toLowerCase() === l),
@@ -70,6 +77,7 @@ export default function BodyEditor(props: {
   });
 
   const loading = useRef(true);
+  const [root, setRoot] = useState<HTMLDivElement | null>(null);
   const { initialMarkdown, onReady } = props;
 
   useEffect(() => {
@@ -98,13 +106,16 @@ export default function BodyEditor(props: {
   }, [editor, initialMarkdown, onReady]);
 
   return (
-    <BlockNoteView
-      editor={editor}
-      theme="light"
-      className="body-editor"
-      onChange={() => {
-        if (!loading.current) props.onChange();
-      }}
-    />
+    <div ref={setRoot} className="relative">
+      <BlockNoteView
+        editor={editor}
+        theme="light"
+        className="body-editor"
+        onChange={() => {
+          if (!loading.current) props.onChange();
+        }}
+      />
+      <CodeLangPickers root={root} />
+    </div>
   );
 }

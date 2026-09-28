@@ -274,8 +274,10 @@ body {
   color: var(--shiki-light) !important;
 }
 .body-editor .bn-block-content[data-content-type="codeBlock"] select {
-  color: var(--text-3);
-  font-size: 12px;
+  /* 기본 select는 자리만 남기고 숨긴다. 그 위에 검색되는 선택기(code-lang-picker.tsx)가 겹쳐 뜬다 */
+  visibility: hidden;
+  width: 120px;
+  height: 28px;
 }
 .body-editor .bn-inline-content code {
   color: #d6336c;
