@@ -59,7 +59,7 @@ export async function Article({ markdown, rawBase }: { markdown: string; rawBase
         components={{
           img: ({ src, alt }) =>
             typeof src === "string" ? (
-              // eslint-disable-next-line @next/next/no-img-element -- raw.githubusercontent 원본 그대로 표시
+              // eslint-disable-next-line @next/next/no-img-element -- 기록 이미지(/api/files)를 원본 그대로 표시
               <img src={resolveImageSrc(src, rawBase)} alt={alt ?? ""} loading="lazy" />
             ) : null,
           // eslint-disable-next-line @typescript-eslint/no-unused-vars -- node는 DOM에 넘기지 않는다

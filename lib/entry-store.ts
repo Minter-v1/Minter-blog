@@ -89,15 +89,14 @@ function escapeRegExp(s: string) {
 
 /**
  * 에디터 마크다운의 이미지 URL을 컬렉션 폴더 기준 상대 경로로 바꾸고, 커밋할 이미지 파일 목록을 만든다.
- * - raw.githubusercontent URL(기존 이미지) → images/{slug}/n.ext
+ * - /api/files/… 주소(기존 이미지, 예전 글은 raw.githubusercontent URL) → images/{slug}/n.ext
  * - blob: URL(새 이미지) → images/{slug}/{다음 번호}.ext
  */
 function resolveImages(dir: string, body: string, slug: string, uploads: UploadedImage[], existingFiles: string[]) {
   const { owner, repo } = githubEnv();
+  const encodedDir = escapeRegExp(dir.split("/").map(encodeURIComponent).join("/"));
   const rawPrefix = new RegExp(
-    `https://raw\\.githubusercontent\\.com/${escapeRegExp(owner)}/${escapeRegExp(repo)}/[^/]+/${escapeRegExp(
-      dir.split("/").map(encodeURIComponent).join("/"),
-    )}/(images/[^)\\s]+)`,
+    `(?:https://raw\\.githubusercontent\\.com/${escapeRegExp(owner)}/${escapeRegExp(repo)}|(?:https?://[^/)\\s]+)?/api/files)/[^/]+/${encodedDir}/(images/[^)\\s]+)`,
     "g",
   );
   let md = body.replace(rawPrefix, (_, rel: string) => {
