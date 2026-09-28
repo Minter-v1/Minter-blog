@@ -395,3 +395,38 @@ body {
     padding-inline: 20px;
   }
 }
+
+/* ---------- Mermaid 다이어그램 ---------- */
+.article .mermaid-block {
+  margin: 1.4em 0;
+  padding: 20px;
+  border-radius: 16px;
+  background: #f7f8fa;
+  overflow-x: auto;
+  text-align: center;
+}
+.article .mermaid-block svg {
+  display: inline-block;
+  max-width: none;
+  height: auto;
+}
+.article .mermaid-error {
+  text-align: left;
+}
+.article .mermaid-error > p {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--danger);
+}
+.article .mermaid-error pre {
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+}
+@media (max-width: 639px) {
+  .article .mermaid-block {
+    margin-inline: -20px;
+    border-radius: 0;
+    padding: 16px;
+  }
+}
