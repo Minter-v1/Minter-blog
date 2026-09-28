@@ -8,6 +8,7 @@ import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import { useEffect, useRef, useState } from "react";
 import { CodeBlockOverlays } from "./code-lang-picker";
+import { EditorFormattingToolbar, EditorSideMenu } from "./editor-menus";
 import { decodeBlocks, encodeBlocks, htmlToTokens, tokensToHtml } from "@/lib/rich-markdown";
 
 export type BodyEditorApi = { getMarkdown: () => string; focus: () => void; reset: (markdown: string) => void };
@@ -111,10 +112,15 @@ export default function BodyEditor(props: {
         editor={editor}
         theme="light"
         className="body-editor"
+        sideMenu={false}
+        formattingToolbar={false}
         onChange={() => {
           if (!loading.current) props.onChange();
         }}
-      />
+      >
+        <EditorSideMenu />
+        <EditorFormattingToolbar />
+      </BlockNoteView>
       <CodeBlockOverlays root={root} />
     </div>
   );
