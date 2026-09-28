@@ -54,12 +54,13 @@ export default async function WritePage(props: PageProps<"/write">) {
         }
         tags={archive.tags[collection]}
         existingSlugs={all.filter((e) => e.collection === collection).map((e) => e.slug)}
-        candidates={archive.entries
+        // 작성 중인 글끼리도 연결할 수 있다 (공개 화면엔 두 글이 모두 공개된 뒤에 보인다)
+        candidates={all
           .filter((e) => e.ref !== entry?.ref)
-          .map(({ ref, collection, title, description, tags }) => ({ ref, collection, title, description, tags }))}
+          .map(({ ref, collection, title, description, tags, draft }) => ({ ref, collection, title, description, tags, draft }))}
         backlinks={
           entry
-            ? archive.entries
+            ? all
                 .filter((e) => e.related.includes(entry.ref) && !entry.related.includes(e.ref))
                 .map(({ ref, title }) => ({ ref, title }))
             : []

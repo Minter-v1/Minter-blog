@@ -5,7 +5,14 @@ import { COLLECTIONS, type CollectionId } from "@/lib/collections";
 import { Close, Search } from "./icons";
 
 // ref: "git/rebase"처럼 컬렉션을 포함한 식별자
-export type RelatedCandidate = { ref: string; collection: CollectionId; title: string; description: string; tags: string[] };
+export type RelatedCandidate = {
+  ref: string;
+  collection: CollectionId;
+  title: string;
+  description: string;
+  tags: string[];
+  draft: boolean; // 작성 중인 글 (연결은 되지만 공개 화면엔 공개된 뒤에 보인다)
+};
 
 /**
  * 연관 기록 고르기(컬렉션을 넘나든다). 검색어가 없으면 전체 목록(같은 컬렉션에서 태그가 겹치는 것을 맨 위에),
@@ -77,6 +84,7 @@ export function RelatedPicker(props: {
               className="inline-flex h-9 items-center gap-1 rounded-full bg-primary-weak pr-1.5 pl-3.5 text-[14px] font-semibold text-primary"
             >
               {byRef.get(ref)?.title ?? ref}
+              {byRef.get(ref)?.draft && <span className="text-[12px] font-medium text-primary/60">작성 중</span>}
               <button
                 type="button"
                 onClick={() => onChange(selected.filter((s) => s !== ref))}
@@ -162,6 +170,7 @@ export function RelatedPicker(props: {
                                     {COLLECTIONS[c.collection].label}
                                   </span>
                                 )}
+                                {c.draft && <span className="shrink-0 text-[11px] font-semibold text-text-3">· 작성 중</span>}
                               </span>
                               <span className="block truncate text-[12px] text-text-3">{c.description}</span>
                             </button>
@@ -176,6 +185,9 @@ export function RelatedPicker(props: {
           </div>
         )}
       </div>
+      {selected.some((ref) => byRef.get(ref)?.draft) && (
+        <p className="mt-2 px-1 text-[13px] leading-relaxed text-text-3">작성 중인 글과의 연결은 두 글이 모두 공개되면 보여요.</p>
+      )}
     </div>
   );
 }
