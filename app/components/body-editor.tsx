@@ -61,6 +61,13 @@ function normalizeFences(markdown: string) {
     .join("\n");
 }
 
+const RICH_PASTE = /<span data-(?:text|bg)-color=|<\/?(?:u|strong|em|del)>/;
+
+// md → 블록. 저장해 둔 <span data-*-color>, <br>을 다시 글자색·배경색·빈 줄로 되살린다
+function parseStoredMarkdown(editor: typeof schema.BlockNoteEditor, markdown: string) {
+  return decodeBlocks(editor.tryParseMarkdownToBlocks(normalizeFences(htmlToTokens(markdown))));
+}
+
 // next/dynamic(ssr: false)로만 불러온다. BlockNote는 브라우저 전용.
 export default function BodyEditor(props: {
   initialMarkdown: string;
@@ -76,6 +83,18 @@ export default function BodyEditor(props: {
       placeholders: { ...ko.placeholders, emptyDocument: "자세한 설명을 적어 보세요. '/'로 블록 추가", default: "'/'로 블록 추가" },
     },
     uploadFile: props.uploadFile,
+    // 블로그 저장 형식(글자색 <span data-*-color>, <u>, <strong> …)이 담긴 텍스트를 붙여넣으면
+    // 저장된 글을 불러올 때와 같은 경로로 바꿔서 서식을 살린다. 그 밖의 붙여넣기는 BlockNote 기본 동작
+    pasteHandler: ({ event, editor, defaultPasteHandler }) => {
+      const text = event.clipboardData?.getData("text/plain") ?? "";
+      if (!RICH_PASTE.test(text)) return defaultPasteHandler();
+      const blocks = parseStoredMarkdown(editor, text);
+      const current = editor.getTextCursorPosition().block;
+      const empty = current.type === "paragraph" && Array.isArray(current.content) && current.content.length === 0;
+      if (empty) editor.replaceBlocks([current], blocks);
+      else editor.insertBlocks(blocks, current, "after");
+      return true;
+    },
   });
 
   const loading = useRef(true);
@@ -83,9 +102,7 @@ export default function BodyEditor(props: {
   const { initialMarkdown, onReady } = props;
 
   useEffect(() => {
-    // md → 블록. 저장해 둔 <span data-*-color>, <br>을 다시 글자색·배경색·빈 줄로 되살린다
-    const fromMarkdown = (markdown: string) =>
-      decodeBlocks(editor.tryParseMarkdownToBlocks(normalizeFences(htmlToTokens(markdown))));
+    const fromMarkdown = (markdown: string) => parseStoredMarkdown(editor, markdown);
 
     if (initialMarkdown.trim()) {
       editor.replaceBlocks(editor.document, fromMarkdown(initialMarkdown));
