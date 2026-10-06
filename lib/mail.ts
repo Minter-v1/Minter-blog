@@ -1,4 +1,5 @@
 import "server-only";
+import { formatFrom } from "./mail-address";
 import { SITE } from "./site";
 
 // 리마인드 메일 공통: 레이아웃, 발송, Cron 인증.
@@ -80,8 +81,9 @@ export async function sendMail(mail: { subject: string; html: string; text: stri
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      // 도메인을 인증하기 전엔 Resend 기본 주소로 (가입한 본인 메일로만 보낼 수 있다)
-      from: process.env.REMIND_FROM || "Minter.log <onboarding@resend.dev>",
+      // 도메인을 인증하기 전엔 Resend 기본 주소로 (가입한 본인 메일로만 보낼 수 있다).
+      // 이름에 특수문자가 있으면 따옴표로 감싼다 (Minter.log → "Minter.log")
+      from: formatFrom(process.env.REMIND_FROM || "Minter.log <onboarding@resend.dev>"),
       to: [to],
       ...mail,
     }),
