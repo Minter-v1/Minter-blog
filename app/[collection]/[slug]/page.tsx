@@ -6,6 +6,7 @@ import { findEntry, loadArchive, relatedOf } from "@/lib/archive";
 import { COLLECTIONS, entryHref, isCollectionId, type CollectionId } from "@/lib/collections";
 import { Article } from "../../components/article";
 import { AuthOnly } from "../../components/auth";
+import { ReviewCheck } from "../../components/review";
 import { ArrowUpRight, ChevronRight } from "../../components/icons";
 import { Outline } from "../../components/outline";
 import { SiteHeader } from "../../components/site-header";
@@ -145,6 +146,7 @@ export default async function EntryPage(props: Props) {
                 </Link>
               </AuthOnly>
             )}
+            <ReviewCheck refKey={entry.ref} />
           </article>
 
           {related.length > 0 && (
