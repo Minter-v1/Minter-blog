@@ -3,10 +3,11 @@ import { COLLECTION_LIST, type CollectionId } from "@/lib/collections";
 import { SITE } from "@/lib/site";
 import { AuthNav } from "./auth";
 import { DraftsLink } from "./drafts";
+import { ReviewLink } from "./review";
 import { NavScroller } from "./nav-scroller";
 
 // 로그인에 따라 바뀌는 오른쪽 버튼은 AuthNav가 브라우저에서 확인한다 (페이지를 CDN에 캐시할 수 있도록)
-export function SiteHeader(props: { active?: CollectionId | "about" | "drafts"; writeHref?: string }) {
+export function SiteHeader(props: { active?: CollectionId | "about" | "drafts" | "review"; writeHref?: string }) {
   return (
     // 본문 폭이 좁은 페이지(목록·상세 760px)에서도 헤더는 같은 폭으로 — 메뉴·버튼이 눌려 꺾이지 않도록
     <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pt-5 pb-4 lg:flex-nowrap lg:py-7 lg:relative lg:left-1/2 lg:w-[max(100%,min(1072px,calc(100vw-3rem)))] lg:-translate-x-1/2">
@@ -40,7 +41,15 @@ export function SiteHeader(props: { active?: CollectionId | "about" | "drafts"; 
         </NavScroller>
       </div>
       <div className="flex shrink-0 items-center gap-1 text-[14px] font-medium whitespace-nowrap text-text-2">
-        <AuthNav writeHref={props.writeHref} extra={<DraftsLink active={props.active === "drafts"} />} />
+        <AuthNav
+          writeHref={props.writeHref}
+          extra={
+            <>
+              <ReviewLink active={props.active === "review"} />
+              <DraftsLink active={props.active === "drafts"} />
+            </>
+          }
+        />
       </div>
     </header>
   );
