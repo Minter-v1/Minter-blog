@@ -26,10 +26,15 @@ export default async function ReviewPage() {
       <SiteHeader active="review" writeHref="/write" />
 
       <div className="mt-4 mb-6 px-1">
-        <h1 className="text-[24px] font-bold tracking-[-0.035em] sm:text-[28px]">
-          복습
-          <span className="ml-2 text-[20px] text-primary tabular-nums">{today.length}</span>
-        </h1>
+        <div className="flex items-end justify-between gap-4">
+          <h1 className="text-[24px] font-bold tracking-[-0.035em] sm:text-[28px]">
+            복습
+            <span className="ml-2 text-[20px] text-primary tabular-nums">{today.length}</span>
+          </h1>
+          <Link href="/review/guide" className="shrink-0 text-[14px] font-semibold text-text-2 hover:text-text">
+            복습 방법
+          </Link>
+        </div>
         <p className="mt-1.5 text-[15px] text-text-3">
           작성 완료한 글을 {REVIEW_INTERVALS.join("·")}일 간격으로 {REVIEW_TOTAL}번 다시 읽어요 · 나만 보여요
         </p>
