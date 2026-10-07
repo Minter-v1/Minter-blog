@@ -11,13 +11,17 @@ export function reminderEmail(day: string, items: { entry: Entry; kind: DayKind 
     heading: "오늘 정리한 기록",
     count: items.length,
     lead: "자기 전에 한 번 더 읽어 봐요.",
-    rows: items.map(({ entry: e, kind }) => ({
-      label: `${COLLECTIONS[e.collection].label}${kind === "updated" ? " · 수정" : ""}`,
-      title: e.title,
-      url: `${siteUrl}${entryHref(e.collection, e.slug)}`,
-      description: e.description,
-      mono: e.collection === "git",
-    })),
+    sections: [
+      {
+        rows: items.map(({ entry: e, kind }) => ({
+          label: `${COLLECTIONS[e.collection].label}${kind === "updated" ? " · 수정" : ""}`,
+          title: e.title,
+          url: `${siteUrl}${entryHref(e.collection, e.slug)}`,
+          description: e.description,
+          mono: e.collection === "git",
+        })),
+      },
+    ],
     button: { label: "몰아 읽기", url: `${siteUrl}/today?d=${day}` },
   });
   return { subject: `오늘 정리한 기록 ${items.length}개 · ${formatDay(day)}`, html, text };

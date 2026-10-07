@@ -3,6 +3,7 @@ import { revalidateTag, unstable_cache } from "next/cache";
 import { loadArchive, type Entry } from "./archive";
 import { githubEnv } from "./env";
 import { commitFiles, ConflictError, readTextFile } from "./github";
+import { plainExcerpt } from "./plain-text";
 import {
   completeReview,
   groupSchedules,
@@ -27,7 +28,10 @@ export const loadReviewLog = unstable_cache(
   { tags: [REVIEW_TAG], revalidate: 300 },
 );
 
-export type ReviewItem = ReviewSchedule & Pick<Entry, "collection" | "slug" | "title" | "description">;
+export type ReviewItem = ReviewSchedule &
+  Pick<Entry, "collection" | "slug" | "title" | "description"> & {
+    excerpt: string; // 본문 앞부분 평문 요약 (메일에서 바로 복습할 수 있도록)
+  };
 
 /** 공개된 글 전체의 복습 일정. 작성 중인 글은 대상이 아니다 */
 export async function loadReviewItems(today = seoulToday()): Promise<ReviewItem[]> {
@@ -38,6 +42,7 @@ export async function loadReviewItems(today = seoulToday()): Promise<ReviewItem[
     slug: e.slug,
     title: e.title,
     description: e.description,
+    excerpt: plainExcerpt(e.body),
   }));
 }
 

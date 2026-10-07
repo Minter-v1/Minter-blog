@@ -8,28 +8,61 @@ import { SITE } from "./site";
 export const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
-export type MailRow = { label: string; title: string; url: string; description: string; mono?: boolean };
+export type MailRow = {
+  label: string;
+  title: string;
+  url: string;
+  description: string;
+  mono?: boolean;
+  excerpt?: string; // 있으면 카드형: 제목을 크게, 설명을 진하게, 본문 요약을 회색 상자로
+};
+
+/** 메일 본문 묶음. heading이 없으면 구분 없이 항목만 이어 붙인다 */
+export type MailSection = { heading?: string; note?: string; rows: MailRow[] };
+
+function rowHtml(r: MailRow) {
+  const mono = r.mono ? "font-family:ui-monospace,Menlo,monospace;" : "";
+  if (r.excerpt === undefined) {
+    return `
+        <tr><td style="padding:14px 0;border-top:1px solid #eceef1">
+          <div style="font-size:12px;font-weight:600;color:#8b95a1">${esc(r.label)}</div>
+          <a href="${r.url}" style="display:block;margin-top:4px;font-size:17px;font-weight:700;color:#191f28;text-decoration:none;${mono}">${esc(r.title)}</a>
+          <div style="margin-top:4px;font-size:14px;line-height:1.6;color:#4e5968">${esc(r.description)}</div>
+        </td></tr>`;
+  }
+  const excerpt = r.excerpt
+    ? `<div style="margin-top:10px;padding:12px 14px;border-radius:12px;background:#f2f4f6;font-size:13px;line-height:1.7;color:#4e5968">${esc(r.excerpt)}</div>`
+    : "";
+  return `
+        <tr><td style="padding:16px 0;border-top:1px solid #eceef1">
+          <div style="font-size:12px;font-weight:600;color:#8b95a1">${esc(r.label)}</div>
+          <a href="${r.url}" style="display:block;margin-top:6px;font-size:20px;font-weight:700;color:#191f28;text-decoration:none;letter-spacing:-0.02em;${mono}">${esc(r.title)}</a>
+          <div style="margin-top:6px;font-size:15px;line-height:1.6;font-weight:600;color:#191f28">${esc(r.description)}</div>
+          ${excerpt}
+        </td></tr>`;
+}
+
+function sectionHtml(sec: MailSection) {
+  const note = sec.note ? `<div style="margin-top:4px;font-size:13px;color:#8b95a1">${esc(sec.note)}</div>` : "";
+  const head = sec.heading
+    ? `
+        <tr><td style="padding:22px 0 8px">
+          <div style="font-size:15px;font-weight:700;color:#191f28">${esc(sec.heading)} <span style="color:#3182f6">${sec.rows.length}</span></div>
+          ${note}
+        </td></tr>`
+    : "";
+  return head + sec.rows.map(rowHtml).join("");
+}
 
 export function mailLayout(props: {
   eyebrow: string; // 위쪽 작은 글씨 (날짜 등)
   heading: string;
   count: number;
   lead: string;
-  rows: MailRow[];
+  sections: MailSection[];
   button: { label: string; url: string };
 }) {
-  const rows = props.rows
-    .map(
-      (r) => `
-        <tr><td style="padding:14px 0;border-top:1px solid #eceef1">
-          <div style="font-size:12px;font-weight:600;color:#8b95a1">${esc(r.label)}</div>
-          <a href="${r.url}" style="display:block;margin-top:4px;font-size:17px;font-weight:700;color:#191f28;text-decoration:none;${
-            r.mono ? "font-family:ui-monospace,Menlo,monospace;" : ""
-          }">${esc(r.title)}</a>
-          <div style="margin-top:4px;font-size:14px;line-height:1.6;color:#4e5968">${esc(r.description)}</div>
-        </td></tr>`,
-    )
-    .join("");
+  const rows = props.sections.map(sectionHtml).join("");
 
   const html = `<!doctype html><html lang="ko"><body style="margin:0;background:#f5f6f8">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f6f8;padding:32px 16px;font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Pretendard',sans-serif">
@@ -54,7 +87,11 @@ export function mailLayout(props: {
     `${SITE.name} · ${props.eyebrow}`,
     `${props.heading} ${props.count}개`,
     "",
-    ...props.rows.map((r) => `- [${r.label}] ${r.title}\n  ${r.description}`),
+    ...props.sections.flatMap((sec) => [
+      ...(sec.heading ? [`[${sec.heading} ${sec.rows.length}]${sec.note ? ` ${sec.note}` : ""}`] : []),
+      ...sec.rows.map((r) => `- [${r.label}] ${r.title}\n  ${r.description}${r.excerpt ? `\n  ${r.excerpt}` : ""}`),
+      "",
+    ]),
     "",
     `${props.button.label}: ${props.button.url}`,
   ].join("\n");
