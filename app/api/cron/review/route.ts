@@ -7,7 +7,7 @@ import { isDay, seoulToday } from "@/lib/today";
 
 export const dynamic = "force-dynamic";
 
-// 매일 아침 08시대(KST) Vercel Cron이 부른다 (vercel.json). 밀린 복습 + 오늘 복습할 글을 메일로 — 없는 날은 보내지 않는다.
+// 매일 밤 23시대(KST) Vercel Cron이 부른다 (vercel.json). 밀린 복습 + 오늘 복습할 글을 메일로 — 없는 날은 보내지 않는다.
 //   ?preview=1   메일을 보내지 않고 HTML만 돌려준다 (확인용)
 //   ?d=YYYY-MM-DD 그날 기준으로 계산 (확인용)
 export async function GET(request: Request) {

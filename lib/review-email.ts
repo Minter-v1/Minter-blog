@@ -8,7 +8,7 @@ import { formatDay } from "./today";
 // 용어 사전을 맨 위에: "용어 → 정의"를 떠올리는 게 복습의 핵심이라 메일 안에서 바로 확인할 수 있게 카드로 보여 준다
 const SECTION_ORDER: CollectionId[] = ["terms", ...COLLECTION_LIST.map((c) => c.id).filter((id) => id !== "terms")];
 
-// 아침 복습 메일: 밀린 글 + 오늘 복습할 글을 컬렉션별로
+// 밤 복습 메일(23시대): 밀린 글 + 오늘 복습할 글을 컬렉션별로
 export function reviewEmail(day: string, items: ReviewItem[], siteUrl: string) {
   const overdue = items.filter((i) => i.days > 0).length;
   const sections: MailSection[] = SECTION_ORDER.flatMap((id) => {

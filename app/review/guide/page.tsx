@@ -112,7 +112,7 @@ export default function ReviewGuidePage() {
               할 때까지 계속 보인다.
             </li>
             <li>
-              <strong>매일 아침 8시대에 메일이 온다.</strong> 밀린 글과 오늘 복습할 글을 컬렉션별로 묶어 보내고, 용어
+              <strong>매일 밤 11시대에 메일이 온다.</strong> 밀린 글과 오늘 복습할 글을 컬렉션별로 묶어 보내고, 용어
               사전은 정의와 본문 요약까지 메일에 담는다. 복습할 글이 없는 날은 보내지 않는다.
             </li>
           </ul>
@@ -140,7 +140,7 @@ export default function ReviewGuidePage() {
 
         <Section title="하루 흐름">
           <ol className="flex flex-wrap items-center gap-2 text-[14px] font-semibold">
-            {["아침 8시대 복습 메일", "제목만 보고 떠올리기", "본문 확인", "복습 완료", "다음 복습일 예약"].map((s, i, all) => (
+            {["밤 11시대 복습 메일", "제목만 보고 떠올리기", "본문 확인", "복습 완료", "다음 복습일 예약"].map((s, i, all) => (
               <li key={s} className="flex items-center gap-2">
                 <span className="rounded-full bg-fill px-3 py-1.5">{s}</span>
                 {i < all.length - 1 && <span className="text-text-3">→</span>}
