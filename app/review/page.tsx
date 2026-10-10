@@ -31,7 +31,7 @@ export default async function ReviewPage() {
             복습
             <span className="ml-2 text-[20px] text-primary tabular-nums">{today.length}</span>
           </h1>
-          <Link href="/review/guide" className="shrink-0 text-[14px] font-semibold text-text-2 hover:text-text">
+          <Link href="/learning" className="shrink-0 text-[14px] font-semibold text-text-2 hover:text-text">
             복습 방법
           </Link>
         </div>

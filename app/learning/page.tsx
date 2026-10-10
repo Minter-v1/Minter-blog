@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { REVIEW_INTERVALS, REVIEW_TOTAL } from "@/lib/review";
-import { SiteHeader } from "../../components/site-header";
+import { SiteHeader } from "../components/site-header";
 
 export const metadata: Metadata = {
   title: "망각곡선 학습법",
   description: "에빙하우스의 망각곡선과 간격 반복, 이 블로그의 복습 규칙과 복습 방법",
 };
 
-// 공개 페이지. 복습 간격은 lib/review.ts의 REVIEW_INTERVALS를 그대로 써서 규칙과 설명이 어긋나지 않게 한다
+// 공개 페이지 (인증 없음, 정적 생성). 복습 간격은 lib/review.ts의 REVIEW_INTERVALS를 그대로 써서 규칙과 설명이 어긋나지 않게 한다
 
 // Ebbinghaus (1885) 실험의 절약률(savings). 처음 외울 때보다 다시 외울 때 줄어든 노력의 비율
 const EBBINGHAUS = [
@@ -27,7 +27,7 @@ const REVIEW_DAYS = REVIEW_INTERVALS.reduce<number[]>((acc, d) => [...acc, (acc.
 export default function ReviewGuidePage() {
   return (
     <div className="mx-auto max-w-[760px] px-4 pb-24 sm:px-6">
-      <SiteHeader />
+      <SiteHeader active="learning" />
 
       <div className="mt-4 mb-8 px-1">
         <p className="text-[14px] font-semibold text-text-3">복습</p>
