@@ -20,7 +20,7 @@ export function HeaderSkeleton() {
       <div className="contents lg:flex lg:items-center lg:gap-7">
         <span className="text-[20px] font-bold tracking-[-0.03em]">Minter.log</span>
         <div className="order-last flex w-full gap-3 overflow-hidden lg:order-none lg:w-auto">
-          {[64, 84, 72, 72, 44].map((w, i) => (
+          {[64, 84, 72, 72, 48, 44].map((w, i) => (
             <Bone key={i} className="h-5 rounded-lg" width={w} />
           ))}
         </div>

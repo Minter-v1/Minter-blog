@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/about/projects/*": ["./content/projects/**/*"],
   },
+  // 망각곡선 학습법 페이지를 공개 경로로 옮겼다 (#32). 예전 링크는 영구 리다이렉트
+  redirects() {
+    return [{ source: "/review/guide", destination: "/learning", permanent: true }];
+  },
 };
 
 export default nextConfig;
