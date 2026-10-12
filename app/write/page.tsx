@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { decodeSlug } from "@/lib/api";
 import { findEntry, loadArchive } from "@/lib/archive";
 import { isAuthed } from "@/lib/auth";
-import { COLLECTIONS, isCollectionId } from "@/lib/collections";
+import { isCollectionId } from "@/lib/collections";
 import { absolutizeImages } from "@/lib/paths";
 import { DraftTray } from "../components/draft-tray";
 import { SiteHeader } from "../components/site-header";
@@ -18,7 +18,6 @@ export default async function WritePage(props: PageProps<"/write">) {
 
   const { c, edit } = await props.searchParams;
   const collection = isCollectionId(c) ? c : "terms";
-  const col = COLLECTIONS[collection];
   const archive = await loadArchive();
 
   const editSlug = typeof edit === "string" ? decodeSlug(edit) : null;
@@ -50,7 +49,7 @@ export default async function WritePage(props: PageProps<"/write">) {
                 // 에디터에서 이미지가 보이도록 상대 경로를 raw URL로
                 body: absolutizeImages(entry.body, archive.rawBase[collection]),
               }
-            : { title: "", description: "", tags: [], related: [], extra: {}, draft: true, body: col.bodyTemplate }
+            : { title: "", description: "", tags: [], related: [], extra: {}, draft: true, body: "" }
         }
         tags={archive.tags[collection]}
         existingSlugs={all.filter((e) => e.collection === collection).map((e) => e.slug)}

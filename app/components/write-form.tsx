@@ -13,6 +13,7 @@ import { refreshDrafts } from "./drafts";
 import { Check } from "./icons";
 import { Spinner } from "./loaders";
 import { OutlinePopover } from "./outline";
+import { missingTemplateMarkdown, stripUnfilledTemplate } from "@/lib/learning-template";
 import { RelatedPicker, type RelatedCandidate } from "./related-picker";
 import { TagPicker } from "./tag-picker";
 
@@ -31,7 +32,6 @@ type Initial = {
   body: string;
 };
 
-const squash = (s: string) => s.replace(/\s+/g, " ").trim();
 
 export function WriteForm(props: {
   collection: CollectionId;
@@ -128,8 +128,8 @@ export function WriteForm(props: {
       related,
       extra,
       draft: !done,
-      // 템플릿(## 상황 ## 원인 …)을 채우지 않았으면 본문 없음으로
-      body: c.bodyTemplate && squash(markdown) === squash(c.bodyTemplate) ? "" : markdown,
+      // 작성 완료로 저장할 때만 안 쓴 학습 템플릿 섹션(가이드만 남은 것)을 뺀다. 작성 중엔 뼈대를 그대로 둔다
+      body: done ? stripUnfilledTemplate(c.id, markdown) : markdown,
       images: [...uploads.current].map(([url, v]) => ({ url, ...v })),
     };
 
@@ -168,7 +168,7 @@ export function WriteForm(props: {
       setSelected([]);
       setRelated([]);
       setExtra({});
-      editorApi.current.reset(c.bodyTemplate);
+      editorApi.current.reset("");
       setDirty(false);
       router.refresh();
       titleRef.current?.focus();
@@ -190,6 +190,21 @@ export function WriteForm(props: {
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
   }, [submit]);
+
+  // 학습 템플릿: 빈 본문이면 전체, 이미 쓴 본문이면 확인 후 아직 없는 섹션만 끝에 추가 (기존 내용 유지)
+  function applyTemplate() {
+    const api = editorApi.current;
+    if (!api) return;
+    const current = api.getMarkdown();
+    const { count, markdown } = missingTemplateMarkdown(c.id, current);
+    if (count === 0) {
+      setToast({ text: "이미 모든 템플릿 섹션이 있어요" });
+      return;
+    }
+    const hasBody = current.replace(/&nbsp;|\s/g, "") !== "";
+    if (hasBody && !window.confirm(`본문 끝에 아직 없는 섹션 ${count}개를 추가할까요?\n기존 내용은 그대로 유지돼요.`)) return;
+    api.appendMarkdown(markdown);
+  }
 
   async function remove() {
     if (!window.confirm(`‘${props.initial.title}’을(를) 삭제할까요?\nmd 파일과 이미지가 repo에서 지워져요. (커밋 기록에는 남아요)`)) return;
@@ -438,6 +453,14 @@ export function WriteForm(props: {
             <p className="hidden text-[13px] text-text-3 md:block">
               <Kbd>/</Kbd> 블록 · <Kbd>⋮⋮</Kbd> 끌어서 순서 변경 · 이미지 붙여넣기·드래그
             </p>
+            <button
+              type="button"
+              onClick={applyTemplate}
+              title="섹션 제목과 작성 가이드를 넣어요. 안 쓴 섹션은 작성 완료로 저장할 때 빠져요"
+              className="inline-flex h-8 items-center rounded-lg px-2.5 text-[13px] font-semibold text-text-2 transition-colors hover:bg-fill hover:text-text"
+            >
+              학습 템플릿
+            </button>
             <OutlinePopover
               selector='.body-editor .bn-block-content[data-content-type="heading"]'
               version={outlineVersion}

@@ -12,7 +12,13 @@ import { EditorFormattingToolbar, EditorSideMenu } from "./editor-menus";
 import { ImageEditButtons } from "./image-editor";
 import { decodeBlocks, encodeBlocks, htmlToTokens, tokensToHtml } from "@/lib/rich-markdown";
 
-export type BodyEditorApi = { getMarkdown: () => string; focus: () => void; reset: (markdown: string) => void };
+export type BodyEditorApi = {
+  getMarkdown: () => string;
+  focus: () => void;
+  reset: (markdown: string) => void;
+  /** 저장 형식 Markdown을 본문 끝에 덧붙인다. 본문이 빈 문단 하나뿐이면 그 자리를 바꾼다 (학습 템플릿) */
+  appendMarkdown: (markdown: string) => void;
+};
 
 // 새 코드 블록의 기본 언어는 bash(Shell).
 // ``` + 스페이스로 만든 코드 블록은 언어가 ""인데, BlockNote는 지원 목록에 없는 언어를 만나면
@@ -120,6 +126,15 @@ export default function BodyEditor(props: {
           markdown.trim() ? fromMarkdown(markdown) : [{ type: "paragraph" }],
         );
         setTimeout(() => (loading.current = false), 0);
+      },
+      appendMarkdown: (markdown) => {
+        const blocks = fromMarkdown(markdown);
+        const doc = editor.document;
+        const first = doc[0];
+        const empty =
+          doc.length === 1 && first.type === "paragraph" && Array.isArray(first.content) && first.content.length === 0;
+        if (empty) editor.replaceBlocks(doc, blocks);
+        else editor.insertBlocks(blocks, doc[doc.length - 1], "after");
       },
     });
   }, [editor, initialMarkdown, onReady]);
