@@ -30,7 +30,6 @@ export type Collection = {
   maxTags: number;
   defaultTags: Tag[];
   extraFields: ExtraField[];
-  bodyTemplate: string; // 새로 쓸 때 에디터에 미리 깔아 둘 뼈대
 };
 
 export const COLLECTIONS: Record<CollectionId, Collection> = {
@@ -51,7 +50,6 @@ export const COLLECTIONS: Record<CollectionId, Collection> = {
     maxTags: 3,
     defaultTags: [{ name: "프로젝트" }, { name: "공부" }, { name: "회고" }, { name: "스터디" }],
     extraFields: [],
-    bodyTemplate: "",
   },
   terms: {
     id: "terms",
@@ -78,7 +76,6 @@ export const COLLECTIONS: Record<CollectionId, Collection> = {
       { name: "채용", hint: "레쥬메, 면접, 인적성" },
     ],
     extraFields: [],
-    bodyTemplate: "",
   },
   git: {
     id: "git",
@@ -106,7 +103,6 @@ export const COLLECTIONS: Record<CollectionId, Collection> = {
       { name: "조회", hint: "log, show, blame" },
     ],
     extraFields: [{ key: "usage", label: "사용법", placeholder: "git rebase -i <기준 커밋>", mono: true }],
-    bodyTemplate: "## 자주 쓰는 옵션\n\n## 예시\n\n## 주의할 점\n",
   },
   troubleshooting: {
     id: "troubleshooting",
@@ -135,7 +131,6 @@ export const COLLECTIONS: Record<CollectionId, Collection> = {
     extraFields: [
       { key: "error", label: "에러 메시지", placeholder: "CONFLICT (content): Merge conflict in ...", mono: true },
     ],
-    bodyTemplate: "## 상황\n\n## 원인\n\n## 해결\n\n## 배운 점\n",
   },
 };
 
