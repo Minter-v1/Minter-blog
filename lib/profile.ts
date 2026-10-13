@@ -110,7 +110,7 @@ export const PROFILE = {
         "App Store 출시 서비스의 AWS 3-Tier(VPC · ALB · EC2 · RDS) 운영 환경을 구축하고, SSM Session Manager로 서버 접근 경로 단일화",
         "GitHub Actions · ECR · SSM으로 배포를 자동화하고, 배포 결과와 일일 AWS 비용을 Slack으로 공유하는 운영 체계 구성",
       ],
-      stack: ["AWS", "EC2", "RDS", "ALB", "ECR", "SSM", "GitHub Actions", "Docker", "Spring Boot", "Firebase"],
+      stack: ["AWS", "EC2", "RDS", "ALB", "ECR", "SSM", "GitHub Actions", "Docker", "Ansible", "CloudWatch", "Grafana", "Spring Boot", "Firebase"],
     },
     {
       period: "2026.03 – 2026.05",
