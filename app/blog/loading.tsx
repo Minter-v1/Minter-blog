@@ -1,6 +1,6 @@
-import { Bone, HeaderSkeleton } from "./components/loaders";
+import { Bone, HeaderSkeleton } from "../components/loaders";
 
-// 홈 이동 중
+// 블로그 대시보드 이동 중
 export default function Loading() {
   return (
     <div className="mx-auto max-w-[1120px] px-4 sm:px-6 pb-24" aria-busy>

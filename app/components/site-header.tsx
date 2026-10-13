@@ -4,7 +4,7 @@ import { PROFILE } from "@/lib/profile";
 import { SITE } from "@/lib/site";
 import { AccountMenu, MobileNav, NavDropdown, type NavGroup } from "./nav-menu";
 
-type Active = CollectionId | "about" | "drafts" | "review" | "learning" | "portfolio";
+type Active = CollectionId | "blog" | "about" | "drafts" | "review" | "learning" | "portfolio";
 
 // 상단 메뉴 (#58): 학습 블로그(Blog)와 채용용 포트폴리오(Portfolio) 두 묶음
 // 로그인에 따라 바뀌는 오른쪽 메뉴는 AccountMenu가 브라우저에서 확인한다 (페이지를 CDN에 캐시할 수 있도록)
@@ -14,8 +14,11 @@ export function SiteHeader(props: { active?: Active; writeHref?: string }) {
     {
       id: "blog",
       label: "Blog",
-      active: COLLECTION_LIST.some((c) => c.id === a) || a === "learning",
-      items: COLLECTION_LIST.map((c) => ({ href: `/${c.id}`, label: c.label, desc: c.intro, collection: c.id, active: a === c.id })),
+      active: COLLECTION_LIST.some((c) => c.id === a) || a === "learning" || a === "blog",
+      items: [
+        { href: "/blog", label: "전체 보기", desc: "최근 기록 · 연결 지도 · 활동", emoji: "🏠", active: a === "blog" },
+        ...COLLECTION_LIST.map((c) => ({ href: `/${c.id}`, label: c.label, desc: c.intro, collection: c.id, active: a === c.id })),
+      ],
       footer: { href: "/learning", label: "학습법", desc: "망각곡선 기반 복습 방식", emoji: "🧠", active: a === "learning" },
     },
     {
