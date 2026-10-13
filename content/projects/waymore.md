@@ -5,6 +5,8 @@
 
 > 교육 공공데이터와 생성형 AI로 진로 로드맵을 만드는 웹 서비스를 개발하고, ALB 대상 그룹 전환 기반 Blue-Green 배포를 설계·구현했다.
 
+---
+
 ## 프로젝트 요약
 
 | 항목 | 내용 |
@@ -28,6 +30,8 @@
 - Spring Boot 백엔드(인증, 로드맵, 채팅, 커리어넷 API 연동)
 - React 프론트엔드(진로검사, 로드맵, 대시보드 화면)
 
+---
+
 ## 1. 프로젝트 개요
 
 ### 1.1 배경
@@ -40,13 +44,15 @@ WAYMORE는 고교학점제 전환기의 중학생과 비교과 활동 계획이 
 
 ### 1.2 문제 정의
 
-같은 VM에서 컨테이너를 재시작하는 방식으로 배포하면, 새 버전이 기동하는 동안 요청이 실패하고 새 버전에 문제가 있어도 바로 되돌릴 곳이 없다. 이 프로젝트에서는 Blue-Green 배포를 실제 서비스에 직접 설계·적용해 검증하는 것을 인프라 목표로 잡았다.
+같은 VM에서 컨테이너를 재시작하는 배포는 기동 중 요청 실패와 롤백 경로 부재라는 두 가지 문제가 있다. 새 버전이 뜨는 동안 요청이 실패하고, 새 버전에 문제가 있어도 바로 되돌릴 곳이 없다. 이 프로젝트에서는 Blue-Green 배포를 실제 서비스에 직접 설계·적용해 검증하는 것을 인프라 목표로 잡았다.
 
 ### 1.3 목표와 요구사항
 
 - 새 버전은 대기 슬롯에서 먼저 기동하고, 헬스체크를 통과한 뒤에만 트래픽 전환
 - 직전 버전은 대기 슬롯에 남겨 리스너 전환만으로 되돌릴 수 있는 구조
 - 관리 접근은 Bastion으로 단일화, App VM의 SSH를 외부에 열지 않음
+
+---
 
 ## 2. 시스템 설계
 
@@ -88,11 +94,13 @@ flowchart LR
 | 프론트엔드 | React | 진로검사·로드맵·대시보드 화면 |
 | 외부 연동 | 커리어넷 Open API, AI 서버(FastAPI) | 진로검사, 추천·RAG 채팅 |
 
+---
+
 ## 3. 주요 구현
 
 ### 3.1 Blue-Green 배포 워크플로
 
-`main` · `dev` push 또는 PR 머지 시 GitHub Actions가 실행된다. 이미지를 빌드해 커밋 SHA(7자리) 태그로 푸시한 뒤, ALB 리스너 기본 동작에서 가중치 100인 대상 그룹을 조회해 현재 Active 슬롯을 판별하고 반대쪽 슬롯을 배포 대상으로 정한다.
+배포는 대기 슬롯에 먼저 띄우고 헬스체크를 통과해야만 트래픽을 넘긴다. `main` · `dev` push 또는 PR 머지 시 GitHub Actions가 실행된다. 이미지를 빌드해 커밋 SHA(7자리) 태그로 푸시한 뒤, ALB 리스너 기본 동작에서 가중치 100인 대상 그룹을 조회해 현재 Active 슬롯을 판별하고 반대쪽 슬롯을 배포 대상으로 정한다.
 
 배포 대상 VM에는 Bastion을 ProxyCommand로 경유해 접속한다. `.env.was`의 이미지 태그를 바꾸고 `docker compose pull`, `up -d`로 새 버전을 띄운 뒤 `/actuator/health`가 UP이 될 때까지 5초 간격으로 최대 10회 확인한다. 헬스체크를 통과해야만 ALB 리스너의 기본 동작을 새 대상 그룹으로 바꾼다.
 
@@ -113,17 +121,26 @@ Spring Boot로 JWT(Access·Refresh 쿠키) 인증, 사용자·로드맵·채팅 
 
 React로 진로검사(카드 선택형 응답), 학기 단위 로드맵 타임라인, 대시보드 화면을 구현했다.
 
+---
+
 ## 4. 트러블슈팅
 
 ### 4.1 회원가입 시 CORS 에러로 보이던 간헐적 504
 
-**현상** 프론트에서 회원가입 요청 시 CORS 에러가 보였고, 같은 시점에 `504 Gateway Time-out`이 간헐적으로 발생했다.
+<dl>
+<dt>요약</dt>
+<dd>CORS 에러로 보이던 문제의 실제 원인은 업스트림 지연에 따른 ALB 504였고, 커넥션 풀과 타임아웃을 명시해 대기 누적을 막았다.</dd>
+<dt>현상</dt>
+<dd>프론트에서 회원가입 요청 시 CORS 에러가 보였고, 같은 시점에 <code>504 Gateway Time-out</code>이 간헐적으로 발생했다.</dd>
+<dt>원인 분석</dt>
+<dd>Preflight(OPTIONS)는 정상 응답했고, 실패한 POST의 응답 헤더는 <code>Server: awselb/2.0</code>이었다. CORS 정책이 아니라 업스트림 지연으로 ALB가 504를 반환한 것이고, 504 응답에는 CORS 헤더가 없어 브라우저가 CORS 에러로 함께 표시했다. 회원가입 트랜잭션은 이메일 확인 → 사용자 저장 → 로드맵 저장 → Redis 저장으로 길어, DB·Redis가 순간적으로 지연되면 요청 스레드가 대기로 묶였다.</dd>
+<dt>해결</dt>
+<dd>CORS 설정이 <code>allowed-origins</code>와 <code>allowed-origin-patterns</code>를 함께 반영하도록 정리하고, HikariCP(<code>maximum-pool-size</code>, <code>connection-timeout</code>, <code>max-lifetime</code>)와 Redis(<code>connect-timeout</code>, <code>timeout</code>, Lettuce 풀) 설정을 명시해 지연 시 무한정 기다리지 않고 빠르게 실패하게 했다.</dd>
+<dt>검증</dt>
+<dd>curl로 Preflight와 회원가입 POST를 반복 호출해 응답 코드와 헤더를 비교했다. 점검 기준은 ALB <code>TargetResponseTime</code>, <code>HTTPCode_Target_5XX_Count</code>, <code>UnHealthyHostCount</code>와 커넥션 풀 고갈 여부로 정리했다.</dd>
+</dl>
 
-**원인 분석** Preflight(OPTIONS)는 정상 응답했고, 실패한 POST의 응답 헤더는 `Server: awselb/2.0`이었다. CORS 정책이 아니라 업스트림 지연으로 ALB가 504를 반환한 것이고, 504 응답에는 CORS 헤더가 없어 브라우저가 CORS 에러로 함께 표시했다. 회원가입 트랜잭션은 이메일 확인 → 사용자 저장 → 로드맵 저장 → Redis 저장으로 길어, DB·Redis가 순간적으로 지연되면 요청 스레드가 대기로 묶였다.
-
-**해결** CORS 설정이 `allowed-origins`와 `allowed-origin-patterns`를 함께 반영하도록 정리하고, HikariCP(`maximum-pool-size`, `connection-timeout`, `max-lifetime`)와 Redis(`connect-timeout`, `timeout`, Lettuce 풀) 설정을 명시해 지연 시 무한정 기다리지 않고 빠르게 실패하게 했다.
-
-**검증** curl로 Preflight와 회원가입 POST를 반복 호출해 응답 코드와 헤더를 비교했다. 점검 기준은 ALB `TargetResponseTime`, `HTTPCode_Target_5XX_Count`, `UnHealthyHostCount`와 커넥션 풀 고갈 여부로 정리했다.
+---
 
 ## 5. 검증 및 성과
 
