@@ -69,6 +69,13 @@ export default async function ProjectPage(props: Props) {
               <ChevronRight className="size-3.5 rotate-180" />
               프로젝트
             </Link>
+            <Link
+              href="/about/portfolio"
+              className="float-right mb-4 inline-flex items-center gap-1 px-1 text-[14px] font-semibold text-text-3 hover:text-primary"
+            >
+              포트폴리오 PDF
+              <ChevronRight className="size-3.5" />
+            </Link>
 
             <article className="rounded-[24px] bg-surface px-5 pt-7 pb-10 sm:rounded-[28px] sm:px-12 sm:pt-11 sm:pb-14">
               <p className="text-[14px] font-medium text-text-3 tabular-nums">{p.period}</p>

@@ -68,6 +68,13 @@ export default async function AboutPage() {
                 ))}
               </p>
               <div className="mt-7 flex flex-wrap gap-2">
+                <Link
+                  href="/about/portfolio"
+                  className="group inline-flex h-11 items-center gap-2 rounded-2xl bg-primary px-4 text-[14px] font-semibold text-white transition-opacity hover:opacity-90"
+                >
+                  포트폴리오 PDF
+                  <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                </Link>
                 {PROFILE.contacts.map((c) => (
                   <a
                     key={c.label}
