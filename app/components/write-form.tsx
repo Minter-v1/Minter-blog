@@ -40,12 +40,17 @@ export function WriteForm(props: {
   initial: Initial;
   tags: Tag[];
   existingSlugs: string[]; // 같은 컬렉션의 파일명 (중복 확인용)
+  allTags: Record<CollectionId, Tag[]>; // 수정 중 컬렉션을 바꿀 때 그 컬렉션의 분류 목록
+  slugsByCollection: Record<CollectionId, string[]>;
   candidates: RelatedCandidate[]; // 연관 기록으로 고를 수 있는 전 컬렉션 기록 (자기 자신 제외)
   backlinks: { ref: string; title: string }[]; // 이 기록을 연결해 둔 다른 글
 }) {
   const router = useRouter();
-  const c = COLLECTIONS[props.collection];
   const editing = props.mode === "edit";
+  // 수정할 때는 저장할 컬렉션을 바꿀 수 있다 (#42). 원래 위치(주소·삭제·취소)는 props.collection
+  const [target, setTarget] = useState(props.collection);
+  const c = COLLECTIONS[target];
+  const moving = editing && target !== props.collection;
   const titleRef = useRef<HTMLInputElement>(null);
   const editorApi = useRef<BodyEditorApi | null>(null);
   const uploads = useRef(new Map<string, { sha: string; ext: string }>());
@@ -66,7 +71,8 @@ export function WriteForm(props: {
   const [outlineVersion, setOutlineVersion] = useState(0);
 
   const slug = editing ? props.slug! : toSlug(title);
-  const duplicate = !editing && slug !== "" && props.existingSlugs.includes(slug);
+  const duplicate =
+    slug !== "" && (editing ? moving && props.slugsByCollection[target].includes(slug) : props.existingSlugs.includes(slug));
   const canSubmit =
     !submitting && !deleting && pendingUploads === 0 && title.trim() !== "" && (!done || description.trim() !== "") && !duplicate;
 
@@ -134,19 +140,21 @@ export function WriteForm(props: {
     };
 
     try {
-      const res = await fetch(editing ? `/api/entries/${c.id}/${encodeURIComponent(slug)}` : "/api/entries", {
+      const res = await fetch(editing ? `/api/entries/${props.collection}/${encodeURIComponent(slug)}` : "/api/entries", {
         method: editing ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = (await res.json().catch(() => ({}))) as { error?: string; slug?: string };
+      const data = (await res.json().catch(() => ({}))) as { error?: string; slug?: string; collection?: CollectionId };
       if (!res.ok || !data.slug) throw new Error(data.error ?? `저장 실패 (${res.status})`);
 
       setDirty(false);
       refreshDrafts();
-      const href = done ? entryHref(c.id, data.slug) : `/write?c=${c.id}&edit=${encodeURIComponent(data.slug)}`;
+      const savedIn = data.collection ?? c.id;
+      const href = done ? entryHref(savedIn, data.slug) : `/write?c=${savedIn}&edit=${encodeURIComponent(data.slug)}`;
       if (editing) {
-        if (done) {
+        // 옮긴 글은 작성 중이어도 새 주소의 편집 화면으로
+        if (done || moving) {
           router.push(href);
         } else {
           // 작성 중인 글은 공개 페이지가 없으니 그 자리에서 계속 쓴다
@@ -177,7 +185,7 @@ export function WriteForm(props: {
     } finally {
       setSubmitting(false);
     }
-  }, [canSubmit, c, title, description, selected, related, extra, done, editing, slug, router]);
+  }, [canSubmit, c, title, description, selected, related, extra, done, editing, moving, slug, router, props.collection]);
 
   // ⌘Enter는 에디터 안에서도 저장
   useEffect(() => {
@@ -190,6 +198,17 @@ export function WriteForm(props: {
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
   }, [submit]);
+
+  // 수정 중 컬렉션 변경: 분류 목록·추가 필드를 그 컬렉션 기준으로. 이미 고른 분류는 남겨 두고(최대 개수까지) 목록에도 보이게
+  function changeTarget(id: CollectionId) {
+    const next = COLLECTIONS[id];
+    const base = id === props.collection ? props.tags : props.allTags[id];
+    setTarget(id);
+    setTags([...base, ...selected.filter((t) => !base.some((b) => b.name === t)).map((name) => ({ name }))]);
+    setSelected((sel) => sel.slice(0, next.maxTags));
+    setExtra(id === props.collection ? props.initial.extra : {});
+    setDirty(true);
+  }
 
   // 학습 템플릿: 빈 본문이면 전체, 이미 쓴 본문이면 확인 후 아직 없는 섹션만 끝에 추가 (기존 내용 유지)
   function applyTemplate() {
@@ -211,12 +230,12 @@ export function WriteForm(props: {
     setDeleting(true);
     setError(null);
     try {
-      const res = await fetch(`/api/entries/${c.id}/${encodeURIComponent(slug)}`, { method: "DELETE" });
+      const res = await fetch(`/api/entries/${props.collection}/${encodeURIComponent(slug)}`, { method: "DELETE" });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? `삭제 실패 (${res.status})`);
       refreshDrafts();
       setDirty(false);
-      router.push(`/${c.id}`);
+      router.push(`/${props.collection}`);
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -239,15 +258,19 @@ export function WriteForm(props: {
   return (
     <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-6">
       <aside className="space-y-7 rounded-[24px] bg-surface p-5 sm:p-7 lg:sticky lg:top-6">
-        {editing ? (
+        {editing && (
           <div className="flex items-baseline justify-between">
             <h1 className="text-[20px] font-bold tracking-[-0.02em]">{c.itemLabel} 수정</h1>
-            <Link href={props.initial.draft ? `/write?c=${c.id}` : entryHref(c.id, slug)} className="text-[13px] font-medium text-text-3 hover:text-text-2">
+            <Link
+              href={props.initial.draft ? `/write?c=${props.collection}` : entryHref(props.collection, slug)}
+              className="text-[13px] font-medium text-text-3 hover:text-text-2"
+            >
               취소
             </Link>
           </div>
-        ) : (
-          // 새로 쓸 때는 어느 컬렉션에 쓸지 고른다
+        )}
+        {/* 새로 쓸 때는 어느 컬렉션에 쓸지, 수정할 때는 어느 컬렉션으로 옮길지 고른다 */}
+        <div className={editing ? "-mt-3 space-y-2" : undefined}>
           <div className="flex gap-1 rounded-2xl bg-fill p-1" role="tablist" aria-label="컬렉션">
             {COLLECTION_LIST.map((col) => (
               <button
@@ -257,6 +280,10 @@ export function WriteForm(props: {
                 aria-selected={col.id === c.id}
                 onClick={() => {
                   if (col.id === c.id) return;
+                  if (editing) {
+                    changeTarget(col.id);
+                    return;
+                  }
                   if (dirty && !window.confirm("작성 중인 내용이 사라져요. 다른 컬렉션으로 옮길까요?")) return;
                   setDirty(false);
                   router.push(`/write?c=${col.id}`);
@@ -269,7 +296,13 @@ export function WriteForm(props: {
               </button>
             ))}
           </div>
-        )}
+          {moving && (
+            <p className="px-1 text-[13px] text-text-3">
+              저장하면 {COLLECTIONS[props.collection].label}에서 <span className="font-semibold text-primary">{c.label}</span>(으)로
+              옮겨져요. 이미지·연관 기록·복습 기록도 함께 옮기고, 예전 주소는 새 주소로 연결돼요.
+            </p>
+          )}
+        </div>
 
         <Field label={c.titleLabel} htmlFor="title">
           <input

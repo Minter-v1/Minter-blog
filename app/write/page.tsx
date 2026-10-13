@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { decodeSlug } from "@/lib/api";
 import { findEntry, loadArchive } from "@/lib/archive";
 import { isAuthed } from "@/lib/auth";
-import { isCollectionId } from "@/lib/collections";
+import { COLLECTION_IDS, isCollectionId, type CollectionId } from "@/lib/collections";
 import { absolutizeImages } from "@/lib/paths";
 import { DraftTray } from "../components/draft-tray";
 import { SiteHeader } from "../components/site-header";
@@ -53,6 +53,11 @@ export default async function WritePage(props: PageProps<"/write">) {
         }
         tags={archive.tags[collection]}
         existingSlugs={all.filter((e) => e.collection === collection).map((e) => e.slug)}
+        // 수정할 때 다른 컬렉션으로 옮기면 그 컬렉션의 분류·파일명 중복을 쓴다 (#42)
+        allTags={archive.tags}
+        slugsByCollection={Object.fromEntries(
+          COLLECTION_IDS.map((id) => [id, all.filter((e) => e.collection === id).map((e) => e.slug)]),
+        ) as Record<CollectionId, string[]>}
         // 작성 중인 글끼리도 연결할 수 있다 (공개 화면엔 두 글이 모두 공개된 뒤에 보인다)
         candidates={all
           .filter((e) => e.ref !== entry?.ref)

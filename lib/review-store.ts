@@ -8,6 +8,7 @@ import {
   completeReview,
   groupSchedules,
   parseReviewLog,
+  REVIEW_FILE,
   REVIEW_TOTAL,
   scheduleOf,
   serializeReviewLog,
@@ -17,7 +18,6 @@ import {
 import { seoulToday } from "./today";
 
 // 복습 기록은 데이터 repo 루트의 review.json 하나에 둔다 (별도 DB 없이 글과 같은 커밋 흐름)
-const REVIEW_FILE = "review.json";
 
 // 복습 기록은 공개 페이지와 무관하므로 아카이브와 다른 캐시 태그를 쓴다.
 // 복습 완료를 눌러도 공개 페이지(ISR)가 다시 만들어지지 않도록
@@ -27,6 +27,11 @@ export const loadReviewLog = unstable_cache(
   ["review-log"],
   { tags: [REVIEW_TAG], revalidate: 300 },
 );
+
+/** review.json 을 다른 경로(글 이동 등)에서 바꿨을 때 */
+export function invalidateReview() {
+  revalidateTag(REVIEW_TAG, { expire: 0 });
+}
 
 export type ReviewItem = ReviewSchedule &
   Pick<Entry, "collection" | "slug" | "title" | "description"> & {

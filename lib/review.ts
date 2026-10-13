@@ -10,6 +10,9 @@ export const REVIEW_TOTAL = REVIEW_INTERVALS.length;
 
 // 이 기능을 배포한 날. 그 전에 쓴 글은 작성일 대신 이 날부터 일정을 시작한다
 // (작성일 기준이면 기존 글이 한꺼번에 '밀림'이 되므로)
+// 복습 기록 파일: 데이터 repo 루트
+export const REVIEW_FILE = "review.json";
+
 export const REVIEW_SINCE = "2026-10-07";
 
 /** 데이터 repo의 review.json: 글(ref)마다 마친 복습 횟수와 마지막 복습일 */
