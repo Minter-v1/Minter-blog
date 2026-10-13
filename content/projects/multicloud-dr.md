@@ -107,7 +107,7 @@ Web의 Public Origin처럼 환경마다 달라야 하는 값은 ConfigMap으로 
 
 ### 3.3 카나리 배포
 
-Argo Rollouts로 레플리카 10개 기준 10% → 50% → 100% 순서로 반영하고, 단계마다 1분씩 대기한다. GitHub Actions는 Workload Identity Federation으로 GKE에 인증해 서비스 계정 키 파일 없이 배포한다.
+Argo Rollouts로 레플리카 10개 기준 10%, 50%, 100% 순서로 반영하고, 단계마다 1분씩 대기한다. GitHub Actions는 Workload Identity Federation으로 GKE에 인증해 서비스 계정 키 파일 없이 배포한다.
 
 ### 3.4 구축 흐름
 

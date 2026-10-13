@@ -4,7 +4,7 @@
 // 문장 안 강조: [[파란 강조]], **굵게**
 // related: 이 프로젝트와 관련된 블로그 기록 ("log/finq-배포-자동화"처럼 컬렉션/파일명)
 // 프로젝트 상세 본문: content/projects/{slug}.md ("더미"가 남은 본문은 상세 페이지를 노출하지 않음)
-// 순서: 주력(featured) → 인프라 비중 순
+// 순서: 주력(featured), 이후 인프라 비중 순
 
 import type { Ref } from "./collections";
 
@@ -176,7 +176,7 @@ export const PROFILE = {
       role: "PM / Developer",
       bullets: [
         "외부 연동이 제한된 인트라넷 환경에서 이미지 인식 기반 주민 검색 · 세대원 수 추출 자동화 설계",
-        "ROI 및 다중 스케일 템플릿 매칭으로 화면 변화에 대응해 UI 인식 정확도 [[40% → 100%]] 개선",
+        "ROI 및 다중 스케일 템플릿 매칭으로 화면 변화에 대응해 UI 인식 정확도를 [[40%에서 100%]]로 개선",
       ],
       stack: ["Python", "OpenCV", "PyAutoGUI"],
     },

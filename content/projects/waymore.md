@@ -19,7 +19,7 @@
 
 ### 핵심 성과
 
-- ALB 리스너 기준 Active 슬롯 판별 → 대기 슬롯 배포 → 헬스체크 → 대상 그룹 전환 자동화
+- Active 슬롯 판별, 대기 슬롯 배포, 헬스체크, 대상 그룹 전환까지 Blue-Green 배포 전 과정 자동화
 - 헬스체크를 통과한 버전만 트래픽을 받는 배포 경로
 - 백엔드 커밋 124건 중 123건, 프론트엔드 커밋 166건 중 120건 직접 작성
 
@@ -133,7 +133,7 @@ React로 진로검사(카드 선택형 응답), 학기 단위 로드맵 타임�
 <dt>현상</dt>
 <dd>프론트에서 회원가입 요청 시 CORS 에러가 보였고, 같은 시점에 <code>504 Gateway Time-out</code>이 간헐적으로 발생했다.</dd>
 <dt>원인 분석</dt>
-<dd>Preflight(OPTIONS)는 정상 응답했고, 실패한 POST의 응답 헤더는 <code>Server: awselb/2.0</code>이었다. CORS 정책이 아니라 업스트림 지연으로 ALB가 504를 반환한 것이고, 504 응답에는 CORS 헤더가 없어 브라우저가 CORS 에러로 함께 표시했다. 회원가입 트랜잭션은 이메일 확인 → 사용자 저장 → 로드맵 저장 → Redis 저장으로 길어, DB·Redis가 순간적으로 지연되면 요청 스레드가 대기로 묶였다.</dd>
+<dd>Preflight(OPTIONS)는 정상 응답했고, 실패한 POST의 응답 헤더는 <code>Server: awselb/2.0</code>이었다. CORS 정책이 아니라 업스트림 지연으로 ALB가 504를 반환한 것이고, 504 응답에는 CORS 헤더가 없어 브라우저가 CORS 에러로 함께 표시했다. 회원가입 트랜잭션은 이메일 확인, 사용자 저장, 로드맵 저장, Redis 저장을 차례로 거쳐 길었고, DB·Redis가 순간적으로 지연되면 요청 스레드가 대기로 묶였다.</dd>
 <dt>해결</dt>
 <dd>CORS 설정이 <code>allowed-origins</code>와 <code>allowed-origin-patterns</code>를 함께 반영하도록 정리하고, HikariCP(<code>maximum-pool-size</code>, <code>connection-timeout</code>, <code>max-lifetime</code>)와 Redis(<code>connect-timeout</code>, <code>timeout</code>, Lettuce 풀) 설정을 명시해 지연 시 무한정 기다리지 않고 빠르게 실패하게 했다.</dd>
 <dt>검증</dt>
