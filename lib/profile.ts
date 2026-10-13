@@ -95,7 +95,7 @@ export const PROFILE = {
       role: "PM / GCP Infra",
       bullets: [
         "NCP Active · GCP Warm Standby 멀티클라우드 DR에서 Terraform 기반 GCP GKE 예비 환경 구축 담당",
-        "NCP에 장애를 직접 주입해 [[20.7초]] 만에 GCP로 자동 전환되는 것을 측정",
+        "NCP 풀을 차단해 장애를 재현하고, [[20.7초]] 만에 GCP로 전환되는 것을 측정",
       ],
       stack: ["NCP", "GCP", "Cloudflare", "Terraform", "GKE", "Argo Rollouts"],
     },
