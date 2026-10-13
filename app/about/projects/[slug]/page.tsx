@@ -9,7 +9,7 @@ import { Reveal } from "../../../components/about/reveal";
 import { ProjectCoverMedia } from "../../../components/about/project-cover";
 import { Rich } from "../../../components/about/rich";
 import { Article } from "../../../components/article";
-import { ChevronRight } from "../../../components/icons";
+import { ArrowUpRight, ChevronRight } from "../../../components/icons";
 import { Outline } from "../../../components/outline";
 import { SiteHeader } from "../../../components/site-header";
 import { CollectionIcon } from "../../../components/collection-icon";
@@ -80,6 +80,19 @@ export default async function ProjectPage(props: Props) {
               <div className="mt-5 flex flex-wrap gap-1.5 text-[13px] font-semibold">
                 <span className="rounded-lg bg-fill px-2.5 py-1 text-text-2">{p.team}</span>
                 <span className="rounded-lg bg-primary-weak px-2.5 py-1 text-primary">{p.role}</span>
+                {p.repo ? (
+                  <a
+                    href={p.repo}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 rounded-lg border border-line px-2.5 py-1 text-text-2 hover:text-text"
+                  >
+                    GitHub
+                    <ArrowUpRight className="size-3" />
+                  </a>
+                ) : p.repo === "" ? (
+                  <span className="rounded-lg border border-dashed border-line px-2.5 py-1 text-text-3">GitHub 준비 중</span>
+                ) : null}
               </div>
 
               {p.cover && <ProjectCoverMedia cover={p.cover} controls={"video" in p.cover} className="mt-6 aspect-[16/9] rounded-2xl" />}
@@ -111,7 +124,7 @@ export default async function ProjectPage(props: Props) {
             {related.length > 0 && (
               <section data-reveal className="mt-6 rounded-[24px] bg-surface px-2 pt-6 pb-4 sm:rounded-[28px] sm:px-8 sm:pt-8 sm:pb-6">
                 <h2 className="px-4 text-[17px] font-bold tracking-[-0.02em]">
-                  관련 기록
+                  관련 학습 기록
                   <span className="ml-1.5 text-primary tabular-nums">{related.length}</span>
                 </h2>
                 <ul className="mt-3">
