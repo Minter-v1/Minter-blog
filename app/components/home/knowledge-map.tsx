@@ -116,10 +116,15 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
     let height = wrap.clientHeight;
     const narrow = () => width < 640;
 
-    // 허브는 가로로 넓게 퍼져서(휴대폰은 2×2로), 기록은 자기 허브 근처에서 출발
+    // 허브는 가로로 넓게 퍼져서(휴대폰은 두 줄씩), 기록은 자기 허브 근처에서 출발
+    const hubRows = Math.ceil(COLLECTION_LIST.length / 2);
     const hubPos = (i: number) =>
       narrow()
-        ? { x: width * (i % 2 === 0 ? 0.27 : 0.73), y: height * (i < 2 ? 0.28 : 0.7) }
+        ? {
+            // 홀수 개면 마지막 허브는 가운데
+            x: width * (i === COLLECTION_LIST.length - 1 && i % 2 === 0 ? 0.5 : i % 2 === 0 ? 0.27 : 0.73),
+            y: height * ((Math.floor(i / 2) + 1) / (hubRows + 1)),
+          }
         : {
             x: width * (0.14 + (i / (COLLECTION_LIST.length - 1)) * 0.72),
             y: height / 2 + (i % 2 === 0 ? -1 : 1) * height * 0.12,
