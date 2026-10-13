@@ -31,6 +31,7 @@ export type Project = {
   related?: Ref[];
   featured?: boolean; // 주력 프로젝트: 목록 맨 위, 2열 너비
   cover?: ProjectCover; // 대표 미디어: 카드 썸네일 + 상세 페이지 상단
+  repo?: string; // GitHub 저장소 URL. 빈 문자열이면 상세 페이지에 "GitHub 준비 중"으로 표시, 없으면 표시 안 함(대외비 등)
 };
 
 export const PROFILE = {
@@ -80,6 +81,7 @@ export const PROFILE = {
     {
       period: "2026.08",
       slug: "ncp-migration",
+      repo: "", // TODO: GitHub 저장소 URL
       cover: { image: "/projects/ncp-migration/architecture.png", alt: "NCP Multi Zone 3-Tier 아키텍처" },
       featured: true,
       name: "단일 서버 인사관리시스템의 NCP Multi Zone 전환",
@@ -94,6 +96,7 @@ export const PROFILE = {
     {
       period: "2026.01",
       slug: "multicloud-dr",
+      repo: "", // TODO: GitHub 저장소 URL
       cover: { image: "/projects/multicloud-dr/architecture.png", alt: "NCP-GCP 멀티클라우드 DR 아키텍처" },
       featured: true,
       name: "Cloudflare GSLB 기반 NCP-GCP 멀티클라우드 DR",
@@ -108,6 +111,7 @@ export const PROFILE = {
     {
       period: "2026.08 – 현재",
       slug: "finq",
+      repo: "", // TODO: GitHub 저장소 URL
       cover: { video: "/projects/finq/promo.mp4", poster: "/projects/finq/promo-poster.jpg", alt: "FinQ 홍보 영상" },
       name: "FinQ",
       tagline: "금융 학습 애플리케이션",
@@ -122,6 +126,7 @@ export const PROFILE = {
     {
       period: "2026.03 – 2026.05",
       slug: "waymore",
+      repo: "", // TODO: GitHub 저장소 URL
       cover: { image: "/projects/waymore/features.jpg", alt: "WAYMORE 주요 기능 화면" },
       name: "WAYMORE",
       tagline: "AI 기반 진로 로드맵 서비스",
@@ -136,6 +141,7 @@ export const PROFILE = {
     {
       period: "2025.06 – 2025.11",
       slug: "moa",
+      repo: "", // TODO: GitHub 저장소 URL
       cover: { image: "/projects/moa/cover.jpg", alt: "MOA 웹앱 서비스" },
       name: "MOA",
       tagline: "인지증 인식 개선 웹앱",
@@ -160,6 +166,7 @@ export const PROFILE = {
     {
       period: "2025.05 – 2025.12",
       slug: "yuseong-automation",
+      repo: "", // TODO: GitHub 저장소 URL
       cover: { image: "/projects/yuseong-automation/cover.jpg", alt: "종량제 봉투 지급 자동화 프로그램" },
       name: "대전광역시 유성구청 이미지 인식 기반 행정업무 자동화",
       team: "4인 팀",
