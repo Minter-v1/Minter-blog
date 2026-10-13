@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { loadArchive, type Entry } from "@/lib/archive";
 import { entryHref } from "@/lib/collections";
 import { PROFILE } from "@/lib/profile";
-import { readProjectBody } from "@/lib/projects";
+import { projectsWithDetail, readProjectBody } from "@/lib/projects";
 import { Reveal } from "../../../components/about/reveal";
 import { Rich } from "../../../components/about/rich";
 import { Article } from "../../../components/article";
@@ -15,8 +15,14 @@ import { CollectionIcon } from "../../../components/collection-icon";
 
 type Props = PageProps<"/about/projects/[slug]">;
 
-export function generateStaticParams() {
-  return PROFILE.projects.map((p) => ({ slug: p.slug }));
+// 상세 본문이 있는 프로젝트만 페이지를 만든다
+const detailProjects = async () => {
+  const has = await projectsWithDetail(PROFILE.projects.map((p) => p.slug));
+  return PROFILE.projects.filter((p) => has.has(p.slug));
+};
+
+export async function generateStaticParams() {
+  return (await detailProjects()).map((p) => ({ slug: p.slug }));
 }
 export const dynamicParams = false;
 // 공개 페이지: 미리 만들어 CDN에 캐시하고, 글을 쓰면 revalidateTag("archive")로 즉시 갱신 (그 외엔 5분마다)
@@ -31,11 +37,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default async function ProjectPage(props: Props) {
   const { slug } = await props.params;
-  const index = find(slug);
+  const projects = await detailProjects();
+  const index = projects.findIndex((p) => p.slug === slug);
   if (index === -1) notFound();
-  const p = PROFILE.projects[index];
-  const prev = PROFILE.projects[index - 1];
-  const next = PROFILE.projects[index + 1];
+  const p = projects[index];
+  const prev = projects[index - 1];
+  const next = projects[index + 1];
 
   const body = await readProjectBody(slug);
 
@@ -74,6 +81,18 @@ export default async function ProjectPage(props: Props) {
                 <span className="rounded-lg bg-primary-weak px-2.5 py-1 text-primary">{p.role}</span>
               </div>
 
+              {p.highlights && (
+                <dl className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
+                  {p.highlights.map((h) => (
+                    <div key={h.label} className="rounded-2xl border border-line px-4 py-3">
+                      <dt className="sr-only">{h.label}</dt>
+                      <dd className="text-[24px] leading-tight font-bold tracking-[-0.03em] text-primary tabular-nums">{h.value}</dd>
+                      <dd className="mt-0.5 text-[13px] text-text-3">{h.label}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+
               {/* 레쥬메 요약 */}
               <ul className="mt-6 space-y-2 rounded-2xl bg-fill/70 px-5 py-4 text-[15px] leading-[1.7] text-text-2">
                 {p.bullets.map((b, i) => (
@@ -94,16 +113,8 @@ export default async function ProjectPage(props: Props) {
                 ))}
               </div>
 
-              {body ? (
-                <>
-                  <hr className="my-10 border-line" />
-                  <Article markdown={body} rawBase="" />
-                </>
-              ) : (
-                <p className="mt-10 rounded-2xl border-2 border-dashed border-fill-strong py-8 text-center text-[14px] text-text-3">
-                  content/projects/{p.slug}.md 에 상세 내용을 적으면 여기에 보여요
-                </p>
-              )}
+              <hr className="my-10 border-line" />
+              <Article markdown={body} rawBase="" />
             </article>
 
             {related.length > 0 && (
@@ -143,13 +154,11 @@ export default async function ProjectPage(props: Props) {
             </nav>
           </div>
 
-          {body && (
-            <aside className="hidden xl:block">
-              <div className="sticky top-12 pt-[76px]">
-                <Outline selector=".article h1, .article h2, .article h3" />
-              </div>
-            </aside>
-          )}
+          <aside className="hidden xl:block">
+            <div className="sticky top-12 pt-[76px]">
+              <Outline selector=".article h1, .article h2, .article h3" />
+            </div>
+          </aside>
         </div>
       </Reveal>
     </div>
