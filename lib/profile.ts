@@ -16,6 +16,9 @@ export type TimelineItem = {
   bullets: string[];
 };
 
+// 대표 미디어. 파일은 public/projects/{slug}/ 에 둔다
+export type ProjectCover = { alt: string } & ({ image: string } | { video: string; poster: string });
+
 export type Project = {
   slug: string; // 상세 페이지 주소 /about/projects/{slug}, 본문은 content/projects/{slug}.md
   period: string;
@@ -27,6 +30,7 @@ export type Project = {
   stack: string[];
   related?: Ref[];
   featured?: boolean; // 주력 프로젝트: 목록 맨 위, 2열 너비
+  cover?: ProjectCover; // 대표 미디어: 카드 썸네일 + 상세 페이지 상단
 };
 
 export const PROFILE = {
@@ -76,6 +80,7 @@ export const PROFILE = {
     {
       period: "2026.08",
       slug: "ncp-migration",
+      cover: { image: "/projects/ncp-migration/architecture.png", alt: "NCP Multi Zone 3-Tier 아키텍처" },
       featured: true,
       name: "단일 서버 인사관리시스템의 NCP Multi Zone 전환",
       team: "1인 과제",
@@ -89,6 +94,7 @@ export const PROFILE = {
     {
       period: "2026.01",
       slug: "multicloud-dr",
+      cover: { image: "/projects/multicloud-dr/architecture.png", alt: "NCP-GCP 멀티클라우드 DR 아키텍처" },
       featured: true,
       name: "Cloudflare GSLB 기반 NCP-GCP 멀티클라우드 DR",
       team: "5인 팀",
@@ -102,6 +108,7 @@ export const PROFILE = {
     {
       period: "2026.08 – 현재",
       slug: "finq",
+      cover: { video: "/projects/finq/promo.mp4", poster: "/projects/finq/promo-poster.jpg", alt: "FinQ 홍보 영상" },
       name: "FinQ",
       tagline: "금융 학습 애플리케이션",
       team: "9인 팀(개발 4인)",
@@ -115,6 +122,7 @@ export const PROFILE = {
     {
       period: "2026.03 – 2026.05",
       slug: "waymore",
+      cover: { image: "/projects/waymore/features.jpg", alt: "WAYMORE 주요 기능 화면" },
       name: "WAYMORE",
       tagline: "AI 기반 진로 로드맵 서비스",
       team: "3인 팀",
@@ -128,16 +136,18 @@ export const PROFILE = {
     {
       period: "2025.06 – 2025.11",
       slug: "moa",
+      cover: { image: "/projects/moa/cover.jpg", alt: "MOA 웹앱 서비스" },
       name: "MOA",
       tagline: "인지증 인식 개선 웹앱",
-      team: "10인 팀(개발 3인)",
+      team: "10인 팀(개발 4인)",
       role: "Development Lead / Infra / Full-stack",
       bullets: ["NCP 3-Tier 서비스 인프라 구축 및 Docker 기반 컨테이너 배포", "QR 인식 · 카드덱 연동 웹앱 풀스택 개발"],
-      stack: ["NCP", "Docker", "Next.js", "FastAPI", "PostgreSQL"],
+      stack: ["NCP", "Docker", "Netlify", "Next.js", "FastAPI", "PostgreSQL"],
     },
     {
       period: "2025.08 – 2025.12",
       slug: "3d-printing-lab",
+      cover: { image: "/projects/3d-printing-lab/home.jpg", alt: "스마트 3D프린팅 연구소 웹사이트" },
       name: "스마트 3D 프린팅 연구소 웹사이트 구축",
       team: "4인 팀",
       role: "Full-stack",
@@ -150,6 +160,7 @@ export const PROFILE = {
     {
       period: "2025.05 – 2025.12",
       slug: "yuseong-automation",
+      cover: { image: "/projects/yuseong-automation/cover.jpg", alt: "종량제 봉투 지급 자동화 프로그램" },
       name: "대전광역시 유성구청 이미지 인식 기반 행정업무 자동화",
       team: "4인 팀",
       role: "PM / Developer",
@@ -198,7 +209,7 @@ export const PROFILE = {
       title: "2025 대전시소 퍼블릭이즈 치매문화팀",
       subtitle: "개발 총괄",
       org: "대전광역시",
-      bullets: ["3인 개발팀 총괄로 인지증 인식 개선 웹앱 'MOA'를 개발 및 배포하고, NCP 3-Tier 서비스 인프라 구축"],
+      bullets: ["4인 개발팀 총괄로 인지증 인식 개선 웹앱 'MOA'를 개발 및 배포하고, NCP 3-Tier 서비스 인프라 구축"],
     },
     {
       period: "2025.06 – 2025.07",

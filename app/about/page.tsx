@@ -6,6 +6,7 @@ import { entryHref } from "@/lib/collections";
 import { PROFILE, type TimelineItem } from "@/lib/profile";
 import { projectsWithDetail } from "@/lib/projects";
 import { Reveal } from "../components/about/reveal";
+import { ProjectCoverMedia } from "../components/about/project-cover";
 import { Rich } from "../components/about/rich";
 import { ArrowUpRight, ChevronRight } from "../components/icons";
 import { SiteHeader } from "../components/site-header";
@@ -135,6 +136,13 @@ export default async function AboutPage() {
                       href={`/about/projects/${p.slug}`}
                       className="absolute inset-0 rounded-[24px]"
                       aria-label={`${p.name} 자세히`}
+                    />
+                  )}
+                  {p.cover && (
+                    // 카드 링크(absolute) 위에 놓여도 클릭이 링크로 가도록
+                    <ProjectCoverMedia
+                      cover={p.cover}
+                      className={`pointer-events-none mb-5 aspect-[16/9] rounded-[18px] ${p.featured ? "md:aspect-[21/9]" : ""}`}
                     />
                   )}
                   <p className="flex items-center justify-between text-[13px] font-medium text-text-3 tabular-nums">
