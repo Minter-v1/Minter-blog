@@ -110,12 +110,17 @@ export async function readTextFile(path: string, ref: string): Promise<string | 
 }
 
 export async function listDir(path: string, ref: string): Promise<string[]> {
+  return (await listDirFiles(path, ref)).map((f) => f.name);
+}
+
+/** 폴더의 파일 이름과 blob sha. 파일을 다른 경로로 옮길 때 내용을 다시 올리지 않고 sha로 재사용한다 */
+export async function listDirFiles(path: string, ref: string): Promise<{ name: string; sha: string }[]> {
   const { owner, repo } = githubEnv();
   try {
-    const entries = await gh<{ name: string; type: string }[]>(
+    const entries = await gh<{ name: string; type: string; sha: string }[]>(
       `/repos/${owner}/${repo}/contents/${encodePath(path)}?ref=${ref}`,
     );
-    return Array.isArray(entries) ? entries.filter((e) => e.type === "file").map((e) => e.name) : [];
+    return Array.isArray(entries) ? entries.filter((e) => e.type === "file").map(({ name, sha }) => ({ name, sha })) : [];
   } catch (e) {
     if (e instanceof GitHubError && e.status === 404) return [];
     throw e;

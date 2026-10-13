@@ -1,8 +1,9 @@
 import "server-only";
 import { COLLECTIONS, parseRef, toRef, type Collection, type CollectionId, type Ref } from "./collections";
 import { githubEnv } from "./env";
-import { commitFiles, ConflictError, listDir, readTextFile, type CommitFile } from "./github";
+import { commitFiles, ConflictError, listDir, listDirFiles, readTextFile, type CommitFile } from "./github";
 import { formatEntry, parseEntry } from "./markdown";
+import { parseReviewLog, REVIEW_FILE, serializeReviewLog } from "./review";
 import { toSlug } from "./slug";
 
 export class ValidationError extends Error {}
@@ -196,4 +197,92 @@ export async function deleteEntry(collectionId: CollectionId, slug: string) {
       ...images.map((name) => ({ path: `${c.dir}/images/${slug}/${name}`, delete: true as const })),
     ];
   });
+}
+
+/**
+ * 다른 컬렉션으로 옮기면서 저장한다 (#42). 커밋 1개로:
+ * - {from}/{slug}.md 삭제, {to}/{slug}.md 생성 (내용은 수정 사항 반영)
+ * - 이미지 폴더 {from}/images/{slug}/ → {to}/images/{slug}/ (blob sha 재사용, 본문은 images/... 상대 경로라 그대로)
+ * - 이 글을 연결해 둔 다른 글의 related 참조를 새 ref로
+ * - review.json 의 복습 기록 키를 새 ref로
+ * 예전 주소는 [collection]/[slug] 페이지의 movedHref 폴백이 새 주소로 308 보낸다
+ */
+export async function moveEntry(
+  fromId: CollectionId,
+  toId: CollectionId,
+  slug: string,
+  input: EntryInput,
+  linkedRefs: Ref[], // 이 글을 related로 가진 글 (아카이브 기준 후보, HEAD에서 다시 확인)
+) {
+  const from = COLLECTIONS[fromId];
+  const to = COLLECTIONS[toId];
+  const oldPath = `${from.dir}/${slug}.md`;
+  const newPath = `${to.dir}/${slug}.md`;
+  const oldRef = toRef(from.id, slug);
+  const newRef = toRef(to.id, slug);
+
+  const sha = await commitFiles(`move ${noun(from)} → ${noun(to)}: ${input.title}`, async ({ headSha }) => {
+    const [current, clash, images, reviewText] = await Promise.all([
+      readTextFile(oldPath, headSha),
+      readTextFile(newPath, headSha),
+      listDirFiles(`${from.dir}/images/${slug}`, headSha),
+      readTextFile(REVIEW_FILE, headSha),
+    ]);
+    const prev = current ? parseEntry(current) : null;
+    if (!prev) throw new ConflictError(`${from.itemLabel}을(를) 찾을 수 없어요: ${oldPath}`);
+    if (clash !== null) throw new ConflictError(`${to.label}에 같은 파일명이 이미 있어요: ${newPath}`);
+
+    // 기존 이미지 주소(/api/files/…/{from}/images/…)를 상대 경로로 바꾸고 새 이미지를 붙인다. 경로는 from 기준으로 나오니 to로 옮긴다
+    const resolved = resolveImages(from.dir, input.body, slug, input.images, images.map((f) => f.name));
+    const imageFiles: CommitFile[] = [];
+    for (const f of resolved.files) {
+      if ("sha" in f) imageFiles.push({ path: f.path.replace(`${from.dir}/`, `${to.dir}/`), sha: f.sha });
+    }
+    for (const img of images) {
+      const rel = `images/${slug}/${img.name}`;
+      if (resolved.markdown.includes(rel)) imageFiles.push({ path: `${to.dir}/${rel}`, sha: img.sha });
+      imageFiles.push({ path: `${from.dir}/${rel}`, delete: true });
+    }
+
+    const publishing = prev.draft && !input.draft;
+    const today = todayInSeoul();
+    const doc = formatEntry({
+      ...input,
+      related: input.related.filter((r) => r !== oldRef && r !== newRef),
+      body: resolved.markdown,
+      date: publishing ? today : prev.date,
+      created: prev.created,
+      updated: publishing ? undefined : today,
+    });
+
+    // 다른 글의 related 참조
+    const linkFiles: CommitFile[] = [];
+    for (const ref of linkedRefs) {
+      if (ref === oldRef) continue;
+      const { collection, slug: s } = splitRef(ref);
+      const path = `${COLLECTIONS[collection].dir}/${s}.md`;
+      const text = await readTextFile(path, headSha);
+      const other = text ? parseEntry(text) : null;
+      if (!other?.related?.length) continue;
+      const related = other.related.map((r) => (parseRef(r, collection) === oldRef ? newRef : r));
+      if (related.every((r, i) => r === other.related![i])) continue;
+      linkFiles.push({ path, text: formatEntry({ ...other, related }) });
+    }
+
+    // 복습 기록
+    const log = parseReviewLog(reviewText);
+    const reviewFiles: CommitFile[] = [];
+    if (log[oldRef]) {
+      const { [oldRef]: record, ...rest } = log;
+      reviewFiles.push({ path: REVIEW_FILE, text: serializeReviewLog({ ...rest, [newRef]: record }) });
+    }
+
+    return [{ path: oldPath, delete: true as const }, { path: newPath, text: doc }, ...imageFiles, ...linkFiles, ...reviewFiles];
+  });
+  return { collection: to.id, slug, sha };
+}
+
+function splitRef(ref: Ref): { collection: CollectionId; slug: string } {
+  const i = ref.indexOf("/");
+  return { collection: ref.slice(0, i) as CollectionId, slug: ref.slice(i + 1) };
 }
