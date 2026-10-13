@@ -26,8 +26,7 @@ export type Project = {
   bullets: string[];
   stack: string[];
   related?: Ref[];
-  featured?: boolean; // 주력 프로젝트: 목록 맨 위에 넓은 카드로
-  highlights?: { value: string; label: string }[]; // 주력 카드의 핵심 수치
+  featured?: boolean; // 주력 프로젝트: 목록 맨 위, 2열 너비
 };
 
 export const PROFILE = {
@@ -36,6 +35,8 @@ export const PROFILE = {
   role: "Cloud Engineer",
   // 프로필 사진: public/about/profile.jpeg (세로 3:4 권장). 없애려면 null
   photo: "/about/profile.jpeg" as string | null,
+  // 소개 아래 해시태그
+  keywords: ["Cloud", "CloudNative", "Automation", "IaC", "MultiCloud", "DisasterRecovery"],
   intro: [
     "트래픽이 몰려도, 장애가 나도 [[멈추지 않는 인프라]]를 만드는 클라우드 엔지니어입니다.",
     "월말 6배로 몰리는 요청에는 **서버가 자동으로 늘어나도록**,",
@@ -77,40 +78,26 @@ export const PROFILE = {
       slug: "ncp-migration",
       featured: true,
       name: "단일 서버 인사관리시스템의 NCP Multi Zone 전환",
-      tagline: "클라우드스퀘어 현장실습 · 가상 고객사 시나리오",
       team: "1인 과제",
-      role: "Cloud Engineer · 전 과정 수행",
-      highlights: [
-        { value: "10분 이내", label: "장애 복구 (기존 30분 이상)" },
-        { value: "0건", label: "65GB 이전 불일치" },
-        { value: "60분", label: "롤백 완료 (RTO 4시간)" },
-      ],
+      role: "Cloud Engineer",
       bullets: [
-        "온프레미스 단일 서버의 WEB · WAS · DB를 [[NCP Multi Zone 3-Tier]]로 분리 · 이중화하고, WAS는 부하에 따라 2~4대 자동 확장",
-        "헬스체크를 실제 서비스 가능 여부 기준으로 재설계하고, 신규 서버 Role 연결을 이벤트 기반으로 자동화해 증설 · 교체 수동 작업 0건",
-        "DMS · s3cmd로 DB 25GB · 첨부파일 40GB를 3시간 안에 이전하고, 역방향 복제 롤백 경로까지 정합성 검증",
+        "온프레미스 단일 서버 인사관리시스템을 NCP Multi Zone 3-Tier로 설계 · 구축해 장애 복구 시간을 30분 이상에서 [[10분 이내]]로 단축",
+        "DMS · s3cmd로 DB와 첨부파일 65GB를 3시간 안에 이전하고, 온프레미스로 되돌리는 롤백 경로까지 검증",
       ],
-      stack: ["NCP", "Auto Scaling", "Load Balancer", "MySQL", "DMS", "Cloud Function", "Secret Manager", "Cloud Insight", "Docker"],
+      stack: ["NCP", "Auto Scaling", "MySQL", "DMS", "Cloud Function", "Docker"],
     },
     {
       period: "2026.01",
       slug: "multicloud-dr",
       featured: true,
       name: "Cloudflare GSLB 기반 NCP-GCP 멀티클라우드 DR",
-      tagline: "네이버 클라우드 실무 특강 Advanced · 프로젝트 1위",
       team: "5인 팀",
-      role: "PM · GCP 인프라 담당",
-      highlights: [
-        { value: "20.7초", label: "NCP 장애 후 GCP 자동 전환" },
-        { value: "0.46초", label: "전환 후 평균 응답 (장애 전 0.60초)" },
-        { value: "0건", label: "전환 스모크 테스트 140건 중 실패" },
-      ],
+      role: "PM / GCP Infra",
       bullets: [
-        "NCP Active · GCP Warm Standby의 Active-Warm DR을 구성하고, 실제 장애 주입으로 [[GCP 자동 전환 20.7초]] 측정",
-        "Terraform으로 GCP Regional GKE 예비 환경을 구성하고, Argo Rollouts 카나리와 Workload Identity Federation으로 키 없는 배포 자동화",
-        "가중치 분산 대신 우선순위 기반 GSLB로 평시 트래픽을 NCP에만 보내고, Public Origin을 ConfigMap으로 분리해 전환 후 재유입 차단",
+        "NCP Active · GCP Warm Standby 멀티클라우드 DR에서 Terraform 기반 GCP GKE 예비 환경 구축 담당",
+        "Failover 테스트에서 실측 복구 [[20.7초]], 기존 환경 재시작(43.7초)보다 23초 빠르게 GCP로 전환",
       ],
-      stack: ["NCP", "GCP", "Cloudflare", "Terraform", "GKE", "Argo Rollouts", "GitHub Actions", "Prometheus"],
+      stack: ["NCP", "GCP", "Cloudflare", "Terraform", "GKE", "Argo Rollouts"],
     },
     {
       period: "2026.08 – 현재",
