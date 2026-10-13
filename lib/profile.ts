@@ -3,7 +3,8 @@
 //
 // 문장 안 강조: [[파란 강조]], **굵게**
 // related: 이 프로젝트와 관련된 블로그 기록 ("log/finq-배포-자동화"처럼 컬렉션/파일명)
-// 프로젝트 상세 본문: content/projects/{slug}.md
+// 프로젝트 상세 본문: content/projects/{slug}.md ("더미"가 남은 본문은 상세 페이지를 노출하지 않음)
+// 순서: 주력(featured) → 인프라 비중 순
 
 import type { Ref } from "./collections";
 
@@ -25,6 +26,8 @@ export type Project = {
   bullets: string[];
   stack: string[];
   related?: Ref[];
+  featured?: boolean; // 주력 프로젝트: 목록 맨 위에 넓은 카드로
+  highlights?: { value: string; label: string }[]; // 주력 카드의 핵심 수치
 };
 
 export const PROFILE = {
@@ -70,6 +73,46 @@ export const PROFILE = {
 
   projects: [
     {
+      period: "2026.08",
+      slug: "ncp-migration",
+      featured: true,
+      name: "단일 서버 인사관리시스템의 NCP Multi Zone 전환",
+      tagline: "클라우드스퀘어 현장실습 · 가상 고객사 시나리오",
+      team: "1인 과제",
+      role: "Cloud Engineer · 전 과정 수행",
+      highlights: [
+        { value: "10분 이내", label: "장애 복구 (기존 30분 이상)" },
+        { value: "0건", label: "65GB 이전 불일치" },
+        { value: "60분", label: "롤백 완료 (RTO 4시간)" },
+      ],
+      bullets: [
+        "온프레미스 단일 서버의 WEB · WAS · DB를 [[NCP Multi Zone 3-Tier]]로 분리 · 이중화하고, WAS는 부하에 따라 2~4대 자동 확장",
+        "헬스체크를 실제 서비스 가능 여부 기준으로 재설계하고, 신규 서버 Role 연결을 이벤트 기반으로 자동화해 증설 · 교체 수동 작업 0건",
+        "DMS · s3cmd로 DB 25GB · 첨부파일 40GB를 3시간 안에 이전하고, 역방향 복제 롤백 경로까지 정합성 검증",
+      ],
+      stack: ["NCP", "Auto Scaling", "Load Balancer", "MySQL", "DMS", "Cloud Function", "Secret Manager", "Cloud Insight", "Docker"],
+    },
+    {
+      period: "2026.01",
+      slug: "multicloud-dr",
+      featured: true,
+      name: "Cloudflare GSLB 기반 NCP-GCP 멀티클라우드 DR",
+      tagline: "네이버 클라우드 실무 특강 Advanced · 프로젝트 1위",
+      team: "5인 팀",
+      role: "PM · GCP 인프라 담당",
+      highlights: [
+        { value: "20.7초", label: "NCP 장애 후 GCP 자동 전환" },
+        { value: "0.46초", label: "전환 후 평균 응답 (장애 전 0.60초)" },
+        { value: "0건", label: "전환 스모크 테스트 140건 중 실패" },
+      ],
+      bullets: [
+        "NCP Active · GCP Warm Standby의 Active-Warm DR을 구성하고, 실제 장애 주입으로 [[GCP 자동 전환 20.7초]] 측정",
+        "Terraform으로 GCP Regional GKE 예비 환경을 구성하고, Argo Rollouts 카나리와 Workload Identity Federation으로 키 없는 배포 자동화",
+        "가중치 분산 대신 우선순위 기반 GSLB로 평시 트래픽을 NCP에만 보내고, Public Origin을 ConfigMap으로 분리해 전환 후 재유입 차단",
+      ],
+      stack: ["NCP", "GCP", "Cloudflare", "Terraform", "GKE", "Argo Rollouts", "GitHub Actions", "Prometheus"],
+    },
+    {
       period: "2026.08 – 현재",
       slug: "finq",
       name: "FinQ",
@@ -85,18 +128,6 @@ export const PROFILE = {
       related: ["git/git-rebase"],
     },
     {
-      period: "2026.08",
-      slug: "ncp-migration",
-      name: "제조기업 인사관리 시스템 NCP 마이그레이션",
-      team: "1인 과제",
-      role: "Cloud Engineer",
-      bullets: [
-        "온프레미스 단일 서버 기반 인사관리 시스템을 NCP Multi Zone 3-Tier 고가용성 아키텍처로 설계 · 마이그레이션",
-        "Auto Scaling 신규 서버의 권한 연결부터 Secret 조회 · 서비스 기동까지 이벤트 기반 자동화",
-      ],
-      stack: ["NCP"],
-    },
-    {
       period: "2026.05",
       slug: "waymore",
       name: "WAYMORE",
@@ -105,21 +136,19 @@ export const PROFILE = {
       role: "Infra / Full-stack",
       bullets: [
         "AWS 3-Tier 서비스 인프라 설계 · 구축 및 Spring Boot · React 기반 웹 서비스 개발",
-        "ALB 기반 Blue-Green 배포로 [[배포 중 다운타임 0초]], 장애 시 N초 내 롤백",
+        "ALB 기반 Blue-Green 배포로 [[배포 중 다운타임 0초]]",
       ],
       stack: ["AWS", "Spring Boot", "React", "Docker", "GitHub Actions"],
     },
     {
-      period: "2026.01",
-      slug: "multicloud-dr",
-      name: "Global DNS 기반 멀티클라우드 DR 시스템 구축",
-      team: "5인 팀",
-      role: "PM / Cloud Engineer",
-      bullets: [
-        "NCP Primary - GCP Standby(Warm) 기반 멀티클라우드 DR 아키텍처 설계 · 구축",
-        "Global DNS Health Check 기반 Failover 및 Argo Rollouts 카나리 배포 기반 GCP Kubernetes 환경 구축",
-      ],
-      stack: ["NCP", "GCP", "Global DNS", "Terraform", "Kubernetes", "Argo Rollouts", "Prometheus", "Grafana"],
+      period: "2025.06 – 2025.11",
+      slug: "moa",
+      name: "MOA",
+      tagline: "인지증 인식 개선 웹앱",
+      team: "10인 팀(개발 3인)",
+      role: "Development Lead / Infra / Full-stack",
+      bullets: ["NCP 3-Tier 서비스 인프라 구축 및 Docker 기반 컨테이너 배포", "QR 인식 · 카드덱 연동 웹앱 풀스택 개발"],
+      stack: ["NCP", "Docker", "Next.js", "FastAPI", "PostgreSQL"],
     },
     {
       period: "2025.08 – 2025.12",
@@ -144,16 +173,6 @@ export const PROFILE = {
         "ROI 및 다중 스케일 템플릿 매칭으로 화면 변화에 대응해 UI 인식 정확도 [[40% → 100%]] 개선",
       ],
       stack: ["Python", "OpenCV", "PyAutoGUI"],
-    },
-    {
-      period: "2025.06 – 2025.11",
-      slug: "moa",
-      name: "MOA",
-      tagline: "인지증 인식 개선 웹앱",
-      team: "10인 팀(개발 3인)",
-      role: "Development Lead / Infra / Full-stack",
-      bullets: ["NCP 3-Tier 서비스 인프라 구축 및 Docker 기반 컨테이너 배포", "QR 인식 · 카드덱 연동 웹앱 풀스택 개발"],
-      stack: ["NCP", "Docker", "Next.js", "FastAPI", "PostgreSQL"],
     },
   ] as Project[],
 
