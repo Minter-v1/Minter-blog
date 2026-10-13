@@ -6,6 +6,7 @@ import { entryHref } from "@/lib/collections";
 import { PROFILE } from "@/lib/profile";
 import { projectsWithDetail, readProjectBody } from "@/lib/projects";
 import { Reveal } from "../../../components/about/reveal";
+import { ProjectCoverMedia } from "../../../components/about/project-cover";
 import { Rich } from "../../../components/about/rich";
 import { Article } from "../../../components/article";
 import { ChevronRight } from "../../../components/icons";
@@ -80,6 +81,8 @@ export default async function ProjectPage(props: Props) {
                 <span className="rounded-lg bg-fill px-2.5 py-1 text-text-2">{p.team}</span>
                 <span className="rounded-lg bg-primary-weak px-2.5 py-1 text-primary">{p.role}</span>
               </div>
+
+              {p.cover && <ProjectCoverMedia cover={p.cover} controls={"video" in p.cover} className="mt-6 aspect-[16/9] rounded-2xl" />}
 
               {/* 레쥬메 요약 */}
               <ul className="mt-6 space-y-2 rounded-2xl bg-fill/70 px-5 py-4 text-[15px] leading-[1.7] text-text-2">

@@ -16,6 +16,9 @@ export type TimelineItem = {
   bullets: string[];
 };
 
+// 대표 미디어. 파일은 public/projects/{slug}/ 에 둔다
+export type ProjectCover = { alt: string } & ({ image: string } | { video: string; poster: string });
+
 export type Project = {
   slug: string; // 상세 페이지 주소 /about/projects/{slug}, 본문은 content/projects/{slug}.md
   period: string;
@@ -27,6 +30,7 @@ export type Project = {
   stack: string[];
   related?: Ref[];
   featured?: boolean; // 주력 프로젝트: 목록 맨 위, 2열 너비
+  cover?: ProjectCover; // 대표 미디어: 카드 썸네일 + 상세 페이지 상단
 };
 
 export const PROFILE = {
@@ -76,6 +80,7 @@ export const PROFILE = {
     {
       period: "2026.08",
       slug: "ncp-migration",
+      cover: { image: "/projects/ncp-migration/architecture.png", alt: "NCP Multi Zone 3-Tier 아키텍처" },
       featured: true,
       name: "단일 서버 인사관리시스템의 NCP Multi Zone 전환",
       team: "1인 과제",
@@ -89,6 +94,7 @@ export const PROFILE = {
     {
       period: "2026.01",
       slug: "multicloud-dr",
+      cover: { image: "/projects/multicloud-dr/architecture.png", alt: "NCP-GCP 멀티클라우드 DR 아키텍처" },
       featured: true,
       name: "Cloudflare GSLB 기반 NCP-GCP 멀티클라우드 DR",
       team: "5인 팀",
@@ -102,6 +108,7 @@ export const PROFILE = {
     {
       period: "2026.08 – 현재",
       slug: "finq",
+      cover: { video: "/projects/finq/promo.mp4", poster: "/projects/finq/promo-poster.jpg", alt: "FinQ 홍보 영상" },
       name: "FinQ",
       tagline: "금융 학습 애플리케이션",
       team: "9인 팀(개발 4인)",
@@ -115,6 +122,7 @@ export const PROFILE = {
     {
       period: "2026.03 – 2026.05",
       slug: "waymore",
+      cover: { image: "/projects/waymore/features.jpg", alt: "WAYMORE 주요 기능 화면" },
       name: "WAYMORE",
       tagline: "AI 기반 진로 로드맵 서비스",
       team: "3인 팀",
