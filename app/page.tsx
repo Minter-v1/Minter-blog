@@ -1,83 +1,255 @@
-import { buildActivity } from "@/lib/activity";
-import { loadArchive, type Archive } from "@/lib/archive";
-import { COLLECTION_IDS, type CollectionId } from "@/lib/collections";
-import { SITE } from "@/lib/site";
-import { Activity } from "./components/home/activity";
-import { CollectionCards, type CardItem } from "./components/home/collection-cards";
-import { Hero } from "./components/home/hero";
-import { KnowledgeMap } from "./components/home/knowledge-map";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { loadArchive, type Entry } from "@/lib/archive";
+import { COLLECTION_LIST, entryHref } from "@/lib/collections";
+import { PROFILE } from "@/lib/profile";
+import { ProjectCoverMedia } from "./components/about/project-cover";
+import { Reveal } from "./components/about/reveal";
+import { Rich } from "./components/about/rich";
+import { CollectionIcon } from "./components/collection-icon";
+import { ArrowUpRight, ChevronRight } from "./components/icons";
+import { ProjectRail } from "./components/landing/project-rail";
 import { SiteHeader } from "./components/site-header";
-import { TodaySection } from "./components/home/today";
-import { entriesOfDay, seoulToday } from "@/lib/today";
 
-// 공개 페이지: 미리 만들어 CDN에 캐시하고, 글을 쓰면 revalidateTag("archive")로 즉시 갱신 (그 외엔 5분마다)
+export const metadata: Metadata = {
+  title: { absolute: `${PROFILE.name} · ${PROFILE.role}` },
+  description: PROFILE.intro.join(" ").replace(/\[\[|\]\]|\*\*/g, ""),
+};
+
+// 공개 페이지: 미리 만들어 CDN에 캐시 (글을 쓰면 revalidateTag("archive")로 갱신, 그 외엔 5분마다)
 export const revalidate = 300;
 
-export default async function Home() {
-  let archive: Archive | null = null;
-  let loadError: string | null = null;
+// 루트 랜딩 (#60): 첫 방문자(HR)에게 누구인지 · 무엇을 했는지 · PDF를 먼저 보여 주고, 블로그로 가는 문을 둔다
+export default async function Landing() {
+  let entries: Entry[] = [];
   try {
-    archive = await loadArchive();
-  } catch (e) {
-    loadError = e instanceof Error ? e.message : String(e);
-  }
+    entries = (await loadArchive()).entries;
+  } catch {}
+  const recent = entries.slice(0, 3);
+  const counts = COLLECTION_LIST.map((c) => ({ c, n: entries.filter((e) => e.collection === c.id).length }));
 
-  const entries = archive?.entries ?? [];
-  const byCollection = (id: CollectionId) => entries.filter((e) => e.collection === id);
-  const counts = Object.fromEntries(COLLECTION_IDS.map((id) => [id, byCollection(id).length])) as Record<CollectionId, number>;
-  const recent = Object.fromEntries(
-    COLLECTION_IDS.map((id) => [id, byCollection(id).slice(0, 3).map(({ collection, slug, title }) => ({ collection, slug, title }))]),
-  ) as Record<CollectionId, CardItem[]>;
-
-  // 연결 지도: 연관 연결은 양쪽이 모두 존재하는 것만, 중복(A→B, B→A) 없이
-  const refs = new Set(entries.map((e) => e.ref));
-  const seen = new Set<string>();
-  const links: [string, string][] = [];
-  for (const e of entries) {
-    for (const r of e.related) {
-      const key = [e.ref, r].sort().join("|");
-      if (refs.has(r) && !seen.has(key)) {
-        seen.add(key);
-        links.push([e.ref, r]);
-      }
-    }
-  }
+  const stats = [
+    { label: "주요 프로젝트", value: PROFILE.projects.length, unit: "개" },
+    { label: "자격증", value: PROFILE.certifications.length, unit: "개" },
+    { label: "수상", value: PROFILE.awards.length, unit: "회" },
+    { label: "제1저자 논문", value: PROFILE.papers.length, unit: "편" },
+  ];
 
   return (
     <div className="mx-auto max-w-[1120px] px-4 sm:px-6 pb-24">
       <SiteHeader writeHref="/write" />
 
-      {loadError && (
-        <div className="mb-6 rounded-2xl bg-danger-weak px-5 py-4 text-[15px] text-danger">
-          <p className="font-semibold">저장소를 읽지 못했어요</p>
-          <p className="mt-1 text-[14px] opacity-80">{loadError}</p>
-        </div>
-      )}
+      <Reveal>
+        {/* 첫 화면 */}
+        <section className="flex flex-col justify-center py-10 sm:py-16 md:min-h-[min(calc(100svh-180px),820px)]">
+          <div className="flex flex-col-reverse items-start justify-between gap-10 md:flex-row md:items-center">
+            <div className="min-w-0 max-w-[640px]">
+              <p className="text-[16px] font-semibold text-primary sm:text-[18px]">{PROFILE.role}</p>
+              <h1 className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <span data-name className="text-[52px] leading-none font-bold tracking-[-0.05em] sm:text-[76px]">
+                  {PROFILE.name}
+                </span>
+                <span className="text-[20px] font-semibold text-text-3 sm:text-[24px]">{PROFILE.nameEn}</span>
+              </h1>
+              <div className="mt-8 space-y-1 text-[17px] leading-[1.7] text-text-2 sm:text-[20px]">
+                {PROFILE.intro.map((line, i) => (
+                  <p key={i}>
+                    <Rich text={line} />
+                  </p>
+                ))}
+              </div>
+              <p className="mt-6 flex flex-wrap gap-x-3 gap-y-1 text-[15px] font-semibold text-text-3">
+                {PROFILE.keywords.map((k) => (
+                  <span key={k}>#{k}</span>
+                ))}
+              </p>
+              <div className="mt-9 flex flex-wrap gap-2">
+                <Link
+                  href={PROFILE.portfolioPdf.href}
+                  className="group inline-flex h-12 items-center gap-2 rounded-2xl bg-primary px-5 text-[15px] font-semibold text-white transition-opacity hover:opacity-90"
+                >
+                  포트폴리오 PDF
+                  <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+                <Link
+                  href="/about"
+                  className="group inline-flex h-12 items-center gap-2 rounded-2xl bg-surface px-5 text-[15px] font-semibold text-text transition-colors hover:bg-fill-strong/60"
+                >
+                  About
+                  <ChevronRight className="size-4 text-text-3 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+                {PROFILE.contacts
+                  .filter((c) => c.label === "GitHub")
+                  .map((c) => (
+                    <a
+                      key={c.label}
+                      href={c.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group inline-flex h-12 items-center gap-2 rounded-2xl bg-surface px-5 text-[15px] font-semibold text-text transition-colors hover:bg-fill-strong/60"
+                    >
+                      GitHub
+                      <ArrowUpRight className="size-3.5 text-text-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </a>
+                  ))}
+              </div>
+            </div>
+            {PROFILE.photo && (
+              <div
+                data-photo
+                className="relative aspect-[3/4] w-[150px] shrink-0 overflow-hidden rounded-[28px] bg-fill sm:w-[260px] sm:rounded-[36px]"
+              >
+                <Image src={PROFILE.photo} alt={`${PROFILE.name} 프로필 사진`} fill sizes="260px" priority className="object-cover" />
+              </div>
+            )}
+          </div>
 
-      <Hero
-        counts={counts}
-        recent={entries
-          .slice(0, 16)
-          .map(({ collection, slug, title, description, date }) => ({ collection, slug, title, description, date }))}
-      />
+          <dl className="mt-14 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {stats.map((s) => (
+              <div key={s.label} className="rounded-[22px] bg-surface px-5 py-4">
+                <dt className="text-[13px] font-semibold text-text-3">{s.label}</dt>
+                <dd className="mt-1 text-[30px] leading-none font-bold tracking-[-0.03em] tabular-nums">
+                  <span data-count={s.value}>{s.value}</span>
+                  <span className="ml-0.5 text-[16px]">{s.unit}</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
 
-      <div className="mt-16 space-y-12">
-        <TodaySection
-          items={entriesOfDay(entries, seoulToday()).map(({ entry: e, kind }) => ({
-            collection: e.collection,
-            slug: e.slug,
-            title: e.title,
-            description: e.description,
-            kind,
-          }))}
-        />
-        <KnowledgeMap
-          entries={entries.map(({ ref, collection, slug, title, description }) => ({ ref, collection, slug, title, description }))}
-          links={links}
-        />
-        <CollectionCards counts={counts} recent={recent} />
-        <Activity data={buildActivity(entries)} goals={SITE.weeklyGoal} />
-      </div>
+        {/* 주요 프로젝트 레일 */}
+        <section className="mt-10" aria-labelledby="projects-title">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <div>
+              <h2 id="projects-title" className="text-[26px] font-bold tracking-[-0.03em] sm:text-[32px]">
+                주요 프로젝트
+              </h2>
+              <p className="mt-1 text-[15px] text-text-3">카드를 누르면 설계 근거와 트러블슈팅을 담은 상세 페이지로 이동해요</p>
+            </div>
+            <Link
+              href="/about#projects"
+              className="inline-flex shrink-0 items-center gap-0.5 text-[14px] font-semibold text-text-3 hover:text-primary"
+            >
+              전체 보기
+              <ChevronRight className="size-3.5" />
+            </Link>
+          </div>
+          <ProjectRail>
+            {PROFILE.projects.map((p) => (
+              <Link
+                key={p.slug}
+                href={`/about/projects/${p.slug}`}
+                data-rail-card
+                className="group flex w-[82vw] max-w-[360px] shrink-0 snap-start flex-col overflow-hidden rounded-[24px] bg-surface transition-[translate,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,23,51,0.08)] sm:w-[360px]"
+              >
+                {p.cover ? (
+                  <ProjectCoverMedia cover={p.cover} className="aspect-[16/10] border-b border-line" />
+                ) : (
+                  <div className="aspect-[16/10] bg-fill" />
+                )}
+                <div className="flex flex-1 flex-col p-5">
+                  <p className="text-[13px] font-medium text-text-3 tabular-nums">{p.period}</p>
+                  <h3 className="mt-1 line-clamp-2 text-[18px] leading-snug font-bold tracking-[-0.025em] group-hover:text-primary">
+                    {p.name}
+                  </h3>
+                  <p className="mt-2 flex flex-wrap gap-1.5 text-[12px] font-semibold">
+                    <span className="rounded-md bg-fill px-2 py-0.5 text-text-2">{p.team}</span>
+                    <span className="rounded-md bg-primary-weak px-2 py-0.5 text-primary">{p.role}</span>
+                  </p>
+                  <p className="mt-3 line-clamp-3 text-[14px] leading-[1.65] text-text-2">
+                    <Rich text={p.bullets[0] ?? ""} />
+                  </p>
+                  <p className="mt-auto flex flex-wrap gap-1.5 pt-4">
+                    {p.stack.slice(0, 4).map((s) => (
+                      <span key={s} className="rounded-full border border-line px-2.5 py-0.5 text-[12px] font-medium text-text-2">
+                        {s}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </ProjectRail>
+        </section>
+
+        {/* 블로그 */}
+        <section className="mt-20" aria-labelledby="blog-title">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <div>
+              <h2 id="blog-title" className="text-[26px] font-bold tracking-[-0.03em] sm:text-[32px]">
+                학습 기록
+              </h2>
+              <p className="mt-1 text-[15px] text-text-3">개발하며 배운 것을 망각곡선에 맞춰 복습하며 쌓고 있어요</p>
+            </div>
+            <Link href="/blog" className="inline-flex shrink-0 items-center gap-0.5 text-[14px] font-semibold text-text-3 hover:text-primary">
+              Blog 전체 보기
+              <ChevronRight className="size-3.5" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+            <ul data-reveal className="rounded-[24px] bg-surface p-2 sm:p-3">
+              {recent.map((e) => (
+                <li key={e.ref}>
+                  <Link
+                    href={entryHref(e.collection, e.slug)}
+                    className="group flex items-center gap-3 rounded-2xl px-3 py-3.5 transition-colors hover:bg-fill"
+                  >
+                    <CollectionIcon id={e.collection} className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-fill text-[20px]" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[16px] font-semibold group-hover:text-primary">{e.title}</span>
+                      <span className="block truncate text-[14px] text-text-3">{e.description}</span>
+                    </span>
+                    <span className="shrink-0 text-[12px] text-text-3 tabular-nums">{e.date}</span>
+                  </Link>
+                </li>
+              ))}
+              {recent.length === 0 && <li className="px-4 py-8 text-center text-[14px] text-text-3">기록을 불러오지 못했어요</li>}
+            </ul>
+            <div data-reveal className="grid grid-cols-2 gap-2 rounded-[24px] bg-surface p-3 sm:gap-3">
+              {counts.map(({ c, n }) => (
+                <Link key={c.id} href={`/${c.id}`} className="group rounded-2xl px-3 py-3 transition-colors hover:bg-fill">
+                  <CollectionIcon id={c.id} className="text-[20px]" />
+                  <p className="mt-1.5 text-[14px] font-semibold group-hover:text-primary">{c.label}</p>
+                  <p className="text-[13px] text-text-3 tabular-nums">{n}편</p>
+                </Link>
+              ))}
+              <Link
+                href="/learning"
+                className="group flex flex-col justify-center rounded-2xl bg-primary-weak px-3 py-3 transition-opacity hover:opacity-90"
+              >
+                <span className="text-[14px] font-semibold text-primary">학습법</span>
+                <span className="text-[13px] text-primary/80">망각곡선 복습 방식</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* 마무리 */}
+        <section data-reveal className="mt-20 rounded-[28px] bg-surface px-6 py-10 text-center sm:px-10 sm:py-14">
+          <h2 className="text-[24px] font-bold tracking-[-0.03em] sm:text-[30px]">한 번에 보고 싶다면</h2>
+          <p className="mt-2 text-[15px] text-text-3 sm:text-[16px]">주력 프로젝트를 정리한 PDF와 전체 이력을 확인할 수 있어요</p>
+          <div className="mt-7 flex flex-wrap justify-center gap-2">
+            <Link
+              href={PROFILE.portfolioPdf.href}
+              className="inline-flex h-12 items-center rounded-2xl bg-primary px-5 text-[15px] font-semibold text-white hover:opacity-90"
+            >
+              포트폴리오 PDF 보기
+            </Link>
+            {PROFILE.contacts
+              .filter((c) => c.label === "Email")
+              .map((c) => (
+                <a
+                  key={c.label}
+                  href={c.href}
+                  className="inline-flex h-12 items-center rounded-2xl bg-fill px-5 text-[15px] font-semibold text-text hover:bg-fill-strong/60"
+                >
+                  {c.text}
+                </a>
+              ))}
+          </div>
+        </section>
+      </Reveal>
     </div>
   );
 }
