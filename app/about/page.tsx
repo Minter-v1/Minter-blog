@@ -30,7 +30,7 @@ export default async function AboutPage() {
   const withDetail = await projectsWithDetail(PROFILE.projects.map((p) => p.slug));
 
   const stats = [
-    { emoji: "🗂️", label: "프로젝트", value: PROFILE.projects.length },
+    { emoji: "🗂️", label: "주요 프로젝트", value: PROFILE.projects.length },
     { emoji: "📜", label: "자격증", value: PROFILE.certifications.length },
     { emoji: "🏆", label: "수상", value: PROFILE.awards.length },
     { emoji: "📄", label: "제1저자 논문", value: PROFILE.papers.length },
@@ -61,6 +61,11 @@ export default async function AboutPage() {
                   </p>
                 ))}
               </div>
+              <p className="mt-5 flex flex-wrap gap-x-3 gap-y-1 text-[15px] font-semibold text-text-3">
+                {PROFILE.keywords.map((k) => (
+                  <span key={k}>#{k}</span>
+                ))}
+              </p>
               <div className="mt-7 flex flex-wrap gap-2">
                 {PROFILE.contacts.map((c) => (
                   <a
@@ -109,7 +114,7 @@ export default async function AboutPage() {
         </section>
 
         {/* 프로젝트 */}
-        <Section emoji="🗂️" title="프로젝트" id="projects">
+        <Section emoji="🗂️" title="주요 프로젝트" id="projects">
           <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
             {PROFILE.projects.map((p) => {
               const related = (p.related ?? []).map((r) => byRef.get(r)).filter((e): e is Entry => !!e);
@@ -118,9 +123,7 @@ export default async function AboutPage() {
                 <article
                   key={p.name}
                   data-reveal
-                  className={`group relative flex flex-col rounded-[24px] bg-surface p-6 ${
-                    p.featured ? "ring-1 ring-primary/25 sm:p-8 md:col-span-2" : ""
-                  } ${
+                  className={`group relative flex flex-col rounded-[24px] bg-surface p-6 ${p.featured ? "md:col-span-2" : ""} ${
                     linked
                       ? "transition-[translate,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,23,51,0.08)]"
                       : ""
@@ -135,12 +138,7 @@ export default async function AboutPage() {
                     />
                   )}
                   <p className="flex items-center justify-between text-[13px] font-medium text-text-3 tabular-nums">
-                    <span className="flex items-center gap-2">
-                      {p.featured && (
-                        <span className="rounded-md bg-primary px-2 py-0.5 text-[12px] font-bold text-white">주력</span>
-                      )}
-                      {p.period}
-                    </span>
+                    {p.period}
                     {linked && (
                       <span className="inline-flex items-center gap-0.5 font-semibold transition-colors group-hover:text-primary">
                         자세히
@@ -149,28 +147,17 @@ export default async function AboutPage() {
                     )}
                   </p>
                   <h3
-                    className={`mt-1.5 leading-snug font-bold tracking-[-0.025em] ${p.featured ? "text-[22px] sm:text-[24px]" : "text-[19px]"} ${
+                    className={`mt-1.5 text-[19px] leading-snug font-bold tracking-[-0.025em] ${
                       linked ? "transition-colors group-hover:text-primary" : ""
                     }`}
                   >
                     {p.name}
+                    {p.tagline && <span className="ml-1.5 text-[15px] font-semibold text-text-3">{p.tagline}</span>}
                   </h3>
-                  {p.tagline && <p className="mt-0.5 text-[14px] font-semibold text-text-3">{p.tagline}</p>}
                   <p className="mt-2 flex flex-wrap gap-1.5 text-[12px] font-semibold">
                     <span className="rounded-md bg-fill px-2 py-0.5 text-text-2">{p.team}</span>
                     <span className="rounded-md bg-primary-weak px-2 py-0.5 text-primary">{p.role}</span>
                   </p>
-                  {p.highlights && (
-                    <dl className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
-                      {p.highlights.map((h) => (
-                        <div key={h.label} className="rounded-2xl bg-fill/70 px-4 py-3">
-                          <dt className="sr-only">{h.label}</dt>
-                          <dd className="text-[24px] leading-tight font-bold tracking-[-0.03em] text-primary tabular-nums">{h.value}</dd>
-                          <dd className="mt-0.5 text-[13px] text-text-3">{h.label}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  )}
                   <ul className="mt-4 space-y-1.5 text-[14px] leading-[1.65] text-text-2">
                     {p.bullets.map((b, i) => (
                       <li key={i} className="flex gap-2">

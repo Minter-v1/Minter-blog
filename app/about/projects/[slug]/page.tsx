@@ -81,18 +81,6 @@ export default async function ProjectPage(props: Props) {
                 <span className="rounded-lg bg-primary-weak px-2.5 py-1 text-primary">{p.role}</span>
               </div>
 
-              {p.highlights && (
-                <dl className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
-                  {p.highlights.map((h) => (
-                    <div key={h.label} className="rounded-2xl border border-line px-4 py-3">
-                      <dt className="sr-only">{h.label}</dt>
-                      <dd className="text-[24px] leading-tight font-bold tracking-[-0.03em] text-primary tabular-nums">{h.value}</dd>
-                      <dd className="mt-0.5 text-[13px] text-text-3">{h.label}</dd>
-                    </div>
-                  ))}
-                </dl>
-              )}
-
               {/* 레쥬메 요약 */}
               <ul className="mt-6 space-y-2 rounded-2xl bg-fill/70 px-5 py-4 text-[15px] leading-[1.7] text-text-2">
                 {p.bullets.map((b, i) => (
