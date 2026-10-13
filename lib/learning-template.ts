@@ -66,6 +66,15 @@ export const LEARNING_TEMPLATES: Record<CollectionId, TemplateSection[]> = {
     { title: "배운 점", guide: "새로 알게 된 개념, 다음에 다르게 할 점" },
     { title: "관련 개념", guide: "이해하는 데 필요한 개념과 관련 용어" },
   ],
+  career: [
+    { title: "개요", guide: "무엇에 관한 노트인지 한두 문장" },
+    { title: "배경", guide: "왜 정리하게 됐는지. 지원 기업, 직무, 상황" },
+    { title: "핵심 내용", guide: "정리한 기준이나 전략, 알게 된 점" },
+    { title: "근거와 자료", guide: "채용 공고, IR 자료, 기사, 피드백 등 판단의 근거" },
+    { title: "적용", guide: "자기소개서, 면접 답변, 포트폴리오에 어떻게 반영했는지" },
+    { title: "회고", guide: "잘된 점과 아쉬운 점, 다음에 다르게 할 점" },
+    { title: "다음 행동", guide: "이어서 할 일과 기한" },
+  ],
 };
 
 // 가이드는 회색 글자로. 저장 형식(lib/rich-markdown.ts)의 글자색 span이라 에디터에서도 회색으로 보인다

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { decodeSlug } from "@/lib/api";
 import { findEntry, loadArchive, relatedOf } from "@/lib/archive";
 import { COLLECTIONS, entryHref, isCollectionId, type CollectionId } from "@/lib/collections";
@@ -30,6 +30,16 @@ async function find(props: Props) {
   return entry ? { entry, archive } : null;
 }
 
+// 다른 컬렉션으로 옮긴 글(예: 학습 기록 → 커리어 노트, #36)의 예전 주소면 새 주소를 돌려준다.
+// 같은 slug가 다른 컬렉션에 정확히 하나 있을 때만 (애매하면 404)
+async function movedHref(props: Props) {
+  const { collection, slug } = await props.params;
+  const { entries } = await loadArchive();
+  const name = decodeSlug(slug);
+  const others = entries.filter((e) => e.slug === name && e.collection !== collection);
+  return others.length === 1 ? entryHref(others[0].collection, others[0].slug) : null;
+}
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const found = await find(props);
   if (!found) return {};
@@ -44,7 +54,11 @@ function formatDate(iso: string) {
 
 export default async function EntryPage(props: Props) {
   const found = await find(props);
-  if (!found) notFound();
+  if (!found) {
+    const moved = await movedHref(props);
+    if (moved) permanentRedirect(moved);
+    notFound();
+  }
   const { entry, archive } = found;
   const c = COLLECTIONS[entry.collection];
   const related = relatedOf(entry, archive.entries);

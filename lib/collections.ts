@@ -1,9 +1,9 @@
 // 블로그의 컬렉션 정의 (서버/클라이언트 공용).
-// 데이터 repo에서 컬렉션마다 폴더 하나: log/, terms/, git/, troubleshooting/
+// 데이터 repo에서 컬렉션마다 폴더 하나: log/, terms/, git/, troubleshooting/, career/
 
 import type { Tag } from "./tags";
 
-export const COLLECTION_IDS = ["log", "terms", "git", "troubleshooting"] as const;
+export const COLLECTION_IDS = ["log", "terms", "git", "troubleshooting", "career"] as const;
 export type CollectionId = (typeof COLLECTION_IDS)[number];
 
 export type ExtraField = {
@@ -131,6 +131,31 @@ export const COLLECTIONS: Record<CollectionId, Collection> = {
     extraFields: [
       { key: "error", label: "에러 메시지", placeholder: "CONFLICT (content): Merge conflict in ...", mono: true },
     ],
+  },
+  // 취업 준비·커리어 기록 (#36). CS·개발 학습(학습 기록)과 섞이지 않도록 분리
+  career: {
+    id: "career",
+    dir: "career",
+    label: "커리어 노트",
+    shortLabel: "커리어",
+    itemLabel: "노트",
+    intro: "취업 준비와 커리어 기록",
+    emoji: "💼",
+    listStyle: "date",
+    titleLabel: "제목",
+    titlePlaceholder: "예) 경험을 나열하지 않고 판단 기준으로 쓰기",
+    descriptionLabel: "한 줄 요약",
+    descriptionPlaceholder: "이 노트에서 무엇을 정리했는지",
+    tagLabel: "분류",
+    maxTags: 3,
+    defaultTags: [
+      { name: "자기소개서" },
+      { name: "면접" },
+      { name: "기업 분석" },
+      { name: "지원 회고" },
+      { name: "커리어" },
+    ],
+    extraFields: [],
   },
 };
 

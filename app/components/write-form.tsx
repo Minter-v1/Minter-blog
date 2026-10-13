@@ -248,7 +248,7 @@ export function WriteForm(props: {
           </div>
         ) : (
           // 새로 쓸 때는 어느 컬렉션에 쓸지 고른다
-          <div className="grid grid-cols-4 gap-1 rounded-2xl bg-fill p-1" role="tablist" aria-label="컬렉션">
+          <div className="flex gap-1 rounded-2xl bg-fill p-1" role="tablist" aria-label="컬렉션">
             {COLLECTION_LIST.map((col) => (
               <button
                 key={col.id}
@@ -261,7 +261,7 @@ export function WriteForm(props: {
                   setDirty(false);
                   router.push(`/write?c=${col.id}`);
                 }}
-                className={`h-9 rounded-xl text-[13px] font-semibold transition-colors ${
+                className={`h-9 flex-auto rounded-xl px-2 text-[13px] font-semibold whitespace-nowrap transition-colors ${
                   col.id === c.id ? "bg-surface text-text shadow-sm" : "text-text-3 hover:text-text-2"
                 }`}
               >
