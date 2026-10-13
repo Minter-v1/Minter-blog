@@ -136,6 +136,7 @@ export const PROFILE = {
     {
       period: "2025.06 – 2025.11",
       slug: "moa",
+      cover: { image: "/projects/moa/cover.jpg", alt: "MOA 웹앱 서비스" },
       name: "MOA",
       tagline: "인지증 인식 개선 웹앱",
       team: "10인 팀(개발 3인)",
@@ -146,6 +147,7 @@ export const PROFILE = {
     {
       period: "2025.08 – 2025.12",
       slug: "3d-printing-lab",
+      cover: { image: "/projects/3d-printing-lab/home.jpg", alt: "스마트 3D프린팅 연구소 웹사이트" },
       name: "스마트 3D 프린팅 연구소 웹사이트 구축",
       team: "4인 팀",
       role: "Full-stack",
@@ -158,6 +160,7 @@ export const PROFILE = {
     {
       period: "2025.05 – 2025.12",
       slug: "yuseong-automation",
+      cover: { image: "/projects/yuseong-automation/cover.jpg", alt: "종량제 봉투 지급 자동화 프로그램" },
       name: "대전광역시 유성구청 이미지 인식 기반 행정업무 자동화",
       team: "4인 팀",
       role: "PM / Developer",
