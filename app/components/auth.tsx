@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useSyncExternalStore } from "react";
 
 // 로그인 여부를 브라우저에서 한 번만 물어보고 모든 컴포넌트가 나눠 쓴다.
@@ -46,38 +45,3 @@ export function AuthOnly({ children }: { children: React.ReactNode }) {
   return useAuthed() ? <>{children}</> : null;
 }
 
-/** 헤더 오른쪽: 로그인 / 로그아웃 · 작성 */
-export function AuthNav({ writeHref, extra }: { writeHref?: string; extra?: React.ReactNode }) {
-  const value = useAuthed();
-  if (value === null) return <span className="h-9 w-20" aria-hidden />;
-  if (!value) {
-    return (
-      <Link href="/login" className="rounded-lg px-3 py-1.5 hover:bg-fill-strong/60">
-        로그인
-      </Link>
-    );
-  }
-  return (
-    <>
-      <button
-        type="button"
-        className="rounded-lg px-3 py-1.5 hover:bg-fill-strong/60"
-        onClick={async () => {
-          await fetch("/api/logout", { method: "POST" });
-          setAuthed(false);
-        }}
-      >
-        로그아웃
-      </button>
-      {extra}
-      {writeHref && (
-        <Link
-          href={writeHref}
-          className="ml-2 rounded-xl bg-primary px-4 py-2 text-[14px] font-semibold text-white transition-colors hover:bg-primary-press"
-        >
-          작성
-        </Link>
-      )}
-    </>
-  );
-}
