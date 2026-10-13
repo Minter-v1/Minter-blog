@@ -213,6 +213,16 @@ body {
   padding: 10px 12px;
   border-bottom: 1px solid var(--line);
   text-align: left;
+  vertical-align: top;
+  /* 한글이 글자 단위로 끊기지 않게 (좁은 첫 열이 "구/분"처럼 깨지던 문제) */
+  word-break: keep-all;
+}
+/* 첫 열은 항목 이름: 한 단어가 한 줄에 들어갈 최소 폭 */
+.article th:first-child,
+.article td:first-child {
+  min-width: 5.5em;
+  font-weight: 600;
+  color: var(--text-2);
 }
 .article th {
   font-weight: 600;
