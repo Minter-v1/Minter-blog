@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { REVIEW_TOTAL } from "@/lib/review";
@@ -35,7 +34,7 @@ export function refreshReview() {
   if (today !== null || pending) load();
 }
 
-function useReviewToday(): TodayItem[] | null {
+export function useReviewToday(): TodayItem[] | null {
   const authed = useAuthed();
   const value = useSyncExternalStore(
     (l) => {
@@ -50,21 +49,6 @@ function useReviewToday(): TodayItem[] | null {
   }, [authed]);
   if (authed === false) return [];
   return authed ? value : null;
-}
-
-/** 헤더: 로그인했고 오늘 복습할 글이 있을 때만 */
-export function ReviewLink({ active }: { active?: boolean }) {
-  const list = useReviewToday();
-  if (!list || list.length === 0) return null;
-  return (
-    <Link
-      href="/review"
-      aria-current={active ? "page" : undefined}
-      className={`rounded-lg px-3 py-1.5 whitespace-nowrap ${active ? "bg-fill-strong/70 text-text" : "hover:bg-fill-strong/60"}`}
-    >
-      복습<span className="ml-1 font-semibold text-primary tabular-nums">{list.length}</span>
-    </Link>
-  );
 }
 
 /** 복습 진행도: 마친 횟수만큼 채운 점 */

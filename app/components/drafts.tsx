@@ -65,26 +65,6 @@ export function draftAge(date: string) {
   return days <= 0 ? "오늘" : `${days + 1}일째`;
 }
 
-/** 헤더: 로그인했고 작성 중인 글이 있을 때만 */
-export function DraftsLink({ active }: { active?: boolean }) {
-  const list = useDrafts();
-  if (!list || list.length === 0) return null;
-  return (
-    <Link
-      href="/drafts"
-      aria-current={active ? "page" : undefined}
-      className={`rounded-lg px-3 py-1.5 whitespace-nowrap ${active ? "bg-fill-strong/70 text-text" : "hover:bg-fill-strong/60"}`}
-    >
-      {/* 휴대폰 헤더는 좁아서 연필 이모지로 */}
-      <span className="tossface sm:hidden" aria-label="작성 중">
-        ✏️
-      </span>
-      <span className="hidden sm:inline">작성 중</span>
-      <span className="ml-1 font-semibold text-primary tabular-nums">{list.length}</span>
-    </Link>
-  );
-}
-
 /** 작성 중인 글 한 줄: 흐린 제목 + 적어둔 지 며칠째 + 늘 보이는 '이어 쓰기' */
 export function DraftRow({ entry, words, showCollection }: { entry: EntrySummary; words: string[]; showCollection?: boolean }) {
   const c = COLLECTIONS[entry.collection];

@@ -59,3 +59,17 @@ export const Search = ({ className }: Props) => (
     <path d="m20 20-4.2-4.2" />
   </svg>
 );
+
+export const Menu = ({ className }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </svg>
+);
+
+export const More = ({ className }: Props) => (
+  <svg viewBox="0 0 24 24" className={className} {...base}>
+    <circle cx="5" cy="12" r="1.2" fill="currentColor" />
+    <circle cx="12" cy="12" r="1.2" fill="currentColor" />
+    <circle cx="19" cy="12" r="1.2" fill="currentColor" />
+  </svg>
+);

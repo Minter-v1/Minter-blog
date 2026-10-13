@@ -17,7 +17,7 @@ export default function PortfolioPage() {
   const fileName = `${PROFILE.nameEn.replace(/\s+/g, "_")}_Portfolio_v${pdf.version}.pdf`;
   return (
     <div className="mx-auto max-w-[960px] px-4 sm:px-6 pb-24">
-      <SiteHeader active="about" writeHref="/write" />
+      <SiteHeader active="portfolio" writeHref="/write" />
 
       <Link
         href="/about#projects"
