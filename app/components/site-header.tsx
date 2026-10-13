@@ -35,7 +35,8 @@ export function SiteHeader(props: { active?: Active; writeHref?: string }) {
 
   return (
     // 본문 폭이 좁은 페이지(목록·상세 760px)에서도 헤더는 같은 폭으로
-    <header className="relative flex items-center justify-between gap-4 pt-5 pb-4 lg:left-1/2 lg:w-[max(100%,min(1072px,calc(100vw-3rem)))] lg:-translate-x-1/2 lg:py-7">
+    // z-50: 가운데 정렬용 transform이 쌓임 맥락을 만들어, z-index가 없으면 드롭다운이 본문 transform 요소 아래로 깔린다 (#62)
+    <header className="relative z-50 flex items-center justify-between gap-4 pt-5 pb-4 lg:left-1/2 lg:w-[max(100%,min(1072px,calc(100vw-3rem)))] lg:-translate-x-1/2 lg:py-7">
       <div className="flex items-center gap-7">
         <Link href="/" className="text-[20px] font-bold tracking-[-0.03em]">
           {SITE.name}
