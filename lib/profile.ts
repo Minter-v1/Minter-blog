@@ -139,10 +139,10 @@ export const PROFILE = {
       cover: { image: "/projects/moa/cover.jpg", alt: "MOA 웹앱 서비스" },
       name: "MOA",
       tagline: "인지증 인식 개선 웹앱",
-      team: "10인 팀(개발 3인)",
+      team: "10인 팀(개발 4인)",
       role: "Development Lead / Infra / Full-stack",
       bullets: ["NCP 3-Tier 서비스 인프라 구축 및 Docker 기반 컨테이너 배포", "QR 인식 · 카드덱 연동 웹앱 풀스택 개발"],
-      stack: ["NCP", "Docker", "Next.js", "FastAPI", "PostgreSQL"],
+      stack: ["NCP", "Docker", "Netlify", "Next.js", "FastAPI", "PostgreSQL"],
     },
     {
       period: "2025.08 – 2025.12",
@@ -209,7 +209,7 @@ export const PROFILE = {
       title: "2025 대전시소 퍼블릭이즈 치매문화팀",
       subtitle: "개발 총괄",
       org: "대전광역시",
-      bullets: ["3인 개발팀 총괄로 인지증 인식 개선 웹앱 'MOA'를 개발 및 배포하고, NCP 3-Tier 서비스 인프라 구축"],
+      bullets: ["4인 개발팀 총괄로 인지증 인식 개선 웹앱 'MOA'를 개발 및 배포하고, NCP 3-Tier 서비스 인프라 구축"],
     },
     {
       period: "2025.06 – 2025.07",
