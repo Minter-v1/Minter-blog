@@ -47,6 +47,9 @@ export const PROFILE = {
     "NCP 장애에는 **GCP로 넘어가도록** 설계하고 전환까지 직접 검증했습니다.",
     "고객의 서비스도 같은 기준으로 옮기고, 멈추지 않게 지키겠습니다.",
   ],
+  // 공개용 범용 포트폴리오 PDF (#53). public/portfolio/ 에 두고 /about/portfolio 에서 브라우저로 렌더링
+  // 기업명·직무명이 들어간 제출용 PDF는 여기에 넣지 않는다. 파일을 바꾸면 version을 올린다
+  portfolioPdf: { file: "/portfolio/portfolio.pdf", version: "2026.10", title: "Cloud Engineer Portfolio" },
   contacts: [
     { label: "GitHub", text: "github.com/Minter-v1", href: "https://github.com/Minter-v1" },
     { label: "Email", text: "adf5858@naver.com", href: "mailto:adf5858@naver.com" },
