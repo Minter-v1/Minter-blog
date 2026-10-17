@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { ChevronRight } from "../icons";
+import { Bone, EmptyState, Spinner } from "../loaders";
 
 // pdf.js로 페이지를 canvas에 그린다. 브라우저 내장 뷰어(iframe)는 Android Chrome 등에서
 // 표시되지 않고 다운로드로 넘어가는 경우가 있어, 모든 기기에서 같은 방식으로 보이게 직접 렌더링한다
@@ -170,9 +171,9 @@ export function PdfViewer({
 
   if (state === "missing")
     return (
-      <p className="rounded-2xl border-2 border-dashed border-fill-strong py-12 text-center text-[14px] text-text-3">
-        포트폴리오 PDF를 준비하고 있어요
-      </p>
+      <div className="rounded-2xl border-2 border-dashed border-fill-strong">
+        <EmptyState emoji="📄" title="PDF를 준비하고 있어요" desc="곧 이 자리에서 바로 볼 수 있어요" />
+      </div>
     );
 
   return (
@@ -182,25 +183,21 @@ export function PdfViewer({
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {/* 페이지 자리를 미리 잡아 넘길 때 높이가 흔들리지 않게 */}
-        <div
-          ref={box}
-          // 한 페이지가 화면 높이 안에 들어오도록 폭을 줄인다 (헤더·버튼 몫 220px)
-          style={{
-            aspectRatio: `1 / ${aspect}`,
-            maxWidth:
-              fit === "page"
+        {/* 페이지 자리를 미리 잡아 넘길 때 높이가 흔들리지 않게. 한 페이지가 화면 높이 안에 들어오도록 폭을 줄인다 (헤더·버튼 몫 220px) */}
+        <div style={{ aspectRatio: `1 / ${aspect}`, maxWidth: fit === "page"
                 ? `max(280px, calc((100svh - 220px) / ${aspect}))`
-                : undefined,
-          }}
-          className="mx-auto w-full"
-          data-pages={pages}
-        />
-        {(state === "loading" || drawn !== page) && (
-          <p className="absolute inset-0 flex items-center justify-center text-[14px] text-text-3">
-            {state === "loading" ? "PDF를 불러오는 중…" : ""}
-          </p>
-        )}
+                : undefined }} className="relative mx-auto w-full">
+          <div ref={box} className="absolute inset-0" data-pages={pages} />
+          {/* 처음 불러올 때: 페이지 모양 스켈레톤 + 스피너, 넘길 때: 스피너만 (#99) */}
+          {state === "loading" && <Bone className="absolute inset-0 rounded-xl" />}
+          {(state === "loading" || drawn !== page) && (
+            <span role="status" aria-label="PDF 불러오는 중" className="absolute inset-0 flex items-center justify-center text-primary">
+              <span className="flex size-12 items-center justify-center rounded-full bg-surface/90 shadow-[0_2px_10px_rgba(0,23,51,0.12)]">
+                <Spinner className="size-5" />
+              </span>
+            </span>
+          )}
+        </div>
         {state === "ready" && (
           <>
             {/* 페이지 왼쪽·오른쪽 절반 클릭으로도 넘김 */}

@@ -11,7 +11,7 @@ import type { Tag } from "@/lib/tags";
 import type { BodyEditorApi } from "./body-editor";
 import { refreshDrafts } from "./drafts";
 import { Check } from "./icons";
-import { Spinner } from "./loaders";
+import { Bone, Spinner } from "./loaders";
 import { OutlinePopover } from "./outline";
 import { missingTemplateMarkdown, stripUnfilledTemplate } from "@/lib/learning-template";
 import { RelatedPicker, type RelatedCandidate } from "./related-picker";
@@ -19,7 +19,13 @@ import { TagPicker } from "./tag-picker";
 
 const BodyEditor = dynamic(() => import("./body-editor"), {
   ssr: false,
-  loading: () => <p className="px-5 text-[16px] text-text-3 sm:px-[54px]">에디터 불러오는 중…</p>,
+  loading: () => (
+    <div aria-busy aria-label="에디터 불러오는 중" className="space-y-3 px-5 py-2 sm:px-[54px]">
+      {[92, 78, 85, 60, 70].map((w, i) => (
+        <Bone key={i} className="h-4" width={`${w}%`} />
+      ))}
+    </div>
+  ),
 });
 
 type Initial = {

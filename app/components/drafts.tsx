@@ -9,6 +9,7 @@ import { useAuthed } from "./auth";
 import { Highlight } from "./highlight";
 import { ChevronRight, Close, Search } from "./icons";
 import { CollectionIcon } from "./collection-icon";
+import { EmptyState } from "./loaders";
 
 // 작성 중인 글(나만 보임)을 브라우저에서 한 번 불러와 헤더·목록이 나눠 쓴다.
 // 공개 페이지는 CDN 캐시라서 서버가 그려 줄 수 없다.
@@ -117,12 +118,16 @@ export function DraftBoard(props: { drafts: EntrySummary[] }) {
 
   if (props.drafts.length === 0) {
     return (
-      <div className="py-16 text-center">
-        <p className="text-[16px] font-semibold text-text-3">작성 중인 글이 없어요</p>
-        <Link href="/write" className="mt-4 inline-block rounded-xl bg-fill px-4 py-2 text-[14px] font-semibold text-text-2 hover:bg-fill-strong">
-          새 글 쓰기
-        </Link>
-      </div>
+      <EmptyState
+        emoji="✍️"
+        title="작성 중인 글이 없어요"
+        desc="쓰다 만 글은 여기에 모여요"
+        action={
+          <Link href="/write" className="inline-block rounded-xl bg-fill px-4 py-2 text-[14px] font-semibold text-text-2 hover:bg-fill-strong">
+            새 글 쓰기
+          </Link>
+        }
+      />
     );
   }
 
@@ -173,9 +178,11 @@ export function DraftBoard(props: { drafts: EntrySummary[] }) {
       </div>
 
       {visible.length === 0 ? (
-        <p className="py-14 text-center text-[15px] text-text-3">
-          {words.length ? `‘${query.trim()}’에 맞는 글이 없어요` : "이 컬렉션엔 작성 중인 글이 없어요"}
-        </p>
+        <EmptyState
+          emoji={words.length ? "🔍" : "📭"}
+          title={words.length ? `‘${query.trim()}’에 맞는 글이 없어요` : "이 컬렉션엔 작성 중인 글이 없어요"}
+          desc={words.length ? "다른 검색어로 찾아보세요" : undefined}
+        />
       ) : (
         <ul className="mt-5">
           {visible.map((e) => (

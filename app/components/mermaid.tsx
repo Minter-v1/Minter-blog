@@ -64,7 +64,12 @@ export function Mermaid({ code }: { code: string }) {
   if (error) {
     return (
       <div className="mermaid-block mermaid-error">
-        <p>다이어그램을 그리지 못했어요 · {error}</p>
+        <p>
+          <span className="tossface mr-1.5" aria-hidden>
+            ⚠️
+          </span>
+          다이어그램을 그리지 못했어요 · {error}
+        </p>
         <pre>
           <code>{code}</code>
         </pre>

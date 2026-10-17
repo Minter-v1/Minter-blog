@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { COLLECTIONS, type CollectionId } from "@/lib/collections";
 import { Close, Search } from "./icons";
+import { EmptyState } from "./loaders";
 
 // ref: "git/rebase"처럼 컬렉션을 포함한 식별자
 export type RelatedCandidate = {
@@ -137,9 +138,11 @@ export function RelatedPicker(props: {
         {open && (
           <div className="absolute top-full right-0 left-0 z-30 mt-2 animate-[fade-in_120ms_ease-out] rounded-2xl bg-surface p-1.5 shadow-[0_8px_30px_rgba(0,23,51,0.14)]">
             {options.length === 0 ? (
-              <p className="px-2.5 py-3 text-[13px] text-text-3">
-                {query.trim() ? `‘${query.trim()}’에 맞는 기록이 없어요` : "모든 기록을 이미 연결했어요"}
-              </p>
+              <EmptyState
+                size="sm"
+                emoji={query.trim() ? "🔍" : "🔗"}
+                title={query.trim() ? `‘${query.trim()}’에 맞는 기록이 없어요` : "모든 기록을 이미 연결했어요"}
+              />
             ) : (
               <div ref={listRef} className="max-h-[320px] overflow-y-auto">
                 {groups.map((g) => (

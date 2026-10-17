@@ -4,6 +4,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, Search } from "./icons";
 import { Mermaid } from "./mermaid";
+import { EmptyState } from "./loaders";
 
 // BlockNote 코드 블록의 기본 <select>(언어 50개가 한 줄로)를 숨기고, 그 자리에 검색되는 언어 선택기를 띄운다.
 // 고르면 원래 <select>에 값을 넣고 change 이벤트를 보내서 BlockNote가 블록을 갱신하게 한다.
@@ -281,7 +282,7 @@ function Picker({ select }: { select: HTMLSelectElement }) {
                 />
               </div>
               <div ref={listRef} className="mt-1.5 max-h-64 overflow-y-auto">
-                {options.length === 0 && <p className="px-2.5 py-3 text-[13px] text-text-3">맞는 언어가 없어요</p>}
+                {options.length === 0 && <EmptyState size="sm" emoji="🔍" title="맞는 언어가 없어요" />}
                 {results.map(
                   (g) =>
                     g.items.length > 0 && (

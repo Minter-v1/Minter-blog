@@ -13,6 +13,7 @@ import { ProjectFilterGrid } from "./components/landing/project-filter-grid";
 import { ProjectSpotlight } from "./components/landing/project-spotlight";
 import { NightSky } from "./components/landing/night-sky";
 import { SiteHeader } from "./components/site-header";
+import { EmptyState } from "./components/loaders";
 
 export const metadata: Metadata = {
   title: { absolute: `${PROFILE.name} · ${PROFILE.role}` },
@@ -229,8 +230,8 @@ export default async function Landing() {
                 </li>
               ))}
               {recent.length === 0 && (
-                <li className="px-4 py-8 text-center text-[14px] text-text-3">
-                  기록을 불러오지 못했어요
+                <li>
+                  <EmptyState emoji="📭" title="기록을 불러오지 못했어요" desc="잠시 뒤 다시 확인해 주세요" />
                 </li>
               )}
             </ul>

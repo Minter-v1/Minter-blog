@@ -7,6 +7,7 @@ import { Article } from "../components/article";
 import { CollectionIcon } from "../components/collection-icon";
 import { ChevronRight } from "../components/icons";
 import { SiteHeader } from "../components/site-header";
+import { EmptyState } from "../components/loaders";
 
 export const metadata: Metadata = { title: "오늘 정리한 기록" };
 
@@ -45,8 +46,8 @@ export default async function TodayPage(props: PageProps<"/today">) {
       </div>
 
       {items.length === 0 ? (
-        <div className="rounded-[24px] bg-surface py-16 text-center">
-          <p className="text-[16px] font-semibold text-text-3">{isToday ? "오늘" : "이날"} 정리한 기록이 없어요</p>
+        <div className="rounded-[24px] bg-surface py-4">
+          <EmptyState emoji="🗓️" title={`${isToday ? "오늘" : "이날"} 정리한 기록이 없어요`} desc="다른 날짜로 이동해 볼 수 있어요" />
         </div>
       ) : (
         <>
