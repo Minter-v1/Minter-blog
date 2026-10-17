@@ -184,12 +184,11 @@ export default async function Landing() {
                   <p className="text-[13px] text-text-3 tabular-nums">{n}편</p>
                 </Link>
               ))}
-              <Link
-                href="/learning"
-                className="group flex flex-col justify-center rounded-2xl bg-primary-weak px-3 py-3 transition-opacity hover:opacity-90"
-              >
-                <span className="text-[14px] font-semibold text-primary">학습법</span>
-                <span className="text-[13px] text-primary/80">망각곡선 복습 방식</span>
+              {/* 다른 타일과 같은 기본 스타일 (색을 칠하면 선택된 탭처럼 보임, #82) */}
+              <Link href="/learning" className="group rounded-2xl px-3 py-3 transition-colors hover:bg-fill">
+                <span className="tossface text-[20px]">🧠</span>
+                <p className="mt-1.5 text-[14px] font-semibold group-hover:text-primary">학습법</p>
+                <p className="text-[13px] text-text-3">망각곡선 복습 방식</p>
               </Link>
             </div>
           </div>
