@@ -171,6 +171,7 @@ export const PROFILE = {
     {
       period: "2025.08 – 2025.12",
       slug: "3d-printing-lab",
+      category: "web",
       cover: { image: "/projects/3d-printing-lab/home.jpg", alt: "스마트 3D프린팅 연구소 웹사이트", position: "center top" },
       name: "스마트 3D 프린팅 연구소 웹사이트 구축",
       team: "4인 팀",
@@ -196,7 +197,7 @@ export const PROFILE = {
       ],
       stack: ["Python", "OpenCV", "PyAutoGUI"],
     },
-  ] as Project[],
+  ] satisfies Project[] as Project[], // satisfies: 필수 필드(category 등) 누락을 타입 검사에서 잡는다
 
   activities: [
     {
