@@ -12,6 +12,7 @@ import { CopyButton } from "./components/landing/copy-button";
 import { ProjectFilterGrid } from "./components/landing/project-filter-grid";
 import { ProjectSpotlight } from "./components/landing/project-spotlight";
 import { NightSky } from "./components/landing/night-sky";
+import { OrbitStats } from "./components/landing/orbit-stats";
 import { SiteHeader } from "./components/site-header";
 import { EmptyState } from "./components/loaders";
 
@@ -37,13 +38,6 @@ export default async function Landing() {
     n: entries.filter((e) => e.collection === c.id).length,
   }));
 
-  const stats = [
-    { label: "주요 프로젝트", value: PROFILE.projects.length, unit: "개" },
-    { label: "자격증", value: PROFILE.certifications.length, unit: "개" },
-    { label: "수상", value: PROFILE.awards.length, unit: "회" },
-    { label: "제1저자 논문", value: PROFILE.papers.length, unit: "편" },
-  ];
-
   return (
     <div className="mx-auto max-w-[1120px] px-4 sm:px-6 pb-24">
       {/* 헤더 + 첫 화면은 밤하늘 위 (#86). .night 안에서는 색 토큰이 어두운 배경용으로 바뀐다 */}
@@ -55,7 +49,7 @@ export default async function Landing() {
 
         <Reveal>
           {/* 첫 화면 */}
-          <section className="flex flex-col justify-center pt-10 pb-40 sm:pt-16 sm:pb-52 md:min-h-[min(calc(100svh-180px),820px)]">
+          <section className="flex flex-col justify-center pt-10 pb-52 sm:pt-16 sm:pb-56 md:min-h-[min(calc(100svh-180px),820px)]">
             <div className="flex flex-col-reverse items-start justify-between gap-10 md:flex-row md:items-center">
               <div className="min-w-0 max-w-[640px]">
                 <p className="text-[16px] font-semibold text-primary sm:text-[18px]">
@@ -132,22 +126,7 @@ export default async function Landing() {
               )}
             </div>
 
-            <dl className="mt-14 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {stats.map((s) => (
-                <div
-                  key={s.label}
-                  className="rounded-[22px] bg-white/[0.07] px-5 py-4 ring-1 ring-white/10 backdrop-blur-sm ring-inset"
-                >
-                  <dt className="text-[13px] font-semibold text-text-3">
-                    {s.label}
-                  </dt>
-                  <dd className="mt-1 text-[30px] leading-none font-bold tracking-[-0.03em] tabular-nums">
-                    <span data-count={s.value}>{s.value}</span>
-                    <span className="ml-0.5 text-[16px]">{s.unit}</span>
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <OrbitStats />
           </section>
         </Reveal>
       </div>

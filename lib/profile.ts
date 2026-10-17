@@ -298,11 +298,11 @@ export const PROFILE = {
   ] as TimelineItem[],
 
   certifications: [
-    { name: "AWS Certified Solutions Architect - Associate", issuer: "Amazon Web Services (AWS)", date: "2026.09.21" },
-    { name: "정보처리기사", issuer: "한국산업인력공단", date: "2026.09.11" },
-    { name: "SQLD (SQL 개발자)", issuer: "한국데이터산업진흥원", date: "2026.03.27" },
-    { name: "NCP (Naver Cloud Platform Professional)", issuer: "네이버클라우드", date: "2026.02.06" },
-    { name: "NCA (Naver Cloud Platform Associate)", issuer: "네이버클라우드", date: "2025.07.17" },
+    { name: "AWS Certified Solutions Architect - Associate", short: "AWS SAA", issuer: "Amazon Web Services (AWS)", date: "2026.09.21" },
+    { name: "정보처리기사", short: "정보처리기사", issuer: "한국산업인력공단", date: "2026.09.11" },
+    { name: "SQLD (SQL 개발자)", short: "SQLD", issuer: "한국데이터산업진흥원", date: "2026.03.27" },
+    { name: "NCP (Naver Cloud Platform Professional)", short: "NCP", issuer: "네이버클라우드", date: "2026.02.06" },
+    { name: "NCA (Naver Cloud Platform Associate)", short: "NCA", issuer: "네이버클라우드", date: "2025.07.17" },
   ],
 
   skills: [
