@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SITE } from "@/lib/site";
+import { BackToTop } from "./components/back-to-top";
 import { SiteFooter } from "./components/site-footer";
 import "./globals.css";
 
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-screen flex-col">
         <div className="flex-1">{children}</div>
         <SiteFooter />
+        <BackToTop />
       </body>
     </html>
   );
