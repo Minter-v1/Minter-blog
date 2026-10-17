@@ -4,12 +4,12 @@ import Link from "next/link";
 import { loadArchive, type Entry } from "@/lib/archive";
 import { COLLECTION_LIST, entryHref } from "@/lib/collections";
 import { PROFILE } from "@/lib/profile";
-import { ProjectCoverMedia } from "./components/about/project-cover";
 import { Reveal } from "./components/about/reveal";
 import { Rich } from "./components/about/rich";
 import { CollectionIcon } from "./components/collection-icon";
 import { ArrowUpRight, ChevronRight } from "./components/icons";
-import { ProjectRail } from "./components/landing/project-rail";
+import { ProjectFilterGrid } from "./components/landing/project-filter-grid";
+import { ProjectSpotlight } from "./components/landing/project-spotlight";
 import { SiteHeader } from "./components/site-header";
 
 export const metadata: Metadata = {
@@ -27,6 +27,8 @@ export default async function Landing() {
     entries = (await loadArchive()).entries;
   } catch {}
   const recent = entries.slice(0, 3);
+  const featured = PROFILE.projects.filter((p) => p.featured);
+  const others = PROFILE.projects.filter((p) => !p.featured);
   const counts = COLLECTION_LIST.map((c) => ({ c, n: entries.filter((e) => e.collection === c.id).length }));
 
   const stats = [
@@ -125,7 +127,7 @@ export default async function Landing() {
               <h2 id="projects-title" className="text-[26px] font-bold tracking-[-0.03em] sm:text-[32px]">
                 주요 프로젝트
               </h2>
-              <p className="mt-1 text-[15px] text-text-3">카드를 누르면 설계 근거와 트러블슈팅을 담은 상세 페이지로 이동해요</p>
+              <p className="mt-1 text-[15px] text-text-3">주력 프로젝트를 먼저, 나머지는 분야별로 볼 수 있어요</p>
             </div>
             <Link
               href="/about#projects"
@@ -135,42 +137,10 @@ export default async function Landing() {
               <ChevronRight className="size-3.5" />
             </Link>
           </div>
-          <ProjectRail>
-            {PROFILE.projects.map((p) => (
-              <Link
-                key={p.slug}
-                href={`/about/projects/${p.slug}`}
-                data-rail-card
-                className="group flex w-[82vw] max-w-[360px] shrink-0 snap-start flex-col overflow-hidden rounded-[24px] bg-surface transition-[translate,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,23,51,0.08)] sm:w-[360px]"
-              >
-                {p.cover ? (
-                  <ProjectCoverMedia cover={p.cover} className="aspect-[16/10] border-b border-line" />
-                ) : (
-                  <div className="aspect-[16/10] bg-fill" />
-                )}
-                <div className="flex flex-1 flex-col p-5">
-                  <p className="text-[13px] font-medium text-text-3 tabular-nums">{p.period}</p>
-                  <h3 className="mt-1 line-clamp-2 text-[18px] leading-snug font-bold tracking-[-0.025em] group-hover:text-primary">
-                    {p.name}
-                  </h3>
-                  <p className="mt-2 flex flex-wrap gap-1.5 text-[12px] font-semibold">
-                    <span className="rounded-md bg-fill px-2 py-0.5 text-text-2">{p.team}</span>
-                    <span className="rounded-md bg-primary-weak px-2 py-0.5 text-primary">{p.role}</span>
-                  </p>
-                  <p className="mt-3 line-clamp-3 text-[14px] leading-[1.65] text-text-2">
-                    <Rich text={p.bullets[0] ?? ""} />
-                  </p>
-                  <p className="mt-auto flex flex-wrap gap-1.5 pt-4">
-                    {p.stack.slice(0, 4).map((s) => (
-                      <span key={s} className="rounded-full border border-line px-2.5 py-0.5 text-[12px] font-medium text-text-2">
-                        {s}
-                      </span>
-                    ))}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </ProjectRail>
+          <ProjectSpotlight projects={featured} />
+          <div className="mt-8">
+            <ProjectFilterGrid projects={others} />
+          </div>
         </section>
 
         {/* 블로그 */}

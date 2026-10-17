@@ -549,3 +549,21 @@ body {
     border-radius: 16px;
   }
 }
+
+/* 홈 주력 프로젝트 스포트라이트 진행 막대 (#65) */
+@keyframes spotlight-progress {
+  from { width: 0; }
+  to { width: 100%; }
+}
+/* 홈 분야 필터 전환: 남는 카드는 제자리로 미끄러지고, 들어오고 나가는 카드는 흐려지며 바뀐다 */
+::view-transition-group(*) {
+  animation-duration: 380ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
