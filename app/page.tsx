@@ -8,6 +8,7 @@ import { Reveal } from "./components/about/reveal";
 import { Rich } from "./components/about/rich";
 import { CollectionIcon } from "./components/collection-icon";
 import { ArrowUpRight, ChevronRight } from "./components/icons";
+import { CopyButton } from "./components/landing/copy-button";
 import { ProjectFilterGrid } from "./components/landing/project-filter-grid";
 import { ProjectSpotlight } from "./components/landing/project-spotlight";
 import { NightSky } from "./components/landing/night-sky";
@@ -263,35 +264,75 @@ export default async function Landing() {
           </div>
         </section>
 
-        {/* 마무리 */}
+        {/* 마무리 (#89): 왼쪽 포트폴리오 PDF, 오른쪽 연락 */}
         <section
           data-reveal
-          className="mt-20 rounded-[28px] bg-surface px-6 py-10 text-center sm:px-10 sm:py-14"
+          className="mt-20 grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2"
+          aria-label="포트폴리오 PDF와 연락처"
         >
-          <h2 className="text-[24px] font-bold tracking-[-0.03em] sm:text-[30px]">
-            한 번에 보고 싶다면
-          </h2>
-          <p className="mt-2 text-[15px] text-text-3 sm:text-[16px]">
-            주력 프로젝트를 정리한 PDF와 전체 이력을 확인할 수 있어요
-          </p>
-          <div className="mt-7 flex flex-wrap justify-center gap-2">
-            <Link
-              href={PROFILE.portfolioPdf.href}
-              className="inline-flex h-12 items-center rounded-2xl bg-primary px-5 text-[15px] font-semibold text-white hover:opacity-90"
-            >
-              포트폴리오 PDF 보기
-            </Link>
-            {PROFILE.contacts
-              .filter((c) => c.label === "Email")
-              .map((c) => (
-                <a
+          <Link
+            href={PROFILE.portfolioPdf.href}
+            className="group flex items-center gap-6 rounded-[28px] bg-surface p-6 transition-colors hover:bg-white sm:p-8"
+          >
+            <div className="relative aspect-[480/679] w-[104px] shrink-0 overflow-hidden rounded-xl bg-white shadow-[0_4px_18px_rgba(0,23,51,0.1)] ring-1 ring-line transition-transform group-hover:-translate-y-1 sm:w-[120px]">
+              <Image
+                src={PROFILE.portfolioPdf.cover}
+                alt=""
+                fill
+                sizes="120px"
+                className="object-cover"
+              />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[13px] font-semibold text-primary tabular-nums">
+                PDF · v{PROFILE.portfolioPdf.version} ·{" "}
+                {PROFILE.portfolioPdf.pages}쪽
+              </p>
+              <h2 className="mt-1 text-[22px] leading-snug font-bold tracking-[-0.03em]">
+                {PROFILE.portfolioPdf.title}
+              </h2>
+              <p className="mt-1 text-[14px] text-text-3">
+                주력 프로젝트의 설계와 트러블슈팅을 한 부에
+              </p>
+              <span className="mt-4 inline-flex items-center gap-1 text-[15px] font-semibold text-primary">
+                PDF 보기
+                <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </div>
+          </Link>
+          <div className="flex flex-col justify-center rounded-[28px] bg-surface p-6 sm:p-8">
+            <h2 className="text-[22px] font-bold tracking-[-0.03em]">
+              함께 일할 팀을 찾고 있어요
+            </h2>
+            <p className="mt-1 text-[14px] text-text-3">편하게 연락 주세요</p>
+            <dl className="mt-4">
+              {PROFILE.contacts.map((c) => (
+                <div
                   key={c.label}
-                  href={c.href}
-                  className="inline-flex h-12 items-center rounded-2xl bg-fill px-5 text-[15px] font-semibold text-text hover:bg-fill-strong/60"
+                  className="flex items-center justify-between gap-3 border-t border-line py-3"
                 >
-                  {c.text}
-                </a>
+                  <dt className="w-16 shrink-0 text-[14px] text-text-3">
+                    {c.label}
+                  </dt>
+                  <dd className="flex min-w-0 flex-1 items-center justify-end gap-2">
+                    <a
+                      href={c.href}
+                      target={c.href.startsWith("http") ? "_blank" : undefined}
+                      rel="noreferrer"
+                      className="group inline-flex min-w-0 items-center gap-1 text-[15px] font-semibold hover:text-primary"
+                    >
+                      <span className="truncate">{c.text}</span>
+                      {c.href.startsWith("http") && (
+                        <ArrowUpRight className="size-3.5 shrink-0 text-text-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      )}
+                    </a>
+                    {c.href.startsWith("mailto:") && (
+                      <CopyButton text={c.text} />
+                    )}
+                  </dd>
+                </div>
               ))}
+            </dl>
           </div>
         </section>
       </Reveal>
