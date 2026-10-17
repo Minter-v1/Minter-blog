@@ -11,7 +11,7 @@ import { ArrowUpRight, ChevronRight } from "./components/icons";
 import { CopyButton } from "./components/landing/copy-button";
 import { ProjectFilterGrid } from "./components/landing/project-filter-grid";
 import { ProjectSpotlight } from "./components/landing/project-spotlight";
-import { ShootingStars } from "./components/landing/shooting-stars";
+import { NightSky } from "./components/landing/night-sky";
 import { SiteHeader } from "./components/site-header";
 
 export const metadata: Metadata = {
@@ -45,106 +45,111 @@ export default async function Landing() {
 
   return (
     <div className="mx-auto max-w-[1120px] px-4 sm:px-6 pb-24">
-      <SiteHeader writeHref="/write" />
+      {/* 헤더 + 첫 화면은 밤하늘 위 (#86). .night 안에서는 색 토큰이 어두운 배경용으로 바뀐다 */}
+      <div className="night relative isolate">
+        <NightSky />
+        <SiteHeader writeHref="/write" />
+
+        <Reveal>
+          {/* 첫 화면 */}
+          <section className="flex flex-col justify-center pt-10 pb-28 sm:pt-16 sm:pb-36 md:min-h-[min(calc(100svh-180px),820px)]">
+            <div className="flex flex-col-reverse items-start justify-between gap-10 md:flex-row md:items-center">
+              <div className="min-w-0 max-w-[640px]">
+                <p className="text-[16px] font-semibold text-primary sm:text-[18px]">
+                  {PROFILE.role}
+                </p>
+                <h1 className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                  <span
+                    data-name
+                    className="text-[52px] leading-none font-bold tracking-[-0.05em] sm:text-[76px]"
+                  >
+                    {PROFILE.name}
+                  </span>
+                  <span className="text-[20px] font-semibold text-text-3 sm:text-[24px]">
+                    {PROFILE.nameEn}
+                  </span>
+                </h1>
+                <div className="mt-8 space-y-1 text-[17px] leading-[1.7] text-text-2 sm:text-[20px]">
+                  {PROFILE.intro.map((line, i) => (
+                    <p key={i}>
+                      <Rich text={line} />
+                    </p>
+                  ))}
+                </div>
+                <p className="mt-6 flex flex-wrap gap-x-3 gap-y-1 text-[15px] font-semibold text-text-3">
+                  {PROFILE.keywords.map((k) => (
+                    <span key={k}>#{k}</span>
+                  ))}
+                </p>
+                <div className="mt-9 flex flex-wrap gap-2">
+                  <Link
+                    href={PROFILE.portfolioPdf.href}
+                    className="group inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 text-[15px] font-semibold text-[#1e2350] transition-opacity hover:opacity-90"
+                  >
+                    포트폴리오 PDF
+                    <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                  <Link
+                    href="/about"
+                    className="group inline-flex h-12 items-center gap-2 rounded-2xl bg-white/10 px-5 text-[15px] font-semibold text-text ring-1 ring-white/15 transition-colors ring-inset hover:bg-white/15"
+                  >
+                    About
+                    <ChevronRight className="size-4 text-text-3 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                  {PROFILE.contacts
+                    .filter((c) => c.label === "GitHub")
+                    .map((c) => (
+                      <a
+                        key={c.label}
+                        href={c.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group inline-flex h-12 items-center gap-2 rounded-2xl bg-white/10 px-5 text-[15px] font-semibold text-text ring-1 ring-white/15 transition-colors ring-inset hover:bg-white/15"
+                      >
+                        GitHub
+                        <ArrowUpRight className="size-3.5 text-text-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </a>
+                    ))}
+                </div>
+              </div>
+              {PROFILE.photo && (
+                <div
+                  data-photo
+                  className="relative aspect-[3/4] w-[150px] shrink-0 overflow-hidden rounded-[28px] bg-fill shadow-[0_20px_60px_rgba(10,12,40,0.45)] sm:w-[260px] sm:rounded-[36px]"
+                >
+                  <Image
+                    src={PROFILE.photo}
+                    alt={`${PROFILE.name} 프로필 사진`}
+                    fill
+                    sizes="260px"
+                    priority
+                    className="object-cover"
+                  />
+                </div>
+              )}
+            </div>
+
+            <dl className="mt-14 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {stats.map((s) => (
+                <div
+                  key={s.label}
+                  className="rounded-[22px] bg-white/[0.07] px-5 py-4 ring-1 ring-white/10 backdrop-blur-sm ring-inset"
+                >
+                  <dt className="text-[13px] font-semibold text-text-3">
+                    {s.label}
+                  </dt>
+                  <dd className="mt-1 text-[30px] leading-none font-bold tracking-[-0.03em] tabular-nums">
+                    <span data-count={s.value}>{s.value}</span>
+                    <span className="ml-0.5 text-[16px]">{s.unit}</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        </Reveal>
+      </div>
 
       <Reveal>
-        {/* 첫 화면 */}
-        <section className="relative isolate flex flex-col justify-center py-10 sm:py-16 md:min-h-[min(calc(100svh-180px),820px)]">
-          <ShootingStars />
-          <div className="flex flex-col-reverse items-start justify-between gap-10 md:flex-row md:items-center">
-            <div className="min-w-0 max-w-[640px]">
-              <p className="text-[16px] font-semibold text-primary sm:text-[18px]">
-                {PROFILE.role}
-              </p>
-              <h1 className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                <span
-                  data-name
-                  className="text-[52px] leading-none font-bold tracking-[-0.05em] sm:text-[76px]"
-                >
-                  {PROFILE.name}
-                </span>
-                <span className="text-[20px] font-semibold text-text-3 sm:text-[24px]">
-                  {PROFILE.nameEn}
-                </span>
-              </h1>
-              <div className="mt-8 space-y-1 text-[17px] leading-[1.7] text-text-2 sm:text-[20px]">
-                {PROFILE.intro.map((line, i) => (
-                  <p key={i}>
-                    <Rich text={line} />
-                  </p>
-                ))}
-              </div>
-              <p className="mt-6 flex flex-wrap gap-x-3 gap-y-1 text-[15px] font-semibold text-text-3">
-                {PROFILE.keywords.map((k) => (
-                  <span key={k}>#{k}</span>
-                ))}
-              </p>
-              <div className="mt-9 flex flex-wrap gap-2">
-                <Link
-                  href={PROFILE.portfolioPdf.href}
-                  className="group inline-flex h-12 items-center gap-2 rounded-2xl bg-primary px-5 text-[15px] font-semibold text-white transition-opacity hover:opacity-90"
-                >
-                  포트폴리오 PDF
-                  <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-                <Link
-                  href="/about"
-                  className="group inline-flex h-12 items-center gap-2 rounded-2xl bg-surface px-5 text-[15px] font-semibold text-text transition-colors hover:bg-fill-strong/60"
-                >
-                  About
-                  <ChevronRight className="size-4 text-text-3 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-                {PROFILE.contacts
-                  .filter((c) => c.label === "GitHub")
-                  .map((c) => (
-                    <a
-                      key={c.label}
-                      href={c.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="group inline-flex h-12 items-center gap-2 rounded-2xl bg-surface px-5 text-[15px] font-semibold text-text transition-colors hover:bg-fill-strong/60"
-                    >
-                      GitHub
-                      <ArrowUpRight className="size-3.5 text-text-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </a>
-                  ))}
-              </div>
-            </div>
-            {PROFILE.photo && (
-              <div
-                data-photo
-                className="relative aspect-[3/4] w-[150px] shrink-0 overflow-hidden rounded-[28px] bg-fill sm:w-[260px] sm:rounded-[36px]"
-              >
-                <Image
-                  src={PROFILE.photo}
-                  alt={`${PROFILE.name} 프로필 사진`}
-                  fill
-                  sizes="260px"
-                  priority
-                  className="object-cover"
-                />
-              </div>
-            )}
-          </div>
-
-          <dl className="mt-14 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {stats.map((s) => (
-              <div
-                key={s.label}
-                className="rounded-[22px] bg-surface px-5 py-4"
-              >
-                <dt className="text-[13px] font-semibold text-text-3">
-                  {s.label}
-                </dt>
-                <dd className="mt-1 text-[30px] leading-none font-bold tracking-[-0.03em] tabular-nums">
-                  <span data-count={s.value}>{s.value}</span>
-                  <span className="ml-0.5 text-[16px]">{s.unit}</span>
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-
         {/* 주요 프로젝트 레일 */}
         <section className="mt-10" aria-labelledby="projects-title">
           <div className="mb-5 flex items-end justify-between gap-4">
