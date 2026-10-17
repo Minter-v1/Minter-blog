@@ -9,6 +9,7 @@ import { formatDay } from "@/lib/today";
 import { CollectionIcon } from "../components/collection-icon";
 import { ReviewDoneButton, ReviewProgress } from "../components/review";
 import { SiteHeader } from "../components/site-header";
+import { EmptyState } from "../components/loaders";
 
 export const metadata: Metadata = { title: "복습" };
 
@@ -43,7 +44,7 @@ export default async function ReviewPage() {
       <section className="rounded-[24px] bg-surface p-4 sm:p-7">
         <h2 className="px-3 text-[17px] font-bold tracking-[-0.02em]">오늘 복습</h2>
         {today.length === 0 ? (
-          <p className="px-3 py-10 text-center text-[15px] text-text-3">오늘은 복습할 글이 없어요</p>
+          <EmptyState emoji="🎉" title="오늘은 복습할 글이 없어요" desc="다음 복습 일정은 아래에서 볼 수 있어요" />
         ) : (
           <ul className="mt-2">
             {today.map((i) => (
@@ -82,7 +83,7 @@ export default async function ReviewPage() {
       <section className="mt-6 rounded-[24px] bg-surface p-4 sm:p-7">
         <h2 className="px-3 text-[17px] font-bold tracking-[-0.02em]">전체 일정</h2>
         {all.length === 0 && done.length === 0 ? (
-          <p className="px-3 py-10 text-center text-[15px] text-text-3">작성 완료한 글이 없어요</p>
+          <EmptyState emoji="🧠" title="작성 완료한 글이 없어요" desc="글을 완료하면 망각곡선에 맞춰 복습 일정이 잡혀요" />
         ) : (
           <ul className="mt-2">
             {all.map((i) => (

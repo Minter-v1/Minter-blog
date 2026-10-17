@@ -9,6 +9,7 @@ import type { Tag } from "@/lib/tags";
 import { DraftRow, draftHref, useDrafts } from "./drafts";
 import { Highlight } from "./highlight";
 import { Check, ChevronRight, Close, Search } from "./icons";
+import { EmptyState } from "./loaders";
 
 function formatDate(iso: string) {
   const [y, m, d] = iso.split("-").map(Number);
@@ -134,9 +135,7 @@ export function EntryList(props: {
 
   if (entries.length === 0) {
     return (
-      <div className="py-16 text-center">
-        <p className="text-[16px] font-semibold text-text-3">등록된 {c.itemLabel}이(가) 없어요</p>
-      </div>
+      <EmptyState emoji="📭" title={`등록된 ${c.itemLabel}이(가) 없어요`} desc="첫 기록을 남기면 여기에 쌓여요" />
     );
   }
 
@@ -188,9 +187,11 @@ export function EntryList(props: {
       </div>
 
       {visible.length === 0 ? (
-        <p className="py-14 text-center text-[15px] text-text-3">
-          {words.length ? `‘${query.trim()}’에 맞는 ${c.itemLabel}이(가) 없어요` : `이 ${c.tagLabel}에는 아직 없어요`}
-        </p>
+        <EmptyState
+          emoji={words.length ? "🔍" : "📭"}
+          title={words.length ? `‘${query.trim()}’에 맞는 ${c.itemLabel}이(가) 없어요` : `이 ${c.tagLabel}에는 아직 없어요`}
+          desc={words.length ? "다른 검색어로 찾아보세요" : "다른 분류를 골라 보세요"}
+        />
       ) : (
         <div className="mt-6 space-y-7">
           {visibleDrafts.length > 0 && <DraftSection drafts={visibleDrafts} words={words} />}

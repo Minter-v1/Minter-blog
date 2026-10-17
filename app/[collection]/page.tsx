@@ -5,6 +5,7 @@ import { COLLECTION_IDS, COLLECTIONS, isCollectionId } from "@/lib/collections";
 import { EntryList } from "../components/entry-list";
 import { SectionTransition } from "../components/section-transition";
 import { SiteHeader } from "../components/site-header";
+import { EmptyState } from "../components/loaders";
 
 export function generateStaticParams() {
   return COLLECTION_IDS.map((collection) => ({ collection }));
@@ -48,9 +49,8 @@ export default async function CollectionPage(props: PageProps<"/[collection]">) 
       </div>
 
       {loadError && (
-        <div className="rounded-2xl bg-danger-weak px-5 py-4 text-[15px] text-danger">
-          <p className="font-semibold">저장소를 읽지 못했어요</p>
-          <p className="mt-1 text-[14px] opacity-80">{loadError}</p>
+        <div className="rounded-[24px] bg-surface">
+          <EmptyState tone="danger" emoji="⚠️" title="저장소를 읽지 못했어요" desc={loadError} />
         </div>
       )}
 

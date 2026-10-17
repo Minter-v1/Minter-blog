@@ -98,7 +98,10 @@ export default async function ProjectPage(props: Props) {
                     <ArrowUpRight className="size-3" />
                   </a>
                 ) : p.repo === "" ? (
-                  <span className="rounded-lg border border-dashed border-line px-2.5 py-1 text-text-3">GitHub 준비 중</span>
+                  <span className="inline-flex items-center gap-1 rounded-lg border border-dashed border-line px-2.5 py-1 text-text-3">
+                    <CollectionIcon id="git" className="text-[12px] opacity-60" />
+                    GitHub 준비 중
+                  </span>
                 ) : null}
               </div>
 

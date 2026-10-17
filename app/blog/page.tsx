@@ -10,6 +10,7 @@ import { SectionTransition } from "../components/section-transition";
 import { SiteHeader } from "../components/site-header";
 import { TodaySection } from "../components/home/today";
 import { entriesOfDay, seoulToday } from "@/lib/today";
+import { EmptyState } from "../components/loaders";
 
 export const metadata = { title: "Blog" };
 
@@ -52,9 +53,8 @@ export default async function BlogHome() {
       <SectionTransition>
 
       {loadError && (
-        <div className="mb-6 rounded-2xl bg-danger-weak px-5 py-4 text-[15px] text-danger">
-          <p className="font-semibold">저장소를 읽지 못했어요</p>
-          <p className="mt-1 text-[14px] opacity-80">{loadError}</p>
+        <div className="mb-6 rounded-[24px] bg-surface">
+          <EmptyState tone="danger" emoji="⚠️" title="저장소를 읽지 못했어요" desc={loadError} />
         </div>
       )}
 

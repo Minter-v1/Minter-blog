@@ -64,3 +64,52 @@ export function HeaderSkeleton() {
     </div>
   );
 }
+
+// 빈 목록 · 검색 결과 없음 · 오류 안내 (#99). 글자만 두지 않고 아이콘(Tossface)과 함께
+export function EmptyState({
+  emoji,
+  title,
+  desc,
+  action,
+  tone = "neutral",
+  size = "md",
+  className = "",
+}: {
+  emoji: string;
+  title: string;
+  desc?: React.ReactNode;
+  action?: React.ReactNode;
+  tone?: "neutral" | "danger";
+  size?: "md" | "sm";
+  className?: string;
+}) {
+  const sm = size === "sm";
+  return (
+    <div
+      role={tone === "danger" ? "alert" : undefined}
+      className={`flex flex-col items-center text-center ${sm ? "gap-1.5 px-3 py-5" : "gap-2 px-4 py-12"} ${className}`}
+    >
+      <span
+        aria-hidden
+        className={`tossface flex items-center justify-center rounded-2xl ${
+          tone === "danger" ? "bg-danger-weak" : "bg-fill"
+        } ${sm ? "mb-0.5 size-10 text-[20px]" : "mb-1 size-14 text-[28px]"}`}
+      >
+        {emoji}
+      </span>
+      <p
+        className={`font-semibold ${tone === "danger" ? "text-danger" : "text-text-2"} ${sm ? "text-[13px]" : "text-[16px]"}`}
+      >
+        {title}
+      </p>
+      {desc && (
+        <p
+          className={`max-w-[420px] text-text-3 ${sm ? "text-[12px]" : "text-[14px]"}`}
+        >
+          {desc}
+        </p>
+      )}
+      {action && <div className="mt-2">{action}</div>}
+    </div>
+  );
+}
