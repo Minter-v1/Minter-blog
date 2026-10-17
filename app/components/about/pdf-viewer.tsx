@@ -7,7 +7,7 @@ import { ChevronRight } from "../icons";
 // pdf.js로 페이지를 canvas에 그린다. 브라우저 내장 뷰어(iframe)는 Android Chrome 등에서
 // 표시되지 않고 다운로드로 넘어가는 경우가 있어, 모든 기기에서 같은 방식으로 보이게 직접 렌더링한다
 // 한 번에 한 페이지 (#78): ← / → 방향키, 이전·다음 버튼, 좌우 스와이프로 넘긴다
-// fit: "page" 한 페이지가 화면 높이 안에 들어오게 (슬라이드형 포트폴리오), "width" 폭에 맞춰 크게 (2단 논문, #92)
+// fit: "page" 한 페이지가 화면 높이 안에 들어오게 (슬라이드형 포트폴리오), "width" 폭에 맞춰 크게, 최대 680px (2단 논문, #92 · #97)
 export function PdfViewer({
   src,
   fit = "page",
@@ -191,7 +191,7 @@ export function PdfViewer({
             maxWidth:
               fit === "page"
                 ? `max(280px, calc((100svh - 220px) / ${aspect}))`
-                : undefined,
+                : "680px", // 논문: 폭에 맞추되 너무 커지지 않게 (#97)
           }}
           className="mx-auto w-full"
           data-pages={pages}
