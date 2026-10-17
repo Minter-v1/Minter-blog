@@ -8,7 +8,7 @@ export const size = OG_SIZE;
 export const contentType = "image/png";
 
 // 한 줄 소개 (intro[0]은 이미지에 넣기엔 길어 줄였다). [[ ]]가 강조
-const HEADLINE = "장애가 나도 [[멈추지 않는 인프라]]를\n만드는 클라우드 엔지니어";
+const HEADLINE = "반복하던 일을 [[시스템에 맡기는]]\n클라우드 엔지니어";
 
 export default async function Image() {
   return new ImageResponse(
