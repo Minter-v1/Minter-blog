@@ -11,11 +11,11 @@ function loadMermaid() {
       securityLevel: "strict", // 글 안의 HTML·클릭 스크립트 막기
       theme: "base",
       fontFamily: '"Pretendard Variable", Pretendard, -apple-system, system-ui, sans-serif',
-      // 블로그 톤: 회색 + 파랑 하나
+      // 블로그 톤: 회색 + 메인 색(Periwinkle) 하나
       themeVariables: {
         fontSize: "14px",
-        primaryColor: "#e8f3ff",
-        primaryBorderColor: "#3182f6",
+        primaryColor: "#ede8f8",
+        primaryBorderColor: "#5a6dcb",
         primaryTextColor: "#191f28",
         secondaryColor: "#f2f4f6",
         secondaryBorderColor: "#c5ccd3",
