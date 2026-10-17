@@ -39,7 +39,7 @@ type GNode = SimulationNodeDatum & {
 type GLink = SimulationLinkDatum<GNode> & { related: boolean };
 
 const POINTER_RADIUS = 80;
-const BLUE = "#3182f6";
+const BLUE = "#5a6dcb"; // --primary와 같은 값 (canvas에는 CSS 변수를 쓸 수 없어 직접 지정)
 const GREY = "#c5ccd3";
 
 /**
@@ -370,7 +370,7 @@ export function KnowledgeMap(props: { entries: MapEntry[]; links: [string, strin
               <line
                 key={i}
                 data-link
-                stroke={l.related ? (hovered && on ? BLUE : "#90c2ff") : "#e5e8eb"}
+                stroke={l.related ? (hovered && on ? BLUE : "#b39ddb") : "#e5e8eb"}
                 strokeWidth={l.related ? 1.8 : 1}
                 strokeDasharray={l.related ? undefined : "3 4"}
                 strokeOpacity={on ? 1 : 0.2}

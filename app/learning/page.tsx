@@ -242,8 +242,8 @@ function ForgettingChart() {
           ))}
           {reviews.map((d, i) => (
             <g key={d}>
-              <line x1={x(d)} x2={x(d)} y1={pad.t} y2={H - pad.b} stroke="#3182f6" strokeOpacity="0.25" strokeDasharray="3 4" />
-              <text x={x(d)} y={H - pad.b + 16} textAnchor="middle" fontSize="11" fill="#3182f6" fontWeight="600">
+              <line x1={x(d)} x2={x(d)} y1={pad.t} y2={H - pad.b} stroke="#5a6dcb" strokeOpacity="0.25" strokeDasharray="3 4" />
+              <text x={x(d)} y={H - pad.b + 16} textAnchor="middle" fontSize="11" fill="#5a6dcb" fontWeight="600">
                 {i + 1}회
               </text>
               <text x={x(d)} y={H - pad.b + 30} textAnchor="middle" fontSize="10" fill="#8b95a1">
@@ -255,7 +255,7 @@ function ForgettingChart() {
             0일
           </text>
           <path d={path(noReview)} fill="none" stroke="#c5ccd3" strokeWidth="2.5" />
-          <path d={path(withReview)} fill="none" stroke="#3182f6" strokeWidth="2.5" strokeLinejoin="round" />
+          <path d={path(withReview)} fill="none" stroke="#5a6dcb" strokeWidth="2.5" strokeLinejoin="round" />
         </svg>
       </div>
       <figcaption className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-text-3">

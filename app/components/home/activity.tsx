@@ -84,7 +84,7 @@ export function Activity(props: { data: ActivityData; goals: Record<CollectionId
             {weeks.map((w, i) => {
               const h = w.total === 0 ? 6 : Math.max(12, (w.total / maxTotal) * BAR_HEIGHT);
               const color =
-                w.total === 0 ? "bg-fill-strong" : i === current || hover === i ? "bg-primary" : "bg-[#90c2ff]";
+                w.total === 0 ? "bg-fill-strong" : i === current || hover === i ? "bg-primary" : "bg-[#b39ddb]";
               return (
                 <button
                   key={w.start}
