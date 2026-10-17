@@ -612,6 +612,16 @@ body {
 .night .bg-primary.text-white {
   background-color: #5a6dcb;
 }
+/* 밤하늘 배경 (#86 · #104): 60%부터 길게, 남색 → Periwinkle → Lavender → 페이지 배경 단계로
+   oklab 보간으로 중간이 탁해지지 않게 (지원하지 않는 브라우저는 위 선언 사용) */
+.night-sky-bg {
+  background: linear-gradient(180deg, #0b0d26 0%, #161a44 38%, #20265c 58%, #2f3678 68%, #5a5fa8 77%, #9a97d0 85%, #d3cdee 92%, #eceaf6 96.5%, #f5f6f8 100%);
+  background: linear-gradient(180deg in oklab, #0b0d26 0%, #161a44 38%, #20265c 58%, #2f3678 68%, #5a5fa8 77%, #9a97d0 85%, #d3cdee 92%, #eceaf6 96.5%, #f5f6f8 100%);
+}
+.night-sky-layers {
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 84%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 84%);
+}
 .night-star {
   position: absolute;
   border-radius: 50%;

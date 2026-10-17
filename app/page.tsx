@@ -51,11 +51,11 @@ export default async function Landing() {
       <div className="night relative isolate">
         <NightSky />
         {/* 헤더가 밝은 톤으로 바뀌는 지점 (밤하늘이 녹기 시작하는 곳) */}
-        <div id="night-end" aria-hidden className="absolute bottom-40 h-px w-px" />
+        <div id="night-end" aria-hidden className="absolute bottom-64 h-px w-px" />
 
         <Reveal>
           {/* 첫 화면 */}
-          <section className="flex flex-col justify-center pt-10 pb-28 sm:pt-16 sm:pb-36 md:min-h-[min(calc(100svh-180px),820px)]">
+          <section className="flex flex-col justify-center pt-10 pb-40 sm:pt-16 sm:pb-52 md:min-h-[min(calc(100svh-180px),820px)]">
             <div className="flex flex-col-reverse items-start justify-between gap-10 md:flex-row md:items-center">
               <div className="min-w-0 max-w-[640px]">
                 <p className="text-[16px] font-semibold text-primary sm:text-[18px]">
