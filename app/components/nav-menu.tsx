@@ -106,7 +106,7 @@ export function NavDropdown({ group }: { group: NavGroup }) {
 }
 
 /** 모바일: 햄버거 패널 (가로 스크롤 메뉴 대신) */
-export function MobileNav({ groups, pdfHref }: { groups: NavGroup[]; pdfHref: string }) {
+export function MobileNav({ groups }: { groups: NavGroup[] }) {
   const { open, setOpen, ref } = useDisclosure();
   return (
     <div ref={ref} className="lg:hidden">
@@ -130,12 +130,6 @@ export function MobileNav({ groups, pdfHref }: { groups: NavGroup[]; pdfHref: st
               {g.footer && <ItemLink item={g.footer} />}
             </div>
           ))}
-          <Link
-            href={pdfHref}
-            className="mt-1 flex h-11 items-center justify-center rounded-xl bg-primary text-[15px] font-semibold text-white"
-          >
-            포트폴리오 PDF 보기
-          </Link>
         </div>
       )}
     </div>

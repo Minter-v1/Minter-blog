@@ -8,6 +8,7 @@ import { projectsWithDetail } from "@/lib/projects";
 import { Reveal } from "../components/about/reveal";
 import { ProjectCoverMedia } from "../components/about/project-cover";
 import { Rich } from "../components/about/rich";
+import { SectionNav } from "../components/about/section-nav";
 import { ArrowUpRight, ChevronRight } from "../components/icons";
 import { SiteHeader } from "../components/site-header";
 import { CollectionIcon } from "../components/collection-icon";
@@ -19,6 +20,19 @@ export const metadata: Metadata = {
 
 // 공개 페이지: 미리 만들어 CDN에 캐시하고, 글을 쓰면 revalidateTag("archive")로 즉시 갱신 (그 외엔 5분마다)
 export const revalidate = 300;
+
+// 섹션 바로가기 순서 = 페이지 순서 (#79)
+const SECTIONS = [
+  { id: "projects", emoji: "🗂️", title: "주요 프로젝트" },
+  { id: "experience", emoji: "💼", title: "경력" },
+  { id: "skills", emoji: "🛠️", title: "기술 스택" },
+  { id: "certifications", emoji: "📜", title: "자격증" },
+  { id: "activities", emoji: "🏃", title: "대내외활동" },
+  { id: "awards", emoji: "🏆", title: "수상" },
+  { id: "papers", emoji: "📄", title: "논문" },
+  { id: "education", emoji: "🎓", title: "학력" },
+];
+const sec = (id: string) => SECTIONS.find((s) => s.id === id)!;
 
 export default async function AboutPage() {
   // 프로젝트 → 관련 블로그 기록 (저장소를 못 읽어도 About은 보여야 하니 실패는 무시)
@@ -121,8 +135,10 @@ export default async function AboutPage() {
           </div>
         </section>
 
+        <SectionNav sections={SECTIONS} />
+
         {/* 프로젝트 */}
-        <Section emoji="🗂️" title="주요 프로젝트" id="projects">
+        <Section {...sec("projects")}>
           <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
             {PROFILE.projects.map((p) => {
               const related = (p.related ?? []).map((r) => byRef.get(r)).filter((e): e is Entry => !!e);
@@ -217,12 +233,12 @@ export default async function AboutPage() {
           </div>
         </Section>
 
-        <Section emoji="💼" title="경력">
+        <Section {...sec("experience")}>
           <Timeline items={PROFILE.experience} />
         </Section>
 
         <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
-          <Section emoji="🛠️" title="기술 스택">
+          <Section {...sec("skills")}>
             <div data-reveal className="space-y-4 rounded-[24px] bg-surface p-6">
               {PROFILE.skills.map((g) => (
                 <div key={g.group} className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[108px_minmax(0,1fr)] sm:gap-3">
@@ -238,7 +254,7 @@ export default async function AboutPage() {
               ))}
             </div>
           </Section>
-          <Section emoji="📜" title="자격증">
+          <Section {...sec("certifications")}>
             <ul data-reveal className="rounded-[24px] bg-surface p-3">
               {PROFILE.certifications.map((c) => (
                 <li key={c.name} className="flex items-start justify-between gap-3 rounded-2xl px-3 py-3">
@@ -253,15 +269,15 @@ export default async function AboutPage() {
           </Section>
         </div>
 
-        <Section emoji="🏃" title="대내외활동">
+        <Section {...sec("activities")}>
           <Timeline items={PROFILE.activities} />
         </Section>
 
-        <Section emoji="🏆" title="수상">
+        <Section {...sec("awards")}>
           <Timeline items={PROFILE.awards} />
         </Section>
 
-        <Section emoji="📄" title="논문">
+        <Section {...sec("papers")}>
           <ul data-reveal className="rounded-[24px] bg-surface p-3">
             {PROFILE.papers.map((p) => (
               <li key={p.title} className="grid grid-cols-1 gap-1 rounded-2xl px-3 py-3.5 sm:grid-cols-[96px_minmax(0,1fr)] sm:gap-4">
@@ -275,7 +291,7 @@ export default async function AboutPage() {
           </ul>
         </Section>
 
-        <Section emoji="🎓" title="학력">
+        <Section {...sec("education")}>
           <Timeline items={PROFILE.education} />
         </Section>
       </Reveal>
@@ -283,9 +299,9 @@ export default async function AboutPage() {
   );
 }
 
-function Section(props: { emoji: string; title: string; id?: string; children: React.ReactNode }) {
+function Section(props: { emoji: string; title: string; id: string; children: React.ReactNode }) {
   return (
-    <section id={props.id} className="mt-12 scroll-mt-6 sm:mt-14">
+    <section id={props.id} className="mt-12 scroll-mt-20 sm:mt-14">
       <h2 data-reveal className="mb-4 flex items-center gap-2 px-1 text-[22px] font-bold tracking-[-0.03em]">
         <span className="tossface text-[24px]">{props.emoji}</span>
         {props.title}

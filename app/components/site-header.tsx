@@ -8,6 +8,7 @@ import { sectionDirection } from "@/lib/sections";
 type Active = CollectionId | "blog" | "about" | "drafts" | "review" | "learning" | "portfolio";
 
 // 상단 메뉴 (#58): 학습 블로그(Blog)와 채용용 포트폴리오(Portfolio) 두 묶음
+// PDF는 Portfolio 메뉴에만 둔다 (#79). About 안 섹션 이동은 About의 섹션 바로가기로
 // 로그인에 따라 바뀌는 오른쪽 메뉴는 AccountMenu가 브라우저에서 확인한다 (페이지를 CDN에 캐시할 수 있도록)
 export function SiteHeader(props: { active?: Active; writeHref?: string }) {
   const a = props.active;
@@ -28,7 +29,6 @@ export function SiteHeader(props: { active?: Active; writeHref?: string }) {
       active: a === "about" || a === "portfolio",
       items: [
         { href: "/about", label: "About", desc: `${PROFILE.name} · ${PROFILE.role}`, emoji: "👋", active: a === "about" },
-        { href: "/about#projects", label: "주요 프로젝트", desc: "프로젝트별 설계와 트러블슈팅", emoji: "🗂️" },
         { href: PROFILE.portfolioPdf.href, label: "포트폴리오 PDF", desc: `v${PROFILE.portfolioPdf.version}`, emoji: "📄", active: a === "portfolio" },
       ],
     },
@@ -49,14 +49,8 @@ export function SiteHeader(props: { active?: Active; writeHref?: string }) {
         </nav>
       </div>
       <div className="flex shrink-0 items-center gap-1 text-[14px] font-medium whitespace-nowrap">
-        <Link
-          href={PROFILE.portfolioPdf.href}
-          className="mr-1 hidden rounded-xl border border-line px-3.5 py-1.5 font-semibold text-text-2 transition-colors hover:border-primary hover:text-primary sm:inline-flex"
-        >
-          PDF 보기
-        </Link>
         <AccountMenu writeHref={props.writeHref} active={a} />
-        <MobileNav groups={groups} pdfHref={PROFILE.portfolioPdf.href} />
+        <MobileNav groups={groups} />
       </div>
     </header>
   );
