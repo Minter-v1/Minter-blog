@@ -73,3 +73,15 @@ export const More = ({ className }: Props) => (
     <circle cx="19" cy="12" r="1.2" fill="currentColor" />
   </svg>
 );
+
+export const Pause = ({ className }: Props) => (
+  <svg viewBox="0 0 12 12" className={className} fill="currentColor" aria-hidden>
+    <rect x="2.5" y="1.5" width="2.5" height="9" rx="1" />
+    <rect x="7" y="1.5" width="2.5" height="9" rx="1" />
+  </svg>
+);
+export const Play = ({ className }: Props) => (
+  <svg viewBox="0 0 12 12" className={className} fill="currentColor" aria-hidden>
+    <path d="M3 1.8v8.4a.6.6 0 0 0 .9.5l6.6-4.2a.6.6 0 0 0 0-1L3.9 1.3a.6.6 0 0 0-.9.5z" />
+  </svg>
+);

@@ -576,6 +576,43 @@ body {
 }
 
 /* 홈 주력 프로젝트 스포트라이트 진행 막대 (#65) */
+/* 주요 프로젝트 별자리 진행 (#106) */
+.star-mark {
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+}
+.star-breath {
+  animation: star-breath 2.4s ease-in-out infinite;
+}
+@keyframes star-breath {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 3px rgb(90 109 203 / 0.45)); }
+  50% { transform: scale(1.15); filter: drop-shadow(0 0 8px rgb(90 109 203 / 0.75)); }
+}
+.star-track {
+  background: linear-gradient(90deg, #d9ccf0, #8c9be6 60%, #5a6dcb);
+  animation: spotlight-progress linear forwards;
+}
+.star-head {
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px #5a6dcb, 0 0 10px 3px rgb(90 109 203 / 0.45);
+}
+.star-arrive {
+  animation: star-arrive 260ms ease-out;
+}
+@keyframes star-arrive {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.6); filter: drop-shadow(0 0 10px rgb(90 109 203 / 0.9)); }
+  100% { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .star-breath, .star-arrive { animation: none; }
+}
 @keyframes spotlight-progress {
   from { width: 0; }
   to { width: 100%; }

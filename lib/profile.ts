@@ -33,6 +33,7 @@ export type Project = {
   period: string;
   name: string;
   tagline?: string;
+  short?: string; // 짧은 이름: 홈 주요 프로젝트 별자리 진행 라벨 (#106)
   team: string;
   role: string;
   bullets: string[];
@@ -102,6 +103,7 @@ export const PROFILE = {
       cover: { image: "/projects/ncp-migration/architecture.png", alt: "NCP Multi Zone 3-Tier 아키텍처", position: "center 30%" },
       featured: true,
       name: "단일 서버 인사관리시스템의 NCP Multi Zone 전환",
+      short: "NCP Multi Zone 전환",
       team: "1인 과제",
       role: "Cloud Engineer",
       bullets: [
@@ -118,6 +120,7 @@ export const PROFILE = {
       cover: { image: "/projects/multicloud-dr/architecture.png", alt: "NCP-GCP 멀티클라우드 DR 아키텍처", position: "left center" },
       featured: true,
       name: "Cloudflare GSLB 기반 NCP-GCP 멀티클라우드 DR",
+      short: "멀티클라우드 DR",
       team: "5인 팀",
       role: "PM / GCP Infra",
       bullets: [
