@@ -1,21 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/lib/profile";
 import { ProjectCoverMedia } from "../about/project-cover";
 import { Rich } from "../about/rich";
 import { ChevronRight } from "../icons";
 
-const DURATION = 7000; // 한 프로젝트를 보여 주는 시간 (ms)
+const DURATION = 4500; // 한 프로젝트를 보여 주는 시간 (ms)
 
 // 주력 프로젝트 스포트라이트 (#65): 큰 카드 하나에서 번갈아 보여 준다
 // - 진행 막대가 다 차면 다음으로 넘어가며 크로스페이드, 마우스를 올리거나 포커스하면 멈춤
+//   나가는 쪽은 빠르게(250ms) 사라지고, 들어오는 쪽은 이미지 → 글 순서로 살짝 늦게 나타나 두 장이 겹쳐 흐려 보이는 구간을 줄인다
 // - 움직임 줄이기 설정이면 자동 전환 없이 버튼으로만 넘긴다
 export function ProjectSpotlight({ projects }: { projects: Project[] }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reduced, setReduced] = useState(false);
+  const [inView, setInView] = useState(false); // 화면에 보일 때만 진행 막대가 찬다
+  const box = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -25,11 +28,20 @@ export function ProjectSpotlight({ projects }: { projects: Project[] }) {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.4 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   const go = (dir: 1 | -1) => setIndex((i) => (i + dir + projects.length) % projects.length);
   const auto = !reduced && projects.length > 1;
 
   return (
     <div
+      ref={box}
       className="relative grid overflow-hidden rounded-[28px] bg-surface"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -45,15 +57,15 @@ export function ProjectSpotlight({ projects }: { projects: Project[] }) {
             key={p.slug}
             aria-hidden={!on}
             inert={!on}
-            className={`col-start-1 row-start-1 flex flex-col transition-opacity duration-700 ease-out md:flex-row ${
-              on ? "opacity-100" : "pointer-events-none opacity-0"
-            }`}
+            className={`col-start-1 row-start-1 flex flex-col md:flex-row ${on ? "z-10" : "pointer-events-none"}`}
           >
             <Link
               href={`/about/projects/${p.slug}`}
               tabIndex={-1}
               aria-hidden
-              className="group relative block overflow-hidden md:w-[56%] md:shrink-0"
+              className={`group relative block overflow-hidden transition-opacity ease-out md:w-[56%] md:shrink-0 ${
+                on ? "opacity-100 duration-500" : "opacity-0 duration-[250ms]"
+              }`}
             >
               {p.cover && (
                 <ProjectCoverMedia
@@ -62,7 +74,11 @@ export function ProjectSpotlight({ projects }: { projects: Project[] }) {
                 />
               )}
             </Link>
-            <div className="flex min-w-0 flex-1 flex-col gap-3 p-6 sm:p-8">
+            <div
+              className={`flex min-w-0 flex-1 flex-col gap-3 p-6 transition-[opacity,translate] ease-out sm:p-8 ${
+                on ? "translate-y-0 opacity-100 delay-150 duration-500" : "translate-y-1.5 opacity-0 duration-200"
+              }`}
+            >
               <div className="flex gap-1.5" aria-hidden>
                 {projects.map((_, j) => (
                   <span key={j} className="h-1 flex-1 overflow-hidden rounded-full bg-primary-weak">
@@ -73,7 +89,7 @@ export function ProjectSpotlight({ projects }: { projects: Project[] }) {
                           ? auto
                             ? {
                                 animation: `spotlight-progress ${DURATION}ms linear forwards`,
-                                animationPlayState: paused ? "paused" : "running",
+                                animationPlayState: paused || !inView ? "paused" : "running",
                               }
                             : { width: "100%" }
                           : undefined
