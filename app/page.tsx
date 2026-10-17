@@ -13,6 +13,7 @@ import { ProjectFilterGrid } from "./components/landing/project-filter-grid";
 import { ProjectSpotlight } from "./components/landing/project-spotlight";
 import { NightSky } from "./components/landing/night-sky";
 import { OrbitStats } from "./components/landing/orbit-stats";
+import { ScrollCue } from "./components/landing/scroll-cue";
 import { SiteHeader } from "./components/site-header";
 import { EmptyState } from "./components/loaders";
 
@@ -46,10 +47,11 @@ export default async function Landing() {
         <NightSky />
         {/* 헤더가 밝은 톤으로 바뀌는 지점 (밤하늘이 녹기 시작하는 곳) */}
         <div id="night-end" aria-hidden className="absolute bottom-64 h-px w-px" />
+        <ScrollCue target="projects" />
 
         <Reveal>
           {/* 첫 화면 */}
-          <section className="flex flex-col justify-center pt-10 pb-52 sm:pt-16 sm:pb-56 md:min-h-[min(calc(100svh-180px),820px)]">
+          <section className="flex flex-col justify-center pt-10 pb-72 sm:pt-16 sm:pb-80 md:min-h-[min(calc(100svh-180px),820px)]">
             <div className="flex flex-col-reverse items-start justify-between gap-10 md:flex-row md:items-center">
               <div className="min-w-0 max-w-[640px]">
                 <p className="text-[16px] font-semibold text-primary sm:text-[18px]">
@@ -133,7 +135,7 @@ export default async function Landing() {
 
       <Reveal>
         {/* 주요 프로젝트 레일 */}
-        <section className="mt-10" aria-labelledby="projects-title">
+        <section id="projects" className="mt-10" aria-labelledby="projects-title">
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
               <h2

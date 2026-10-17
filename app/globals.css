@@ -594,6 +594,39 @@ body {
   .orbit-sat { animation: none; offset-distance: 25%; z-index: 3; }
 }
 
+/* 홈 스크롤 안내 (#112): 세로선 위에서 아래로 꼬리 달린 별이 떨어진다 (1.5초) */
+.scroll-cue-head,
+.scroll-cue-tail {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  animation: scroll-cue 1.5s cubic-bezier(0.5, 0, 0.75, 1) infinite;
+}
+.scroll-cue-head {
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 10px 3px rgb(217 204 240 / 0.9);
+}
+.scroll-cue-tail {
+  width: 2px;
+  height: 22px;
+  margin: -19px 0 0 -1px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgb(217 204 240 / 0), rgb(217 204 240 / 0.85));
+}
+@keyframes scroll-cue {
+  0% { transform: translateY(0); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateY(56px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue-head, .scroll-cue-tail { animation: none; transform: translateY(24px); }
+}
+
 /* 주요 프로젝트 별자리 진행 (#106) */
 .star-mark {
   clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
