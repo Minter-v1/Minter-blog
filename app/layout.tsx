@@ -3,6 +3,8 @@ import { SITE } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // OG 이미지 등 절대 주소 기준
+  metadataBase: new URL("https://minter-v1.com"),
   title: { default: SITE.name, template: `%s · ${SITE.name}` },
   description: SITE.bio || `${SITE.author}의 개발 기록`,
 };
