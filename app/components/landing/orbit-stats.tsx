@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { PROFILE, type ProjectCategory } from "@/lib/profile";
+import { ChevronRight } from "../icons";
 
 // 홈 히어로 통계 (#108): 기울어진 고리를 두른 행성 위 숫자 + 제목 + 설명 두 줄
 // 고리는 뒤쪽(옅게) · 행성 · 앞쪽(진하게) 순으로 겹쳐 입체감, 네 갈래 별이 앞뒤로 돈다 (.orbit-sat, globals.css)
 // 숫자는 Reveal이 [data-count]를 0부터 올린다
+// 누를 수 있다는 신호 (#116): 평소 제목 옆 옅은 ›, 마우스 올림 · 포커스 때 행성 · 고리 · 별 · › 가 함께 반응 (.orbit-stat)
 
 const SHORT: Record<ProjectCategory, string> = { cloud: "클라우드", web: "웹", automation: "자동화" };
 // 행성 색: 밝은 쪽, 기본 (칸마다 조금씩 다르게)
@@ -71,27 +73,26 @@ const BACK = `M ${CX - RX} ${CY} A ${RX} ${RY} 0 0 1 ${CX + RX} ${CY}`;
 
 function Planet({ i, value, unit }: { i: number; value: number; unit: string }) {
   const [hi, lo] = PLANET[i % PLANET.length];
-  const ring = (d: string, opacity: number, width: number, z: number) => (
+  const ring = (d: string, side: "front" | "back", z: number) => (
     <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} className="absolute inset-0 overflow-visible" style={{ zIndex: z }} aria-hidden>
-      <path d={d} fill="none" stroke={`rgb(217 204 240 / ${opacity})`} strokeWidth={width} />
+      <path d={d} fill="none" className={`orbit-ring-${side}`} />
     </svg>
   );
   return (
-    <div className="relative shrink-0 -rotate-12" style={{ width: W, height: H }}>
-      {ring(BACK, 0.22, 1, 1)}
+    <div className="orbit-planet relative shrink-0" style={{ width: W, height: H }}>
+      {ring(BACK, "back", 1)}
       <span
         aria-hidden
-        className="absolute z-[2] rounded-full"
+        className="orbit-globe absolute z-[2] rounded-full"
         style={{
           left: CX - PR,
           top: CY - PR,
           width: PR * 2,
           height: PR * 2,
           background: `radial-gradient(circle at 34% 30%, ${hi}, ${lo} 52%, #1b2050 100%)`,
-          boxShadow: "0 0 26px rgb(140 155 230 / 0.45), inset -8px -6px 16px rgb(10 12 40 / 0.55)",
         }}
       />
-      {ring(FRONT, 0.55, 1.3, 3)}
+      {ring(FRONT, "front", 3)}
       <span
         aria-hidden
         className="orbit-sat star-mark absolute top-0 left-0 size-[11px] bg-white"
@@ -117,11 +118,14 @@ export function OrbitStats() {
         <Link
           key={s.label}
           href={s.href}
-          className="group flex flex-col items-center gap-3 rounded-[22px] text-center outline-offset-4 sm:flex-row sm:gap-4 sm:text-left"
+          className="orbit-stat group flex flex-col items-center gap-3 rounded-[22px] px-2 py-2 text-center outline-offset-4 transition-[background-color,scale] duration-150 active:scale-[0.97] active:bg-white/[0.08] sm:flex-row sm:gap-4 sm:text-left"
         >
           <Planet i={i} value={s.value} unit={s.unit} />
           <div className="min-w-0">
-            <dt className="text-[14px] font-semibold text-text group-hover:text-primary">{s.label}</dt>
+            <dt className="inline-flex items-center gap-1 text-[14px] font-semibold text-text">
+              {s.label}
+              <ChevronRight className="orbit-chev size-3" />
+            </dt>
             <dd className="mt-1 text-[12px] leading-[1.5] whitespace-nowrap text-text-3">
               {s.lines[0]}
               {s.lines[1] && (

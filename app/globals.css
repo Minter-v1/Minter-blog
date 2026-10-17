@@ -576,6 +576,44 @@ body {
 }
 
 /* 홈 주력 프로젝트 스포트라이트 진행 막대 (#65) */
+/* 홈 통계 행성 (#108) · 누를 수 있다는 반응 (#116) */
+.orbit-planet {
+  transform: rotate(-12deg);
+  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.orbit-globe {
+  box-shadow: 0 0 26px rgb(140 155 230 / 0.45), inset -8px -6px 16px rgb(10 12 40 / 0.55);
+  transition: box-shadow 300ms ease-out;
+}
+.orbit-ring-front,
+.orbit-ring-back {
+  transition: stroke 300ms ease-out, stroke-width 300ms ease-out;
+}
+.orbit-ring-front { stroke: rgb(217 204 240 / 0.55); stroke-width: 1.3; }
+.orbit-ring-back { stroke: rgb(217 204 240 / 0.22); stroke-width: 1; }
+.orbit-chev {
+  opacity: 0.5;
+  transition: opacity 200ms ease-out, transform 200ms ease-out;
+}
+.orbit-stat:hover .orbit-planet,
+.orbit-stat:focus-visible .orbit-planet { transform: rotate(-12deg) scale(1.08); }
+.orbit-stat:hover .orbit-globe,
+.orbit-stat:focus-visible .orbit-globe { box-shadow: 0 0 42px rgb(140 155 230 / 0.8), inset -8px -6px 16px rgb(10 12 40 / 0.5); }
+.orbit-stat:hover .orbit-ring-front,
+.orbit-stat:focus-visible .orbit-ring-front { stroke: rgb(217 204 240 / 0.9); stroke-width: 1.8; }
+.orbit-stat:hover .orbit-ring-back,
+.orbit-stat:focus-visible .orbit-ring-back { stroke: rgb(217 204 240 / 0.42); }
+.orbit-stat:hover .orbit-sat,
+.orbit-stat:focus-visible .orbit-sat { filter: drop-shadow(0 0 9px #fff); }
+.orbit-stat:hover .orbit-chev,
+.orbit-stat:focus-visible .orbit-chev { opacity: 1; transform: translateX(3px); }
+@media (prefers-reduced-motion: reduce) {
+  .orbit-stat:hover .orbit-planet,
+  .orbit-stat:focus-visible .orbit-planet { transform: rotate(-12deg); }
+  .orbit-stat:hover .orbit-chev,
+  .orbit-stat:focus-visible .orbit-chev { transform: none; }
+}
+
 /* 홈 통계 행성 고리를 도는 별 (#108): 앞(아래 반원)에서는 행성 위, 뒤(위 반원)에서는 행성에 가려지고 옅게 */
 .orbit-sat {
   margin: -5.5px 0 0 -5.5px;
