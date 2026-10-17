@@ -1,12 +1,10 @@
 import { ImageResponse } from "next/og";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { OG_COLORS, OG_SIZE, OgConstellation, OgFrame, clip, ogFonts, plain } from "@/lib/og";
-import { PROFILE } from "@/lib/profile";
+import { emph, OG, OG_SIZE, OgFrame, slashed, ogFonts, plain } from "@/lib/og";
+import { PROFILE, PROJECT_CATEGORIES } from "@/lib/profile";
 import { projectsWithDetail } from "@/lib/projects";
 
-// 프로젝트 상세 OG 이미지: 기간·역할, 이름, 한 줄 소개, 스택 + 오른쪽 대표 이미지
-export const alt = "프로젝트 소개 이미지 | Minter.log";
+// 프로젝트 상세 OG 이미지: 분야 · 기간 · 역할, 이름, 대표 성과 한 줄([[강조]] 포함 bullet), 스택
+export const alt = "프로젝트 소개 이미지";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
@@ -16,90 +14,53 @@ export async function generateStaticParams() {
   return PROFILE.projects.filter((p) => has.has(p.slug)).map((p) => ({ slug: p.slug }));
 }
 
-// 대표 이미지(영상이면 포스터)를 data URI로. 없거나 못 읽으면 별자리 장식
-async function coverSrc(cover: (typeof PROFILE.projects)[number]["cover"]) {
-  const file = cover && ("image" in cover ? cover.image : cover.poster);
-  if (!file || !/\.(png|jpe?g)$/i.test(file)) return null;
-  try {
-    const data = await readFile(path.join(process.cwd(), "public", file));
-    return `data:image/${file.toLowerCase().endsWith(".png") ? "png" : "jpeg"};base64,${data.toString("base64")}`;
-  } catch {
-    return null;
-  }
-}
-
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const p = PROFILE.projects.find((x) => x.slug === slug);
   const fonts = await ogFonts();
   if (!p) {
     return new ImageResponse(
-      <OgFrame label="프로젝트" side={<OgConstellation />}>
-        <span style={{ fontSize: 72, fontWeight: 800 }}>{PROFILE.name}</span>
+      <OgFrame label="프로젝트" footLeft={null} footRight={PROFILE.name}>
+        <span style={{ fontSize: 56, fontWeight: 600 }}>{PROFILE.name}</span>
       </OgFrame>,
       { ...size, fonts },
     );
   }
 
-  const cover = await coverSrc(p.cover);
-  // 한 줄 소개는 tagline만 쓴다 (bullet은 길어 어색하게 잘림)
-  const summary = p.tagline ? clip(plain(p.tagline), 40) : "";
-  const long = p.name.length > 16;
+  // 대표 성과: [[강조]]가 있는 첫 bullet, 없으면 tagline
+  const highlight = p.bullets.find((b) => b.includes("[["));
+  const summary = highlight ?? (p.tagline ? plain(p.tagline) : "");
 
   return new ImageResponse(
     (
       <OgFrame
-        label="프로젝트"
-        side={
-          cover ? (
-            <div
-              style={{
-                position: "absolute",
-                right: 64,
-                top: 140,
-                width: 400,
-                height: 350,
-                display: "flex",
-                borderRadius: 28,
-                overflow: "hidden",
-                border: `2px solid ${OG_COLORS.periwinkle}55`,
-                background: "#ffffff",
-              }}
-            >
-              <img src={cover} width={400} height={350} alt="" style={{ objectFit: "cover", objectPosition: p.cover?.position ?? "center" }} />
-            </div>
-          ) : (
-            <OgConstellation size={400} />
-          )
-        }
+        label={`프로젝트 · ${PROJECT_CATEGORIES[p.category].label}`}
+        footLeft={<>{slashed(p.stack.slice(0, 4))}</>}
+        footRight={PROFILE.name}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 22, maxWidth: 620 }}>
-          <span style={{ fontSize: 26, fontWeight: 700, color: OG_COLORS.periwinkle }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          <span style={{ fontSize: 22, fontWeight: 600, color: OG.primary }}>
             {p.period} · {p.role}
           </span>
-          <span style={{ fontSize: long ? 48 : 64, fontWeight: 800, lineHeight: 1.2, letterSpacing: "-0.03em", wordBreak: "keep-all" }}>
-            {clip(p.name, 36)}
+          <span
+            style={{
+              fontSize: p.name.length > 22 ? 50 : 56,
+              fontWeight: 600,
+              lineHeight: 1.3,
+              letterSpacing: "-0.03em",
+              color: OG.ink,
+              wordBreak: "keep-all",
+            }}
+          >
+            {p.name}
           </span>
           {summary && (
-            <span style={{ fontSize: 28, fontWeight: 500, lineHeight: 1.45, color: OG_COLORS.mist }}>{summary}</span>
+            <div
+              style={{ display: "flex", flexDirection: "column", fontSize: 26, lineHeight: 1.5, color: OG.muted }}
+            >
+              {emph(summary)}
+            </div>
           )}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 6 }}>
-            {p.stack.slice(0, 4).map((s) => (
-              <span
-                key={s}
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  padding: "6px 16px",
-                  borderRadius: 999,
-                  background: `${OG_COLORS.lavender}2e`,
-                  color: OG_COLORS.pale,
-                }}
-              >
-                {s}
-              </span>
-            ))}
-          </div>
         </div>
       </OgFrame>
     ),
