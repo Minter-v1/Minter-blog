@@ -576,6 +576,24 @@ body {
 }
 
 /* 홈 주력 프로젝트 스포트라이트 진행 막대 (#65) */
+/* 홈 통계 행성 고리를 도는 별 (#108): 앞(아래 반원)에서는 행성 위, 뒤(위 반원)에서는 행성에 가려지고 옅게 */
+.orbit-sat {
+  margin: -5.5px 0 0 -5.5px;
+  filter: drop-shadow(0 0 5px rgb(217 204 240));
+  offset-rotate: 0deg;
+  animation: orbit-sat 8s linear infinite;
+}
+@keyframes orbit-sat {
+  0% { offset-distance: 0%; z-index: 3; opacity: 1; }
+  49.9% { z-index: 3; opacity: 1; }
+  50% { z-index: 1; opacity: 0.45; }
+  99.9% { z-index: 1; opacity: 0.45; }
+  100% { offset-distance: 100%; z-index: 3; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orbit-sat { animation: none; offset-distance: 25%; z-index: 3; }
+}
+
 /* 주요 프로젝트 별자리 진행 (#106) */
 .star-mark {
   clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
@@ -649,15 +667,15 @@ body {
 .night .bg-primary.text-white {
   background-color: #5a6dcb;
 }
-/* 밤하늘 배경 (#86 · #104): 60%부터 길게, 남색 → Periwinkle → Lavender → 페이지 배경 단계로
+/* 밤하늘 배경 (#86 · #104 · #108): 아래 300px에서 (화면 높이와 상관없이 같은 거리로), 남색 → Periwinkle → Lavender → 페이지 배경 단계로
    oklab 보간으로 중간이 탁해지지 않게 (지원하지 않는 브라우저는 위 선언 사용) */
 .night-sky-bg {
-  background: linear-gradient(180deg, #0b0d26 0%, #161a44 38%, #20265c 58%, #2f3678 68%, #5a5fa8 77%, #9a97d0 85%, #d3cdee 92%, #eceaf6 96.5%, #f5f6f8 100%);
-  background: linear-gradient(180deg in oklab, #0b0d26 0%, #161a44 38%, #20265c 58%, #2f3678 68%, #5a5fa8 77%, #9a97d0 85%, #d3cdee 92%, #eceaf6 96.5%, #f5f6f8 100%);
+  background: linear-gradient(180deg, #0b0d26 0%, #161a44 40%, #20265c calc(100% - 300px), #2f3678 calc(100% - 250px), #5a5fa8 calc(100% - 195px), #9a97d0 calc(100% - 135px), #d3cdee calc(100% - 75px), #eceaf6 calc(100% - 28px), #f5f6f8 100%);
+  background: linear-gradient(180deg in oklab, #0b0d26 0%, #161a44 40%, #20265c calc(100% - 300px), #2f3678 calc(100% - 250px), #5a5fa8 calc(100% - 195px), #9a97d0 calc(100% - 135px), #d3cdee calc(100% - 75px), #eceaf6 calc(100% - 28px), #f5f6f8 100%);
 }
 .night-sky-layers {
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 84%);
-  mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 84%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 calc(100% - 330px), transparent calc(100% - 150px));
+  mask-image: linear-gradient(180deg, #000 0%, #000 calc(100% - 330px), transparent calc(100% - 150px));
 }
 .night-star {
   position: absolute;
