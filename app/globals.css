@@ -15,6 +15,30 @@
   --primary-weak: #ede8f8;
   --danger: #f04452;
   --danger-weak: #fff0f1;
+  --header-h: 72px; /* 고정 헤더 높이 (#95). sticky 요소·앵커 이동이 이 아래에 붙는다 */
+}
+@media (min-width: 1024px) {
+  :root {
+    --header-h: 88px;
+  }
+}
+html {
+  scroll-padding-top: calc(var(--header-h) + 12px);
+}
+
+/* 상단 고정 헤더 (#95). 본문 폭이 좁은 페이지(목록·상세 760px)에서도 같은 폭(최대 1072px)으로 가운데 */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--header-h);
+}
+@media (min-width: 1024px) {
+  .site-header {
+    --w: max(100%, min(1072px, calc(100vw - 3rem)));
+    width: var(--w);
+    margin-left: calc((100% - var(--w)) / 2);
+  }
 }
 
 @theme inline {

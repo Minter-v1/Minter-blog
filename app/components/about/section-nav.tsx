@@ -11,18 +11,25 @@ export function SectionNav({ sections }: { sections: SectionLink[] }) {
   // 칩을 눌러 이동하는 동안(그리고 페이지 끝이라 더 못 내려가도) 누른 섹션을 유지. 직접 스크롤하면 풀린다
   const picked = useRef<string | null>(null);
 
-  // 화면 위 기준선(96px)을 지난 섹션 중 가장 아래 것이 현재 섹션.
+  // 화면 위 기준선(고정 헤더 + 칩 줄 아래)을 지난 섹션 중 가장 아래 것이 현재 섹션.
   // 기술 스택·자격증처럼 나란히 놓여 위치가 같으면 앞의 것
   useEffect(() => {
     let raf = 0;
     const update = () => {
       raf = 0;
       if (picked.current) return setActive(picked.current);
+      const headerH =
+        parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            "--header-h",
+          ),
+        ) || 72;
+      const line = headerH + 80;
       let current: string | null = null;
       let best = -Infinity;
       for (const s of sections) {
         const top = document.getElementById(s.id)?.getBoundingClientRect().top;
-        if (top === undefined || top > 96) continue;
+        if (top === undefined || top > line) continue;
         if (top > best + 1) {
           best = top;
           current = s.id;
@@ -85,7 +92,7 @@ export function SectionNav({ sections }: { sections: SectionLink[] }) {
   return (
     <nav
       aria-label="About 섹션"
-      className="sticky top-0 z-30 -mx-4 mt-10 bg-bg/90 px-4 py-2.5 backdrop-blur sm:-mx-6 sm:px-6"
+      className="sticky top-[var(--header-h)] z-30 -mx-4 mt-10 bg-bg/90 px-4 py-2.5 backdrop-blur sm:-mx-6 sm:px-6"
     >
       <div
         ref={bar}
