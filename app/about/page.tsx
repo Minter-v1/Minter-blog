@@ -42,7 +42,9 @@ export default async function AboutPage() {
   } catch {}
   const byRef = new Map(entries.map((e) => [e.ref, e]));
   // 상세 본문이 있는 프로젝트만 카드에서 상세 페이지로 연결
-  const withDetail = await projectsWithDetail(PROFILE.projects.map((p) => p.slug));
+  const withDetail = await projectsWithDetail(
+    PROFILE.projects.map((p) => p.slug),
+  );
 
   const stats = [
     { emoji: "🗂️", label: "주요 프로젝트", value: PROFILE.projects.length },
@@ -64,10 +66,15 @@ export default async function AboutPage() {
                 {PROFILE.role}
               </span>
               <h1 className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <span data-name className="text-[40px] leading-none font-bold tracking-[-0.045em] sm:text-[52px]">
+                <span
+                  data-name
+                  className="text-[40px] leading-none font-bold tracking-[-0.045em] sm:text-[52px]"
+                >
                   {PROFILE.name}
                 </span>
-                <span className="text-[20px] font-semibold text-text-3">{PROFILE.nameEn}</span>
+                <span className="text-[20px] font-semibold text-text-3">
+                  {PROFILE.nameEn}
+                </span>
               </h1>
               <div className="mt-6 space-y-1 text-[16px] leading-[1.7] text-text-2 sm:text-[18px]">
                 {PROFILE.intro.map((line, i) => (
@@ -125,10 +132,14 @@ export default async function AboutPage() {
             {stats.map((s) => (
               <div key={s.label} className="rounded-[22px] bg-surface p-5">
                 <span className="tossface text-[26px]">{s.emoji}</span>
-                <p className="mt-3 text-[13px] font-semibold text-text-3">{s.label}</p>
+                <p className="mt-3 text-[13px] font-semibold text-text-3">
+                  {s.label}
+                </p>
                 <p className="mt-0.5 text-[28px] leading-none font-bold tracking-[-0.03em] tabular-nums">
                   <span data-count={s.value}>{s.value}</span>
-                  <span className="ml-0.5 text-[16px]">{s.label === "제1저자 논문" ? "편" : "개"}</span>
+                  <span className="ml-0.5 text-[16px]">
+                    {s.label === "제1저자 논문" ? "편" : "개"}
+                  </span>
                 </p>
               </div>
             ))}
@@ -141,7 +152,9 @@ export default async function AboutPage() {
         <Section {...sec("projects")}>
           <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
             {PROFILE.projects.map((p) => {
-              const related = (p.related ?? []).map((r) => byRef.get(r)).filter((e): e is Entry => !!e);
+              const related = (p.related ?? [])
+                .map((r) => byRef.get(r))
+                .filter((e): e is Entry => !!e);
               const linked = withDetail.has(p.slug);
               return (
                 <article
@@ -183,11 +196,19 @@ export default async function AboutPage() {
                     }`}
                   >
                     {p.name}
-                    {p.tagline && <span className="ml-1.5 text-[15px] font-semibold text-text-3">{p.tagline}</span>}
+                    {p.tagline && (
+                      <span className="ml-1.5 text-[15px] font-semibold text-text-3">
+                        {p.tagline}
+                      </span>
+                    )}
                   </h3>
                   <p className="mt-2 flex flex-wrap gap-1.5 text-[12px] font-semibold">
-                    <span className="rounded-md bg-fill px-2 py-0.5 text-text-2">{p.team}</span>
-                    <span className="rounded-md bg-primary-weak px-2 py-0.5 text-primary">{p.role}</span>
+                    <span className="rounded-md bg-fill px-2 py-0.5 text-text-2">
+                      {p.team}
+                    </span>
+                    <span className="rounded-md bg-primary-weak px-2 py-0.5 text-primary">
+                      {p.role}
+                    </span>
                   </p>
                   <ul className="mt-4 space-y-1.5 text-[14px] leading-[1.65] text-text-2">
                     {p.bullets.map((b, i) => (
@@ -211,7 +232,9 @@ export default async function AboutPage() {
                   </div>
                   {related.length > 0 && (
                     <div className="relative mt-4 border-t border-line pt-3">
-                      <p className="text-[12px] font-semibold text-text-3">관련 기록</p>
+                      <p className="text-[12px] font-semibold text-text-3">
+                        관련 기록
+                      </p>
                       <ul className="mt-1">
                         {related.map((e) => (
                           <li key={e.ref}>
@@ -219,7 +242,10 @@ export default async function AboutPage() {
                               href={entryHref(e.collection, e.slug)}
                               className="-mx-2 flex items-center gap-2 rounded-lg px-2 py-1.5 text-[13px] font-medium hover:bg-fill"
                             >
-                              <CollectionIcon id={e.collection} className="text-[14px]" />
+                              <CollectionIcon
+                                id={e.collection}
+                                className="text-[14px]"
+                              />
                               <span className="truncate">{e.title}</span>
                             </Link>
                           </li>
@@ -239,13 +265,24 @@ export default async function AboutPage() {
 
         <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
           <Section {...sec("skills")}>
-            <div data-reveal className="space-y-4 rounded-[24px] bg-surface p-6">
+            <div
+              data-reveal
+              className="space-y-4 rounded-[24px] bg-surface p-6"
+            >
               {PROFILE.skills.map((g) => (
-                <div key={g.group} className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[108px_minmax(0,1fr)] sm:gap-3">
-                  <p className="text-[13px] font-semibold text-text-3">{g.group}</p>
+                <div
+                  key={g.group}
+                  className="grid grid-cols-1 items-baseline gap-2 sm:grid-cols-[108px_minmax(0,1fr)] sm:gap-3"
+                >
+                  <p className="text-[13px] font-semibold text-text-3">
+                    {g.group}
+                  </p>
                   <div className="flex flex-wrap gap-1.5">
                     {g.items.map((s) => (
-                      <span key={s} className="rounded-lg bg-fill px-2.5 py-1 text-[13px] font-semibold text-text-2">
+                      <span
+                        key={s}
+                        className="rounded-lg bg-fill px-2.5 py-1 text-[13px] font-semibold text-text-2"
+                      >
                         {s}
                       </span>
                     ))}
@@ -257,12 +294,19 @@ export default async function AboutPage() {
           <Section {...sec("certifications")}>
             <ul data-reveal className="rounded-[24px] bg-surface p-3">
               {PROFILE.certifications.map((c) => (
-                <li key={c.name} className="flex items-start justify-between gap-3 rounded-2xl px-3 py-3">
+                <li
+                  key={c.name}
+                  className="flex items-start justify-between gap-3 rounded-2xl px-3 py-3"
+                >
                   <div className="min-w-0">
-                    <p className="text-[14px] leading-snug font-bold">{c.name}</p>
+                    <p className="text-[14px] leading-snug font-bold">
+                      {c.name}
+                    </p>
                     <p className="mt-0.5 text-[12px] text-text-3">{c.issuer}</p>
                   </div>
-                  <span className="shrink-0 text-[12px] font-medium text-text-3 tabular-nums">{c.date}</span>
+                  <span className="shrink-0 text-[12px] font-medium text-text-3 tabular-nums">
+                    {c.date}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -280,11 +324,37 @@ export default async function AboutPage() {
         <Section {...sec("papers")}>
           <ul data-reveal className="rounded-[24px] bg-surface p-3">
             {PROFILE.papers.map((p) => (
-              <li key={p.title} className="grid grid-cols-1 gap-1 rounded-2xl px-3 py-3.5 sm:grid-cols-[96px_minmax(0,1fr)] sm:gap-4">
-                <span className="text-[13px] font-medium text-text-3 tabular-nums">{p.date}</span>
-                <div>
-                  <p className="text-[15px] leading-snug font-bold">{p.title}</p>
-                  <p className="mt-1 text-[13px] text-text-3">{p.venue}</p>
+              <li
+                key={p.title}
+                className="grid grid-cols-1 gap-1 rounded-2xl px-3 py-3.5 sm:grid-cols-[96px_minmax(0,1fr)] sm:gap-4"
+              >
+                <span className="text-[13px] font-medium text-text-3 tabular-nums">
+                  {p.date}
+                </span>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-[15px] leading-snug font-bold">
+                      {p.title}
+                    </p>
+                    <p className="mt-1 text-[13px] text-text-3">{p.venue}</p>
+                  </div>
+                  {p.file && (
+                    <div className="flex shrink-0 gap-1.5">
+                      <Link
+                        href={`/about/papers/${p.slug}`}
+                        className="inline-flex h-8 items-center rounded-lg bg-fill px-3 text-[13px] font-semibold text-text-2 transition-colors hover:bg-fill-strong/70 hover:text-primary"
+                      >
+                        보기
+                      </Link>
+                      <a
+                        href={p.file}
+                        download
+                        className="inline-flex h-8 items-center rounded-lg bg-fill px-3 text-[13px] font-semibold text-text-2 transition-colors hover:bg-fill-strong/70 hover:text-primary"
+                      >
+                        다운로드
+                      </a>
+                    </div>
+                  )}
                 </div>
               </li>
             ))}
@@ -299,10 +369,18 @@ export default async function AboutPage() {
   );
 }
 
-function Section(props: { emoji: string; title: string; id: string; children: React.ReactNode }) {
+function Section(props: {
+  emoji: string;
+  title: string;
+  id: string;
+  children: React.ReactNode;
+}) {
   return (
     <section id={props.id} className="mt-12 scroll-mt-20 sm:mt-14">
-      <h2 data-reveal className="mb-4 flex items-center gap-2 px-1 text-[22px] font-bold tracking-[-0.03em]">
+      <h2
+        data-reveal
+        className="mb-4 flex items-center gap-2 px-1 text-[22px] font-bold tracking-[-0.03em]"
+      >
         <span className="tossface text-[24px]">{props.emoji}</span>
         {props.title}
       </h2>
@@ -320,13 +398,21 @@ function Timeline({ items }: { items: TimelineItem[] }) {
           data-reveal
           className="grid grid-cols-1 gap-1 px-3 py-4 sm:grid-cols-[132px_minmax(0,1fr)] sm:gap-4"
         >
-          <span className="pt-0.5 text-[13px] font-medium text-text-3 tabular-nums">{it.period}</span>
+          <span className="pt-0.5 text-[13px] font-medium text-text-3 tabular-nums">
+            {it.period}
+          </span>
           <div>
             <p className="text-[16px] leading-snug font-bold tracking-[-0.02em]">
               {it.title}
-              {it.subtitle && <span className="ml-1.5 font-semibold text-text-2">{it.subtitle}</span>}
+              {it.subtitle && (
+                <span className="ml-1.5 font-semibold text-text-2">
+                  {it.subtitle}
+                </span>
+              )}
             </p>
-            {it.org && <p className="mt-0.5 text-[13px] text-text-3">{it.org}</p>}
+            {it.org && (
+              <p className="mt-0.5 text-[13px] text-text-3">{it.org}</p>
+            )}
             <ul className="mt-2 space-y-1 text-[14px] leading-[1.65] text-text-2">
               {it.bullets.map((b, i) => (
                 <li key={i}>
