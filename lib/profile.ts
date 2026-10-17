@@ -60,7 +60,8 @@ export const PROFILE = {
   ],
   // 공개용 범용 포트폴리오 PDF (#53). public/portfolio/ 에 두고 /about/portfolio 에서 브라우저로 렌더링
   // 기업명·직무명이 들어간 제출용 PDF는 여기에 넣지 않는다. 파일을 바꾸면 version을 올린다
-  portfolioPdf: { file: "/portfolio/portfolio.pdf", href: "/about/portfolio", version: "2026.10", title: "Cloud Engineer Portfolio" },
+  // pages · cover: 홈 마무리 PDF 카드용. PDF를 바꾸면 쪽수와 첫 페이지 이미지(cover)도 함께 바꾼다 (#89)
+  portfolioPdf: { file: "/portfolio/portfolio.pdf", href: "/about/portfolio", version: "2026.10", title: "Cloud Engineer Portfolio", pages: 8, cover: "/portfolio/cover.png" },
   contacts: [
     { label: "GitHub", text: "github.com/Minter-v1", href: "https://github.com/Minter-v1" },
     { label: "Email", text: "adf5858@naver.com", href: "mailto:adf5858@naver.com" },
