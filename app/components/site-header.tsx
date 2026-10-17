@@ -3,6 +3,7 @@ import { COLLECTION_LIST, type CollectionId } from "@/lib/collections";
 import { PROFILE } from "@/lib/profile";
 import { SITE } from "@/lib/site";
 import { AccountMenu, MobileNav, NavDropdown, type NavGroup } from "./nav-menu";
+import { sectionDirection } from "@/lib/sections";
 
 type Active = CollectionId | "blog" | "about" | "drafts" | "review" | "learning" | "portfolio";
 
@@ -16,10 +17,10 @@ export function SiteHeader(props: { active?: Active; writeHref?: string }) {
       label: "Blog",
       active: COLLECTION_LIST.some((c) => c.id === a) || a === "learning" || a === "blog",
       items: [
-        { href: "/blog", label: "전체 보기", desc: "최근 기록 · 연결 지도 · 활동", emoji: "🏠", active: a === "blog" },
-        ...COLLECTION_LIST.map((c) => ({ href: `/${c.id}`, label: c.label, desc: c.intro, collection: c.id, active: a === c.id })),
+        { href: "/blog", label: "전체 보기", desc: "최근 기록 · 연결 지도 · 활동", emoji: "🏠", active: a === "blog", direction: sectionDirection(a, "blog") },
+        ...COLLECTION_LIST.map((c) => ({ href: `/${c.id}`, label: c.label, desc: c.intro, collection: c.id, active: a === c.id, direction: sectionDirection(a, c.id) })),
       ],
-      footer: { href: "/learning", label: "학습법", desc: "망각곡선 기반 복습 방식", emoji: "🧠", active: a === "learning" },
+      footer: { href: "/learning", label: "학습법", desc: "망각곡선 기반 복습 방식", emoji: "🧠", active: a === "learning", direction: sectionDirection(a, "learning") },
     },
     {
       id: "portfolio",

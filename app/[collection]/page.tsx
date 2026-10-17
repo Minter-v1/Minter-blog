@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { loadArchive, summarize, type Archive } from "@/lib/archive";
 import { COLLECTION_IDS, COLLECTIONS, isCollectionId } from "@/lib/collections";
 import { EntryList } from "../components/entry-list";
+import { SectionTransition } from "../components/section-transition";
 import { SiteHeader } from "../components/site-header";
 
 export function generateStaticParams() {
@@ -36,6 +37,7 @@ export default async function CollectionPage(props: PageProps<"/[collection]">) 
   return (
     <div className="mx-auto max-w-[760px] px-4 sm:px-6 pb-24">
       <SiteHeader active={collection} writeHref={`/write?c=${collection}`} />
+      <SectionTransition key={collection}>
 
       <div className="mt-4 mb-6 px-1">
         <h1 className="text-[24px] font-bold sm:text-[28px] tracking-[-0.035em]">
@@ -61,6 +63,7 @@ export default async function CollectionPage(props: PageProps<"/[collection]">) 
           />
         </section>
       )}
+      </SectionTransition>
     </div>
   );
 }
