@@ -47,6 +47,7 @@ function useDisclosure() {
   return { open, setOpen, ref };
 }
 
+// 떠 있는 메뉴 패널. 항상 그려 두고 data-open으로 페이드 열고 닫기 (.dropdown, globals.css · #102)
 const panel =
   "absolute z-40 mt-2 rounded-2xl border border-line bg-surface p-2 shadow-[0_12px_32px_rgba(0,23,51,0.12)]";
 
@@ -88,19 +89,17 @@ export function NavDropdown({ group }: { group: NavGroup }) {
         {group.label}
         <ChevronDown className={`size-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
-      {open && (
-        <div className={`${panel} left-0 w-[300px]`}>
-          {group.items.map((item) => (
-            <ItemLink key={item.href} item={item} />
-          ))}
-          {group.footer && (
-            <>
-              <div className="mx-3 my-1 border-t border-line" />
-              <ItemLink item={group.footer} />
-            </>
-          )}
-        </div>
-      )}
+      <div data-open={open} inert={!open} className={`${panel} dropdown left-0 w-[300px]`}>
+        {group.items.map((item) => (
+          <ItemLink key={item.href} item={item} />
+        ))}
+        {group.footer && (
+          <>
+            <div className="mx-3 my-1 border-t border-line" />
+            <ItemLink item={group.footer} />
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -119,19 +118,17 @@ export function MobileNav({ groups }: { groups: NavGroup[] }) {
       >
         {open ? <Close className="size-5" /> : <Menu className="size-5" />}
       </button>
-      {open && (
-        <div className={`${panel} right-4 left-4 max-h-[75vh] overflow-y-auto sm:right-6 sm:left-auto sm:w-[340px]`}>
-          {groups.map((g) => (
-            <div key={g.id} className="mb-1">
-              <p className="px-3 pt-2 pb-1 text-[12px] font-bold tracking-wide text-text-3 uppercase">{g.label}</p>
-              {g.items.map((item) => (
-                <ItemLink key={item.href} item={item} />
-              ))}
-              {g.footer && <ItemLink item={g.footer} />}
-            </div>
-          ))}
-        </div>
-      )}
+      <div data-open={open} inert={!open} className={`${panel} dropdown right-4 left-4 max-h-[75vh] overflow-y-auto sm:right-6 sm:left-auto sm:w-[340px]`}>
+        {groups.map((g) => (
+          <div key={g.id} className="mb-1">
+            <p className="px-3 pt-2 pb-1 text-[12px] font-bold tracking-wide text-text-3 uppercase">{g.label}</p>
+            {g.items.map((item) => (
+              <ItemLink key={item.href} item={item} />
+            ))}
+            {g.footer && <ItemLink item={g.footer} />}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -165,38 +162,36 @@ export function AccountMenu({ writeHref, active }: { writeHref?: string; active?
           <More className="size-5" />
           {reviewCount + draftCount > 0 && <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-primary" />}
         </button>
-        {open && (
-          <div className={`${panel} right-0 w-[200px] text-[15px]`}>
-            <Link
-              href="/review"
-              aria-current={active === "review" ? "page" : undefined}
-              className="flex items-center justify-between rounded-xl px-3 py-2.5 hover:bg-fill"
-            >
-              복습
-              {reviewCount > 0 && <span className="font-semibold text-primary tabular-nums">{reviewCount}</span>}
-            </Link>
-            <Link
-              href="/drafts"
-              aria-current={active === "drafts" ? "page" : undefined}
-              className="flex items-center justify-between rounded-xl px-3 py-2.5 hover:bg-fill"
-            >
-              작성 중
-              {draftCount > 0 && <span className="font-semibold text-primary tabular-nums">{draftCount}</span>}
-            </Link>
-            <div className="mx-3 my-1 border-t border-line" />
-            <button
-              type="button"
-              className="w-full rounded-xl px-3 py-2.5 text-left text-text-3 hover:bg-fill"
-              onClick={async () => {
-                await fetch("/api/logout", { method: "POST" });
-                setAuthed(false);
-                setOpen(false);
-              }}
-            >
-              로그아웃
-            </button>
-          </div>
-        )}
+        <div data-open={open} inert={!open} className={`${panel} dropdown right-0 w-[200px] text-[15px]`}>
+          <Link
+            href="/review"
+            aria-current={active === "review" ? "page" : undefined}
+            className="flex items-center justify-between rounded-xl px-3 py-2.5 hover:bg-fill"
+          >
+            복습
+            {reviewCount > 0 && <span className="font-semibold text-primary tabular-nums">{reviewCount}</span>}
+          </Link>
+          <Link
+            href="/drafts"
+            aria-current={active === "drafts" ? "page" : undefined}
+            className="flex items-center justify-between rounded-xl px-3 py-2.5 hover:bg-fill"
+          >
+            작성 중
+            {draftCount > 0 && <span className="font-semibold text-primary tabular-nums">{draftCount}</span>}
+          </Link>
+          <div className="mx-3 my-1 border-t border-line" />
+          <button
+            type="button"
+            className="w-full rounded-xl px-3 py-2.5 text-left text-text-3 hover:bg-fill"
+            onClick={async () => {
+              await fetch("/api/logout", { method: "POST" });
+              setAuthed(false);
+              setOpen(false);
+            }}
+          >
+            로그아웃
+          </button>
+        </div>
       </div>
       {writeHref && (
         <Link
