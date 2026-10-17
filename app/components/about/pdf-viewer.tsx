@@ -64,7 +64,14 @@ export function PdfViewer({
         import.meta.url,
       ).toString();
       try {
-        const d = await pdfjs.getDocument(src).promise;
+        // 한글 CID 글꼴(학회 논문)은 CMap이, 내장되지 않은 기본 글꼴은 standard font 데이터가 있어야 글자가 깨지지 않는다 (#110)
+        const assets = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}`;
+        const d = await pdfjs.getDocument({
+          url: src,
+          cMapUrl: `${assets}/cmaps/`,
+          cMapPacked: true,
+          standardFontDataUrl: `${assets}/standard_fonts/`,
+        }).promise;
         if (cancelled) return;
         const first = (await d.getPage(1)).getViewport({ scale: 1 });
         doc.current = d;
@@ -183,19 +190,27 @@ export function PdfViewer({
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {/* 페이지 자리를 미리 잡아 넘길 때 높이가 흔들리지 않게. 한 페이지가 화면 높이 안에 들어오도록 폭을 줄인다 (헤더·버튼 몫 220px) */}
-        <div style={{ aspectRatio: `1 / ${aspect}`, maxWidth: fit === "page"
-                ? `max(280px, calc((100svh - 220px) / ${aspect}))`
-                : "680px", // 논문: 폭에 맞추되 너무 커지지 않게 (#97)
+        {/* 페이지 자리를 미리 잡아 넘길 때 높이가 흔들리지 않게 (#78)
+            포트폴리오: 한 페이지가 화면 높이 안에 들어오도록 폭을 줄인다 (헤더·버튼 몫 220px), 논문: 최대 680px (#97) */}
+        <div
+          style={{
+            aspectRatio: `1 / ${aspect}`,
+            maxWidth: fit === "page" ? `max(280px, calc((100svh - 220px) / ${aspect}))` : "680px",
           }}
-          className="mx-auto w-full"
-          data-pages={pages}
-        />
-        {(state === "loading" || drawn !== page) && (
-          <p className="absolute inset-0 flex items-center justify-center text-[14px] text-text-3">
-            {state === "loading" ? "PDF를 불러오는 중…" : ""}
-          </p>
-        )}
+          className="relative mx-auto w-full"
+        >
+          {/* canvas는 이 요소에 직접 붙인다. React가 그리는 형제(스켈레톤 · 스피너)와 분리 (#110) */}
+          <div ref={box} className="absolute inset-0" data-pages={pages} />
+          {/* 처음 불러올 때: 페이지 모양 스켈레톤 + 스피너, 넘길 때: 스피너만 (#99) */}
+          {state === "loading" && <Bone className="absolute inset-0 rounded-xl" />}
+          {(state === "loading" || drawn !== page) && (
+            <span role="status" aria-label="PDF 불러오는 중" className="absolute inset-0 flex items-center justify-center text-primary">
+              <span className="flex size-12 items-center justify-center rounded-full bg-surface/90 shadow-[0_2px_10px_rgba(0,23,51,0.12)]">
+                <Spinner className="size-5" />
+              </span>
+            </span>
+          )}
+        </div>
         {state === "ready" && (
           <>
             {/* 페이지 왼쪽·오른쪽 절반 클릭으로도 넘김 */}
