@@ -5,12 +5,13 @@ import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/lib/profile";
 import { ProjectCoverMedia } from "../about/project-cover";
 import { Rich } from "../about/rich";
-import { ChevronRight } from "../icons";
+import { ChevronRight, Pause, Play } from "../icons";
 
 const DURATION = 4500; // 한 프로젝트를 보여 주는 시간 (ms)
 
 // 주력 프로젝트 스포트라이트 (#65): 큰 카드 하나에서 번갈아 보여 준다
-// - 진행 막대가 다 차면 다음으로 넘어가며 크로스페이드, 마우스를 올리거나 포커스하면 멈춤
+// - 별자리 진행(#106): 슬라이드 밖에 고정된 "현재 별 — 선 — 다음 별". 선 끝 빛나는 머리가 다음 별에 닿으면 넘어간다
+//   마우스를 올리거나 포커스하면 멈춤, 일시정지 버튼으로도 멈춤
 //   나가는 쪽은 빠르게(250ms) 사라지고, 들어오는 쪽은 이미지 → 글 순서로 살짝 늦게 나타나 두 장이 겹쳐 흐려 보이는 구간을 줄인다
 // - 움직임 줄이기 설정이면 자동 전환 없이 버튼으로만 넘긴다
 export function ProjectSpotlight({ projects }: { projects: Project[] }) {
@@ -18,6 +19,8 @@ export function ProjectSpotlight({ projects }: { projects: Project[] }) {
   const [paused, setPaused] = useState(false);
   const [reduced, setReduced] = useState(false);
   const [inView, setInView] = useState(false); // 화면에 보일 때만 진행 막대가 찬다
+  const [stopped, setStopped] = useState(false); // 일시정지 버튼
+  const [arrived, setArrived] = useState(false); // 다음 별이 반짝 켜지는 짧은 순간
   const box = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,11 +41,22 @@ export function ProjectSpotlight({ projects }: { projects: Project[] }) {
 
   const go = (dir: 1 | -1) => setIndex((i) => (i + dir + projects.length) % projects.length);
   const auto = !reduced && projects.length > 1;
+  const running = auto && !paused && !stopped && inView;
+  const next = projects[(index + 1) % projects.length];
+  const label = (p: Project) => p.short ?? p.name;
+  // 머리가 다음 별에 닿으면 별을 반짝 켜고 넘긴다
+  const onArrive = () => {
+    setArrived(true);
+    setTimeout(() => {
+      setArrived(false);
+      go(1);
+    }, 260);
+  };
 
   return (
     <div
       ref={box}
-      className="relative grid overflow-hidden rounded-[28px] bg-surface"
+      className="@container relative grid overflow-hidden rounded-[28px] bg-surface"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -75,30 +89,10 @@ export function ProjectSpotlight({ projects }: { projects: Project[] }) {
               )}
             </Link>
             <div
-              className={`flex min-w-0 flex-1 flex-col gap-3 p-6 transition-[opacity,translate] ease-out sm:p-8 ${
+              className={`flex min-w-0 flex-1 flex-col gap-3 p-6 transition-[opacity,translate] ease-out sm:p-8 ${projects.length > 1 ? "pt-[92px] sm:pt-[100px]" : ""} ${
                 on ? "translate-y-0 opacity-100 delay-150 duration-500" : "translate-y-1.5 opacity-0 duration-200"
               }`}
             >
-              <div className="flex gap-1.5" aria-hidden>
-                {projects.map((_, j) => (
-                  <span key={j} className="h-1 flex-1 overflow-hidden rounded-full bg-primary-weak">
-                    <span
-                      className={`block h-full rounded-full bg-primary ${j < index ? "w-full" : j > index ? "w-0" : ""}`}
-                      style={
-                        j === index && on
-                          ? auto
-                            ? {
-                                animation: `spotlight-progress ${DURATION}ms linear forwards`,
-                                animationPlayState: paused || !inView ? "paused" : "running",
-                              }
-                            : { width: "100%" }
-                          : undefined
-                      }
-                      onAnimationEnd={j === index && on ? () => go(1) : undefined}
-                    />
-                  </span>
-                ))}
-              </div>
               <p className="text-[13px] font-medium text-text-3 tabular-nums">
                 주력 {i + 1} / {projects.length} · {p.period}
               </p>
@@ -129,31 +123,64 @@ export function ProjectSpotlight({ projects }: { projects: Project[] }) {
                   자세히 보기
                   <ChevronRight className="size-3.5" />
                 </Link>
-                {projects.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => go(-1)}
-                      aria-label="이전 주력 프로젝트"
-                      className="flex size-10 items-center justify-center rounded-xl bg-fill text-text-2 hover:bg-fill-strong/70"
-                    >
-                      <ChevronRight className="size-4 rotate-180" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => go(1)}
-                      aria-label="다음 주력 프로젝트"
-                      className="flex size-10 items-center justify-center rounded-xl bg-fill text-text-2 hover:bg-fill-strong/70"
-                    >
-                      <ChevronRight className="size-4" />
-                    </button>
-                  </>
-                )}
               </div>
             </div>
           </article>
         );
       })}
+      {projects.length > 1 && (
+        // 별자리 진행: 모바일은 이미지 바로 아래(16:10), 데스크톱은 글 영역 위쪽에 고정
+        <div className="relative z-20 col-start-1 row-start-1 mx-6 mt-[calc(62.5cqw+20px)] self-start sm:mx-8 md:mt-8 md:ml-[calc(56%+32px)]">
+          <div className="flex items-center">
+            <span className={`star-mark size-4 shrink-0 bg-primary ${running ? "star-breath" : ""}`} aria-hidden />
+            <span className="relative mx-2.5 h-0.5 flex-1 rounded-full bg-line" aria-hidden>
+              <span
+                key={index}
+                className="star-track absolute inset-y-0 left-0 rounded-full"
+                style={
+                  auto
+                    ? { animationDuration: `${DURATION}ms`, animationPlayState: running ? "running" : "paused" }
+                    : { width: 0 }
+                }
+                onAnimationEnd={auto ? onArrive : undefined}
+              >
+                <span className="star-head" />
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => go(1)}
+              aria-label={`다음 주력 프로젝트: ${label(next)}`}
+              className={`star-mark size-3.5 shrink-0 transition-colors ${arrived ? "star-arrive bg-primary" : "bg-primary-weak hover:bg-primary/60"}`}
+            />
+            <span className="ml-3 flex shrink-0 gap-1">
+              <button type="button" onClick={() => go(-1)} aria-label="이전 주력 프로젝트" className="flex size-8 items-center justify-center rounded-lg bg-fill text-text-2 hover:bg-fill-strong/70">
+                <ChevronRight className="size-3.5 rotate-180" />
+              </button>
+              {auto && (
+                <button
+                  type="button"
+                  onClick={() => setStopped((v) => !v)}
+                  aria-label={stopped ? "자동 넘김 재생" : "자동 넘김 일시정지"}
+                  aria-pressed={stopped}
+                  className="flex size-8 items-center justify-center rounded-lg bg-fill text-text-2 hover:bg-fill-strong/70"
+                >
+                  {stopped ? <Play className="size-3" /> : <Pause className="size-3" />}
+                </button>
+              )}
+              <button type="button" onClick={() => go(1)} aria-label="다음 주력 프로젝트" className="flex size-8 items-center justify-center rounded-lg bg-fill text-text-2 hover:bg-fill-strong/70">
+                <ChevronRight className="size-3.5" />
+              </button>
+            </span>
+          </div>
+          <div className="mt-2 flex justify-between gap-3 text-[12px] font-semibold sm:pr-[112px]" aria-live="polite">
+            <span className="min-w-0 truncate text-text">{label(projects[index])}</span>
+            <button type="button" onClick={() => go(1)} className="min-w-0 truncate text-text-3 hover:text-primary">
+              다음 · {label(next)}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
