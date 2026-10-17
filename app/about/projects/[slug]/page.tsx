@@ -166,7 +166,7 @@ export default async function ProjectPage(props: Props) {
           </div>
 
           <aside className="hidden xl:block">
-            <div className="sticky top-12 pt-[76px]">
+            <div className="sticky top-[var(--header-h)] pt-[76px]">
               <Outline selector=".article h1, .article h2, .article h3" />
             </div>
           </aside>

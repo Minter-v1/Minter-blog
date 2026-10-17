@@ -228,7 +228,7 @@ export default async function EntryPage(props: Props) {
 
         {entry.body && (
           <aside className="hidden xl:block">
-            <div className="sticky top-12 pt-12">
+            <div className="sticky top-[var(--header-h)] pt-12">
               <Outline selector=".article h1, .article h2, .article h3" />
             </div>
           </aside>

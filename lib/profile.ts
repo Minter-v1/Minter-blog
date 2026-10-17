@@ -48,7 +48,7 @@ export type Paper = { slug: string; date: string; title: string; venue: string; 
 
 export const PROFILE = {
   name: "이민지",
-  nameEn: "Minji Lee",
+  nameEn: "MINJI LEE",
   role: "Cloud Engineer",
   // 프로필 사진: public/about/profile.jpeg (세로 3:4 권장). 없애려면 null
   photo: "/about/profile.jpeg" as string | null,

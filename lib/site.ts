@@ -1,6 +1,6 @@
 // 블로그 기본 정보. 홈 자기소개와 헤더에 쓰인다. 자유롭게 고쳐 쓰면 된다.
 export const SITE = {
-  name: "Minter.log",
+  name: "Minter",
   author: "Minter",
   // 홈 이름 아래 한 줄 소개. 직접 쓰면 표시되고, 비워 두면 표시하지 않는다
   bio: "",

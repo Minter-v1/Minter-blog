@@ -45,9 +45,11 @@ export default async function Landing() {
   return (
     <div className="mx-auto max-w-[1120px] px-4 sm:px-6 pb-24">
       {/* 헤더 + 첫 화면은 밤하늘 위 (#86). .night 안에서는 색 토큰이 어두운 배경용으로 바뀐다 */}
+      <SiteHeader writeHref="/write" tone="night" />
       <div className="night relative isolate">
         <NightSky />
-        <SiteHeader writeHref="/write" />
+        {/* 헤더가 밝은 톤으로 바뀌는 지점 (밤하늘이 녹기 시작하는 곳) */}
+        <div id="night-end" aria-hidden className="absolute bottom-40 h-px w-px" />
 
         <Reveal>
           {/* 첫 화면 */}

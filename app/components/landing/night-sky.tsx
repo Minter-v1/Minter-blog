@@ -1,6 +1,6 @@
 import { ShootingStars } from "./shooting-stars";
 
-// 홈 헤더 + 히어로 뒤 밤하늘 (#86). 화면 전체 폭으로 깔고, 아래로 갈수록 페이지 배경색으로 녹인다
+// 홈 헤더 + 히어로 뒤 밤하늘 (#86). 고정 헤더(#95) 뒤까지 덮도록 위로 헤더 높이만큼 늘린다. 화면 전체 폭으로 깔고, 아래로 갈수록 페이지 배경색으로 녹인다
 // 별 위치는 고정 시드로 만들어 서버·브라우저 렌더 결과가 같다
 
 function seeded(seed: number) {
@@ -22,7 +22,7 @@ export function NightSky() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute inset-y-0 left-1/2 -z-10 w-screen -translate-x-1/2 overflow-hidden"
+      className="pointer-events-none absolute top-[calc(var(--header-h)*-1)] bottom-0 left-1/2 -z-10 w-screen -translate-x-1/2 overflow-hidden"
       style={{ background: "linear-gradient(180deg, #0b0d26 0%, #161a44 45%, #232a63 80%, #f5f6f8 100%)" }}
     >
       {/* 성운 빛 */}

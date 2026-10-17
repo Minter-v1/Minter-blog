@@ -257,7 +257,7 @@ export function WriteForm(props: {
 
   return (
     <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-6">
-      <aside className="space-y-7 rounded-[24px] bg-surface p-5 sm:p-7 lg:sticky lg:top-6">
+      <aside className="space-y-7 rounded-[24px] bg-surface p-5 sm:p-7 lg:sticky lg:top-[calc(var(--header-h)+24px)]">
         {editing && (
           <div className="flex items-baseline justify-between">
             <h1 className="text-[20px] font-bold tracking-[-0.02em]">{c.itemLabel} 수정</h1>
@@ -480,7 +480,7 @@ export function WriteForm(props: {
 
       <section className="min-h-[60vh] rounded-[24px] bg-surface pb-24 lg:min-h-[calc(100vh-140px)]">
         {/* 긴 글을 쓰며 내려가도 목차 버튼이 따라오도록 */}
-        <div className="sticky top-0 z-20 mb-2 flex items-center justify-between gap-4 rounded-t-[24px] bg-surface/90 px-5 pt-5 pb-3 backdrop-blur sm:px-[54px] sm:pt-6">
+        <div className="sticky top-[var(--header-h)] z-20 mb-2 flex items-center justify-between gap-4 rounded-t-[24px] bg-surface/90 px-5 pt-5 pb-3 backdrop-blur sm:px-[54px] sm:pt-6">
           <h2 className="text-[14px] font-semibold text-text-2">상세 설명</h2>
           <div className="flex items-center gap-3">
             <p className="hidden text-[13px] text-text-3 md:block">

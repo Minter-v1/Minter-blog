@@ -376,7 +376,7 @@ function Section(props: {
   children: React.ReactNode;
 }) {
   return (
-    <section id={props.id} className="mt-12 scroll-mt-20 sm:mt-14">
+    <section id={props.id} className="mt-12 scroll-mt-16 sm:mt-14">
       <h2
         data-reveal
         className="mb-4 flex items-center gap-2 px-1 text-[22px] font-bold tracking-[-0.03em]"

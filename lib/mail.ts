@@ -120,7 +120,7 @@ export async function sendMail(mail: { subject: string; html: string; text: stri
     body: JSON.stringify({
       // 도메인을 인증하기 전엔 Resend 기본 주소로 (가입한 본인 메일로만 보낼 수 있다).
       // 이름에 특수문자가 있으면 따옴표로 감싼다 (Minter.log → "Minter.log")
-      from: formatFrom(process.env.REMIND_FROM || "Minter.log <onboarding@resend.dev>"),
+      from: formatFrom(process.env.REMIND_FROM || "Minter <onboarding@resend.dev>"),
       to: [to],
       ...mail,
     }),
