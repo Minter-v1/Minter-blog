@@ -6,6 +6,7 @@ import { Activity } from "../components/home/activity";
 import { CollectionCards, type CardItem } from "../components/home/collection-cards";
 import { Hero } from "../components/home/hero";
 import { KnowledgeMap } from "../components/home/knowledge-map";
+import { SectionTransition } from "../components/section-transition";
 import { SiteHeader } from "../components/site-header";
 import { TodaySection } from "../components/home/today";
 import { entriesOfDay, seoulToday } from "@/lib/today";
@@ -48,6 +49,7 @@ export default async function BlogHome() {
   return (
     <div className="mx-auto max-w-[1120px] px-4 sm:px-6 pb-24">
       <SiteHeader active="blog" writeHref="/write" />
+      <SectionTransition>
 
       {loadError && (
         <div className="mb-6 rounded-2xl bg-danger-weak px-5 py-4 text-[15px] text-danger">
@@ -80,6 +82,7 @@ export default async function BlogHome() {
         <CollectionCards counts={counts} recent={recent} />
         <Activity data={buildActivity(entries)} goals={SITE.weeklyGoal} />
       </div>
+      </SectionTransition>
     </div>
   );
 }

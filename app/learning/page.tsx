@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { REVIEW_INTERVALS, REVIEW_TOTAL } from "@/lib/review";
+import { SectionTransition } from "../components/section-transition";
 import { SiteHeader } from "../components/site-header";
 
 export const metadata: Metadata = {
@@ -28,6 +29,7 @@ export default function ReviewGuidePage() {
   return (
     <div className="mx-auto max-w-[760px] px-4 pb-24 sm:px-6">
       <SiteHeader active="learning" />
+      <SectionTransition>
 
       <div className="mt-4 mb-8 px-1">
         <p className="text-[14px] font-semibold text-text-3">복습</p>
@@ -155,6 +157,7 @@ export default function ReviewGuidePage() {
           </Link>
         </Section>
       </div>
+      </SectionTransition>
     </div>
   );
 }

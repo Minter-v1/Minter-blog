@@ -9,8 +9,17 @@ import { CollectionIcon } from "./collection-icon";
 import { useDrafts } from "./drafts";
 import { ChevronDown, Close, Menu, More } from "./icons";
 import { useReviewToday } from "./review";
+import { markSectionNavigation } from "./section-transition";
 
-export type NavItem = { href: string; label: string; desc?: string; emoji?: string; collection?: CollectionId; active?: boolean };
+export type NavItem = {
+  href: string;
+  label: string;
+  desc?: string;
+  emoji?: string;
+  collection?: CollectionId;
+  active?: boolean;
+  direction?: -1 | 0 | 1; // 블로그 섹션 사이 이동 방향 (#66)
+};
 export type NavGroup = { id: string; label: string; active: boolean; items: NavItem[]; footer?: NavItem };
 
 // 열림 상태 공통: 바깥 클릭·Esc·페이지 이동이면 닫는다
@@ -45,6 +54,7 @@ function ItemLink({ item }: { item: NavItem }) {
   return (
     <Link
       href={item.href}
+      onClick={() => item.direction !== undefined && markSectionNavigation(item.direction)}
       aria-current={item.active ? "page" : undefined}
       className={`flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-fill ${item.active ? "bg-fill" : ""}`}
     >
