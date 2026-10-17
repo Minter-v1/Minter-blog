@@ -22,9 +22,10 @@ export function NightSky() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute top-[calc(var(--header-h)*-1)] bottom-0 left-1/2 -z-10 w-screen -translate-x-1/2 overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #0b0d26 0%, #161a44 45%, #232a63 80%, #f5f6f8 100%)" }}
+      className="night-sky-bg pointer-events-none absolute top-[calc(var(--header-h)*-1)] bottom-0 left-1/2 -z-10 w-screen -translate-x-1/2 overflow-hidden"
     >
+      {/* 별 · 성운 · 별똥별은 배경이 밝아지기 전에 함께 옅어진다 (#104) */}
+      <div className="night-sky-layers absolute inset-0">
       {/* 성운 빛 */}
       <div
         className="absolute inset-0"
@@ -48,6 +49,7 @@ export function NightSky() {
         />
       ))}
       <ShootingStars />
+      </div>
     </div>
   );
 }
