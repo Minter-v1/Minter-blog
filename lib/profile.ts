@@ -17,7 +17,8 @@ export type TimelineItem = {
 };
 
 // 대표 미디어. 파일은 public/projects/{slug}/ 에 둔다
-export type ProjectCover = { alt: string } & ({ image: string } | { video: string; poster: string });
+// position: 카드 썸네일을 틀에 꽉 채울 때(object-cover) 남길 기준 위치 (CSS object-position, 기본 center)
+export type ProjectCover = { alt: string; position?: string } & ({ image: string } | { video: string; poster: string });
 
 export type Project = {
   slug: string; // 상세 페이지 주소 /about/projects/{slug}, 본문은 content/projects/{slug}.md
@@ -85,7 +86,7 @@ export const PROFILE = {
       period: "2026.08",
       slug: "ncp-migration",
       repo: "", // TODO: GitHub 저장소 URL
-      cover: { image: "/projects/ncp-migration/architecture.png", alt: "NCP Multi Zone 3-Tier 아키텍처" },
+      cover: { image: "/projects/ncp-migration/architecture.png", alt: "NCP Multi Zone 3-Tier 아키텍처", position: "center 30%" },
       featured: true,
       name: "단일 서버 인사관리시스템의 NCP Multi Zone 전환",
       team: "1인 과제",
@@ -100,7 +101,7 @@ export const PROFILE = {
       period: "2026.01",
       slug: "multicloud-dr",
       repo: "", // TODO: GitHub 저장소 URL
-      cover: { image: "/projects/multicloud-dr/architecture.png", alt: "NCP-GCP 멀티클라우드 DR 아키텍처" },
+      cover: { image: "/projects/multicloud-dr/architecture.png", alt: "NCP-GCP 멀티클라우드 DR 아키텍처", position: "left center" },
       featured: true,
       name: "Cloudflare GSLB 기반 NCP-GCP 멀티클라우드 DR",
       team: "5인 팀",
@@ -130,7 +131,7 @@ export const PROFILE = {
       period: "2026.03 – 2026.05",
       slug: "waymore",
       repo: "", // TODO: GitHub 저장소 URL
-      cover: { image: "/projects/waymore/features.jpg", alt: "WAYMORE 주요 기능 화면" },
+      cover: { image: "/projects/waymore/features.jpg", alt: "WAYMORE 주요 기능 화면", position: "left top" },
       name: "WAYMORE",
       tagline: "AI 기반 진로 로드맵 서비스",
       team: "3인 팀",
@@ -156,7 +157,7 @@ export const PROFILE = {
     {
       period: "2025.08 – 2025.12",
       slug: "3d-printing-lab",
-      cover: { image: "/projects/3d-printing-lab/home.jpg", alt: "스마트 3D프린팅 연구소 웹사이트" },
+      cover: { image: "/projects/3d-printing-lab/home.jpg", alt: "스마트 3D프린팅 연구소 웹사이트", position: "center top" },
       name: "스마트 3D 프린팅 연구소 웹사이트 구축",
       team: "4인 팀",
       role: "Full-stack",
