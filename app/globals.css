@@ -566,3 +566,67 @@ body {
     translate: 0 0;
   }
 }
+
+/* 홈 히어로 별똥별 (#84). 오른쪽 위에서 왼쪽 아래로 떨어진다
+   머리(왼쪽 끝)는 Periwinkle 점 + 빛, 꼬리는 Lavender로 옅어짐 */
+.shooting-star {
+  position: absolute;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #5a6dcb 0%, rgb(140 155 230 / 0.8) 25%, rgb(179 157 219 / 0) 100%);
+  opacity: 0;
+  transform-origin: left center;
+  animation: shooting-star 8s linear infinite;
+}
+.shooting-star::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5a6dcb;
+  box-shadow: 0 0 12px 4px rgb(140 155 230 / 0.7);
+  transform: translateY(-50%);
+}
+@keyframes shooting-star {
+  0% {
+    transform: translate(0, 0) rotate(-32deg);
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  12% {
+    transform: translate(-420px, 262px) rotate(-32deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-420px, 262px) rotate(-32deg);
+    opacity: 0;
+  }
+}
+.sparkle {
+  opacity: 0.25;
+  animation: sparkle 3.6s ease-in-out infinite;
+}
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shooting-star {
+    display: none;
+  }
+  .sparkle {
+    animation: none;
+  }
+}

@@ -10,6 +10,7 @@ import { CollectionIcon } from "./components/collection-icon";
 import { ArrowUpRight, ChevronRight } from "./components/icons";
 import { ProjectFilterGrid } from "./components/landing/project-filter-grid";
 import { ProjectSpotlight } from "./components/landing/project-spotlight";
+import { ShootingStars } from "./components/landing/shooting-stars";
 import { SiteHeader } from "./components/site-header";
 
 export const metadata: Metadata = {
@@ -44,7 +45,8 @@ export default async function Landing() {
 
       <Reveal>
         {/* 첫 화면 */}
-        <section className="flex flex-col justify-center py-10 sm:py-16 md:min-h-[min(calc(100svh-180px),820px)]">
+        <section className="relative isolate flex flex-col justify-center py-10 sm:py-16 md:min-h-[min(calc(100svh-180px),820px)]">
+          <ShootingStars />
           <div className="flex flex-col-reverse items-start justify-between gap-10 md:flex-row md:items-center">
             <div className="min-w-0 max-w-[640px]">
               <p className="text-[16px] font-semibold text-primary sm:text-[18px]">{PROFILE.role}</p>
