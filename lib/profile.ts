@@ -44,6 +44,8 @@ export type Project = {
   repo?: string; // GitHub 저장소 URL. 빈 문자열이면 상세 페이지에 "GitHub 준비 중"으로 표시, 없으면 표시 안 함(대외비 등)
 };
 
+export type Paper = { slug: string; date: string; title: string; venue: string; file?: string };
+
 export const PROFILE = {
   name: "이민지",
   nameEn: "Minji Lee",
@@ -309,9 +311,10 @@ export const PROFILE = {
     { group: "Collaboration", items: ["Git", "GitHub", "Jira", "Confluence", "Notion"] },
   ],
 
+  // file: public/papers/ 의 PDF. 있으면 About에 보기(/about/papers/{slug}) · 다운로드 버튼 (#92)
   papers: [
-    { date: "2025.11", title: "대규모 언어 모델을 활용한 어휘력 맞춤형 뉴스 요약 플랫폼 개발", venue: "한국통신학회 2025년 추계종합학술발표회 · 제1저자" },
-    { date: "2024.11", title: "Korean News Summarization with Contrasts by Augmenting Counterfactual Data", venue: "ICCE-Asia 2024 · 제1저자" },
-    { date: "2024.10", title: "과학기술정보 전문분야 한국어 벤치마크", venue: "제36회 한글 및 한국어 정보처리 학술대회 · 제1저자" },
-  ],
+    { slug: "kics-2025", date: "2025.11", title: "대규모 언어 모델을 활용한 어휘력 맞춤형 뉴스 요약 플랫폼 개발", venue: "한국통신학회 2025년 추계종합학술발표회 · 제1저자", file: "/papers/2025_kics.pdf" },
+    { slug: "icce-asia-2024", date: "2024.11", title: "Korean News Summarization with Contrasts by Augmenting Counterfactual Data", venue: "ICCE-Asia 2024 · 제1저자" },
+    { slug: "hclt-2024", date: "2024.10", title: "과학기술정보 전문분야 한국어 벤치마크", venue: "제36회 한글 및 한국어 정보처리 학술대회 · 제1저자", file: "/papers/2024_hclt.pdf" },
+  ] as Paper[],
 };
