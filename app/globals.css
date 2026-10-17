@@ -594,6 +594,20 @@ body {
   .orbit-sat { animation: none; offset-distance: 25%; z-index: 3; }
 }
 
+/* 맨 위로 버튼 (#114): 밤하늘 원 안에서 꼬리 달린 별이 아래에서 위로 솟는다 */
+.btt-star {
+  animation: btt-star 1.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+@keyframes btt-star {
+  0% { transform: translateY(14px); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(-16px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btt-star { animation: none; }
+}
+
 /* 홈 스크롤 안내 (#112): 세로선 위에서 아래로 꼬리 달린 별이 떨어진다 (1.5초) */
 .scroll-cue-head,
 .scroll-cue-tail {
