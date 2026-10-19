@@ -632,6 +632,11 @@ body {
   .orbit-sat { animation: none; offset-distance: 25%; z-index: 3; }
 }
 
+/* Blog 최근 기록 레일 잡아 끌기 (#126) */
+@media (prefers-reduced-motion: no-preference) {
+  .marquee-row { cursor: grab; }
+  .marquee-row.is-dragging, .marquee-row.is-dragging * { cursor: grabbing; }
+}
 /* 홈 섹션 내비게이션 (#124): 밝은 구간은 메인 색, 첫 화면(밤하늘) 위는 밝은 색 */
 .home-nav-line { background: linear-gradient(180deg, transparent, rgb(90 109 203 / 0.35) 15%, rgb(90 109 203 / 0.35) 85%, transparent); }
 .home-nav-star { background: rgb(90 109 203 / 0.35); }
