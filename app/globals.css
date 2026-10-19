@@ -632,34 +632,111 @@ body {
   .orbit-sat { animation: none; offset-distance: 25%; z-index: 3; }
 }
 
-/* 소개 문구 형광펜 (#120): 진한 글자 + Lavender 형광펜, 처음 보일 때 빛줄기가 한 번 지나간다 */
+/* 소개 문구 형광펜 (#120): 처음 보일 때 꼬리 달린 별이 왼쪽 → 오른쪽으로 달리며 형광펜을 칠하고(1.1초),
+   지나간 자리에 반짝임이 잠깐 남고, 끝에서 작은 빛 고리가 퍼진다. 밝은 화면은 메인 색 별, 밤하늘(.night)은 흰 별 */
 .marker {
-  --marker: rgb(217 204 240 / 0.95);
+  --marker-band: rgb(217 204 240 / 0.95);
+  --marker-star: #5a6dcb;
+  --marker-glow: rgb(90 109 203 / 0.6);
+  --marker-tail: rgb(90 109 203 / 0.7);
   position: relative;
+  display: inline-block;
+  isolation: isolate;
+  padding: 0 0.2em;
+  margin: 0 -0.1em;
   font-weight: 600;
   color: var(--text);
-  padding: 0 0.15em;
-  margin: 0 -0.05em;
-  border-radius: 0.2em;
-  background-image:
-    linear-gradient(100deg, transparent 0%, transparent 35%, rgb(255 255 255 / 0.55) 50%, transparent 65%, transparent 100%),
-    linear-gradient(transparent 56%, var(--marker) 56%, var(--marker) 92%, transparent 92%);
-  background-size: 300% 100%, 100% 100%;
-  background-position: 120% 0, 0 0;
-  background-repeat: no-repeat;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-  animation: marker-shine 0.9s cubic-bezier(0.45, 0, 0.55, 1) 0.5s both;
 }
 .night .marker {
-  --marker: rgb(179 157 219 / 0.5);
+  --marker-band: rgb(179 157 219 / 0.5);
+  --marker-star: #fff;
+  --marker-glow: rgb(255 255 255 / 0.95);
+  --marker-tail: rgb(255 255 255 / 0.9);
 }
-@keyframes marker-shine {
-  from { background-position: 120% 0, 0 0; }
-  to { background-position: -20% 0, 0 0; }
+.marker-band {
+  position: absolute;
+  inset: 56% 0 8% 0;
+  z-index: -2;
+  border-radius: 3px;
+  background: var(--marker-band);
+  transform-origin: left;
+  animation: marker-paint 0.85s cubic-bezier(0.45, 0, 0.55, 1) 0.4s both;
+}
+.marker-star {
+  position: absolute;
+  top: 56%;
+  left: 0;
+  z-index: 2;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  animation: marker-star 0.95s cubic-bezier(0.45, 0, 0.55, 1) 0.4s both;
+}
+.marker-star-tail {
+  position: absolute;
+  left: -44px;
+  top: -1px;
+  width: 44px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--marker-tail));
+}
+.marker-star-head {
+  position: absolute;
+  left: -8px;
+  top: -8px;
+  width: 16px;
+  height: 16px;
+  background: var(--marker-star);
+  filter: drop-shadow(0 0 6px var(--marker-glow));
+  animation: marker-spin 0.95s linear 0.4s both;
+}
+.marker-glit {
+  position: absolute;
+  z-index: 1;
+  background: var(--marker-star);
+  opacity: 0;
+  animation: marker-glit 0.7s ease-out both;
+}
+.marker-burst {
+  position: absolute;
+  right: -10px;
+  top: 56%;
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--marker-star);
+  opacity: 0;
+  animation: marker-burst 0.55s ease-out 1.25s both;
+}
+@keyframes marker-paint {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes marker-star {
+  0% { left: 0; opacity: 0; }
+  8% { opacity: 1; }
+  88% { left: 100%; opacity: 1; }
+  100% { left: 102%; opacity: 0; }
+}
+@keyframes marker-spin {
+  to { transform: rotate(180deg); }
+}
+@keyframes marker-glit {
+  0% { opacity: 0; transform: scale(0.3) rotate(0); }
+  25% { opacity: 1; transform: scale(1.3) rotate(20deg); }
+  100% { opacity: 0; transform: scale(0.6) rotate(45deg); }
+}
+@keyframes marker-burst {
+  0% { opacity: 0; transform: scale(0.3); }
+  25% { opacity: 0.9; transform: scale(0.6); }
+  100% { opacity: 0; transform: scale(1.6); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .marker { animation: none; }
+  .marker-band { animation: none; }
+  .marker-star, .marker-glit, .marker-burst { display: none; }
 }
 
 /* 맨 위로 버튼 (#114): 밤하늘 원 안에서 꼬리 달린 별이 아래에서 위로 솟는다 */
