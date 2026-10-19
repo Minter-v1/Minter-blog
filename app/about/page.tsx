@@ -76,10 +76,10 @@ export default async function AboutPage() {
                   {PROFILE.nameEn}
                 </span>
               </h1>
-              <div className="mt-6 space-y-1 text-[16px] leading-[1.7] text-text-2 sm:text-[18px]">
+              <div className="mt-6 space-y-1 text-[16px] leading-[1.7] break-keep text-text-2 sm:text-[18px]">
                 {PROFILE.intro.map((line, i) => (
                   <p key={i}>
-                    <Rich text={line} />
+                    <Rich text={line} marker />
                   </p>
                 ))}
               </div>

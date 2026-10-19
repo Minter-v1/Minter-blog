@@ -632,6 +632,36 @@ body {
   .orbit-sat { animation: none; offset-distance: 25%; z-index: 3; }
 }
 
+/* 소개 문구 형광펜 (#120): 진한 글자 + Lavender 형광펜, 처음 보일 때 빛줄기가 한 번 지나간다 */
+.marker {
+  --marker: rgb(217 204 240 / 0.95);
+  position: relative;
+  font-weight: 600;
+  color: var(--text);
+  padding: 0 0.15em;
+  margin: 0 -0.05em;
+  border-radius: 0.2em;
+  background-image:
+    linear-gradient(100deg, transparent 0%, transparent 35%, rgb(255 255 255 / 0.55) 50%, transparent 65%, transparent 100%),
+    linear-gradient(transparent 56%, var(--marker) 56%, var(--marker) 92%, transparent 92%);
+  background-size: 300% 100%, 100% 100%;
+  background-position: 120% 0, 0 0;
+  background-repeat: no-repeat;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  animation: marker-shine 0.9s cubic-bezier(0.45, 0, 0.55, 1) 0.5s both;
+}
+.night .marker {
+  --marker: rgb(179 157 219 / 0.5);
+}
+@keyframes marker-shine {
+  from { background-position: 120% 0, 0 0; }
+  to { background-position: -20% 0, 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marker { animation: none; }
+}
+
 /* 맨 위로 버튼 (#114): 밤하늘 원 안에서 꼬리 달린 별이 아래에서 위로 솟는다 */
 .btt-star {
   animation: btt-star 1.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
