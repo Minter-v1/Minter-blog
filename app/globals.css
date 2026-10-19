@@ -632,6 +632,12 @@ body {
   .orbit-sat { animation: none; offset-distance: 25%; z-index: 3; }
 }
 
+/* Blog 최근 기록 레일 잡아 끌기 (#126) */
+@media (prefers-reduced-motion: no-preference) {
+  .marquee-row { cursor: grab; }
+  .marquee-row.is-dragging, .marquee-row.is-dragging * { cursor: grabbing; }
+}
+
 /* 소개 문구 형광펜 (#120): 처음 보일 때 꼬리 달린 별이 왼쪽 → 오른쪽으로 달리며 형광펜을 칠하고(1.1초),
    지나간 자리에 반짝임이 잠깐 남고, 끝에서 작은 빛 고리가 퍼진다. 밝은 화면은 메인 색 별, 밤하늘(.night)은 흰 별 */
 .marker {
