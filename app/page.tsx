@@ -68,10 +68,10 @@ export default async function Landing() {
                     {PROFILE.nameEn}
                   </span>
                 </h1>
-                <div className="mt-8 space-y-1 text-[17px] leading-[1.7] text-text-2 sm:text-[20px]">
+                <div className="mt-8 space-y-1 text-[17px] leading-[1.7] break-keep text-text-2 sm:text-[20px]">
                   {PROFILE.intro.map((line, i) => (
                     <p key={i}>
-                      <Rich text={line} />
+                      <Rich text={line} marker />
                     </p>
                   ))}
                 </div>

@@ -55,11 +55,11 @@ export const PROFILE = {
   photo: "/about/profile.jpeg" as string | null,
   // 소개 아래 해시태그
   keywords: ["Cloud", "CloudNative", "Automation", "IaC", "MultiCloud", "DisasterRecovery"],
+  // [[ ]]는 소개에서 형광펜 강조 (Rich marker, #120)
   intro: [
-    "저는 [[사람이 반복하던 일을 시스템에 맡기는]] 클라우드 엔지니어입니다.",
-    "수작업으로 버티던 운영을 코드로 옮기고,",
-    "그 코드가 **장애 앞에서도 제대로 동작하는지** 끝까지 확인합니다.",
-    "편한 쪽보다 믿을 수 있는 쪽을 고릅니다.",
+    "저는 [[사람의 반복을 시스템의 루틴으로]] 바꾸는 클라우드 엔지니어입니다.",
+    "헬스체크가 '정상'이어도 실제 서비스는 멈춰 있을 수 있다는 걸 알기에,",
+    "루틴이 그냥 돌아가는 게 아니라 제대로 동작하는지 끝까지 확인합니다.",
   ],
   // 공개용 범용 포트폴리오 PDF (#53). public/portfolio/ 에 두고 /about/portfolio 에서 브라우저로 렌더링
   // 기업명·직무명이 들어간 제출용 PDF는 여기에 넣지 않는다. 파일을 바꾸면 version을 올린다
