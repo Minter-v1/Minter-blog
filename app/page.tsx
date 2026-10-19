@@ -14,6 +14,7 @@ import { ProjectSpotlight } from "./components/landing/project-spotlight";
 import { NightSky } from "./components/landing/night-sky";
 import { OrbitStats } from "./components/landing/orbit-stats";
 import { ScrollCue } from "./components/landing/scroll-cue";
+import { HomeSectionNav } from "./components/landing/home-section-nav";
 import { SiteHeader } from "./components/site-header";
 import { EmptyState } from "./components/loaders";
 
@@ -43,6 +44,7 @@ export default async function Landing() {
     <div className="mx-auto max-w-[1120px] px-4 sm:px-6 pb-24">
       {/* 헤더 + 첫 화면은 밤하늘 위 (#86). .night 안에서는 색 토큰이 어두운 배경용으로 바뀐다 */}
       <SiteHeader writeHref="/write" tone="night" />
+      <HomeSectionNav />
       <div className="night relative isolate">
         <NightSky />
         {/* 헤더가 밝은 톤으로 바뀌는 지점 (밤하늘이 녹기 시작하는 곳) */}
@@ -135,7 +137,7 @@ export default async function Landing() {
 
       <Reveal>
         {/* 주요 프로젝트 레일 */}
-        <section id="projects" className="mt-10" aria-labelledby="projects-title">
+        <section id="projects" className="mt-10 scroll-mt-14 lg:scroll-mt-0" aria-labelledby="projects-title">
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
               <h2
@@ -163,7 +165,7 @@ export default async function Landing() {
         </section>
 
         {/* 블로그 */}
-        <section className="mt-20" aria-labelledby="blog-title">
+        <section id="records" className="mt-20 scroll-mt-14 lg:scroll-mt-0" aria-labelledby="blog-title">
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
               <h2
@@ -250,8 +252,9 @@ export default async function Landing() {
 
         {/* 마무리 (#89): 왼쪽 포트폴리오 PDF, 오른쪽 연락 */}
         <section
+          id="contact"
           data-reveal
-          className="mt-20 grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2"
+          className="scroll-mt-14 lg:scroll-mt-0 mt-20 grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2"
           aria-label="포트폴리오 PDF와 연락처"
         >
           <Link
