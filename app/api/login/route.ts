@@ -1,11 +1,14 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { checkPassword, createSessionToken, SESSION_COOKIE, SESSION_MAX_AGE } from "@/lib/auth";
-import { adminPassword } from "@/lib/env";
+import { adminPassword, adminPasswordHash, sessionSecret } from "@/lib/env";
 
 export async function POST(request: Request) {
-  if (!adminPassword()) {
-    return NextResponse.json({ error: "서버에 ADMIN_PASSWORD가 설정되지 않았습니다." }, { status: 500 });
+  if (!adminPasswordHash() && !adminPassword()) {
+    return NextResponse.json({ error: "서버에 ADMIN_PASSWORD_HASH가 설정되지 않았습니다." }, { status: 500 });
+  }
+  if (!sessionSecret()) {
+    return NextResponse.json({ error: "서버에 SESSION_SECRET이 설정되지 않았습니다." }, { status: 500 });
   }
   const body = (await request.json().catch(() => ({}))) as { password?: unknown };
   const password = typeof body.password === "string" ? body.password : "";
