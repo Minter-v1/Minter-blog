@@ -15,7 +15,22 @@ export type MailRow = {
   description: string;
   mono?: boolean;
   excerpt?: string; // 있으면 카드형: 제목을 크게, 설명을 진하게, 본문 요약을 회색 상자로
+  links?: { label: string; title: string; url: string }[]; // 함께 볼 글 (용어에서 이어 쓴 단계 글 등)
+  action?: { label: string; url: string }; // 항목 아래 작은 버튼
 };
+
+function extrasHtml(r: MailRow) {
+  const links = (r.links ?? [])
+    .map(
+      (l) =>
+        `<div style="margin-top:6px;font-size:13px;color:#8b95a1">${esc(l.label)} · <a href="${esc(l.url)}" style="color:#3182f6;font-weight:600;text-decoration:none">${esc(l.title)}</a></div>`,
+    )
+    .join("");
+  const action = r.action
+    ? `<a href="${esc(r.action.url)}" style="display:inline-block;margin-top:10px;padding:8px 14px;border-radius:10px;background:#e8f3ff;color:#3182f6;font-size:13px;font-weight:600;text-decoration:none">${esc(r.action.label)}</a>`
+    : "";
+  return links + action;
+}
 
 /** 메일 본문 묶음. heading이 없으면 구분 없이 항목만 이어 붙인다 */
 export type MailSection = { heading?: string; note?: string; rows: MailRow[] };
@@ -28,6 +43,7 @@ function rowHtml(r: MailRow) {
           <div style="font-size:12px;font-weight:600;color:#8b95a1">${esc(r.label)}</div>
           <a href="${r.url}" style="display:block;margin-top:4px;font-size:17px;font-weight:700;color:#191f28;text-decoration:none;${mono}">${esc(r.title)}</a>
           <div style="margin-top:4px;font-size:14px;line-height:1.6;color:#4e5968">${esc(r.description)}</div>
+          ${extrasHtml(r)}
         </td></tr>`;
   }
   const excerpt = r.excerpt
@@ -39,6 +55,7 @@ function rowHtml(r: MailRow) {
           <a href="${r.url}" style="display:block;margin-top:6px;font-size:20px;font-weight:700;color:#191f28;text-decoration:none;letter-spacing:-0.02em;${mono}">${esc(r.title)}</a>
           <div style="margin-top:6px;font-size:15px;line-height:1.6;font-weight:600;color:#191f28">${esc(r.description)}</div>
           ${excerpt}
+          ${extrasHtml(r)}
         </td></tr>`;
 }
 
@@ -89,7 +106,12 @@ export function mailLayout(props: {
     "",
     ...props.sections.flatMap((sec) => [
       ...(sec.heading ? [`[${sec.heading} ${sec.rows.length}]${sec.note ? ` ${sec.note}` : ""}`] : []),
-      ...sec.rows.map((r) => `- [${r.label}] ${r.title}\n  ${r.description}${r.excerpt ? `\n  ${r.excerpt}` : ""}`),
+      ...sec.rows.map(
+        (r) =>
+          `- [${r.label}] ${r.title}\n  ${r.description}${r.excerpt ? `\n  ${r.excerpt}` : ""}` +
+          (r.links ?? []).map((l) => `\n  ${l.label}: ${l.title} ${l.url}`).join("") +
+          (r.action ? `\n  ${r.action.label}: ${r.action.url}` : ""),
+      ),
       "",
     ]),
     "",

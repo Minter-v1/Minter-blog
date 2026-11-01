@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { fail, handleError } from "@/lib/api";
 import { isAuthed } from "@/lib/auth";
-import { loadReviewGroups, markReviewed } from "@/lib/review-store";
+import { isStepId } from "@/lib/learning-steps";
+import { loadReviewGroups, markReviewed, skipStep } from "@/lib/review-store";
 
 const noStore = { "Cache-Control": "private, no-store" };
 
@@ -15,13 +16,18 @@ export async function GET() {
   );
 }
 
-// 복습 완료 처리
+// 복습 완료 처리. skip이 있으면 학습 단계 건너뛰기 (#135): "hands-on" | "deep-dive" | "all"(이 글은 여기까지)
 export async function POST(request: Request) {
   if (!(await isAuthed())) return fail("로그인이 필요해요.", 401);
-  const body = (await request.json().catch(() => ({}))) as { ref?: unknown };
+  const body = (await request.json().catch(() => ({}))) as {
+    ref?: unknown;
+    skip?: unknown;
+  };
   if (typeof body.ref !== "string" || !body.ref.includes("/")) return fail("잘못된 요청이에요.");
+  if (body.skip !== undefined && body.skip !== "all" && !isStepId(body.skip)) return fail("잘못된 요청이에요.");
   try {
-    const record = await markReviewed(body.ref.normalize("NFC"));
+    const ref = body.ref.normalize("NFC");
+    const record = body.skip === undefined ? await markReviewed(ref) : await skipStep(ref, body.skip);
     return NextResponse.json({ ref: body.ref, ...record }, { headers: noStore });
   } catch (e) {
     return handleError(e);

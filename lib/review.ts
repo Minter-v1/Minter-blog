@@ -3,6 +3,7 @@
 // - 작성 완료한 글을 1·3·7·14·30·60일 간격으로 6번 복습하면 끝
 // - "복습 완료"를 눌러야 다음 단계로 넘어가고, 다음 복습일은 실제로 복습한 날부터 센다
 // - 복습일이 지나도 안 하면 '밀림'으로 계속 남는다
+import { isStepId, type StepId } from "./learning-steps";
 import { addDays, isoDay, parseDay } from "./week";
 
 export const REVIEW_INTERVALS = [1, 3, 7, 14, 30, 60] as const;
@@ -15,8 +16,11 @@ export const REVIEW_FILE = "review.json";
 
 export const REVIEW_SINCE = "2026-10-07";
 
-/** 데이터 repo의 review.json: 글(ref)마다 마친 복습 횟수와 마지막 복습일 */
-export type ReviewRecord = { stage: number; last: string };
+/**
+ * 데이터 repo의 review.json: 글(ref)마다 마친 복습 횟수와 마지막 복습일.
+ * 용어는 건너뛴 학습 단계와 그날을 함께 둔다 (#135, 없으면 생략 — 예전 기록 그대로 읽힌다)
+ */
+export type ReviewRecord = { stage: number; last: string; skipped?: Partial<Record<StepId, string>> };
 export type ReviewLog = Record<string, ReviewRecord>;
 
 export type ReviewTarget = { ref: string; date: string };
@@ -29,16 +33,25 @@ export type ReviewSchedule = {
   days: number; // 오늘 - 복습일. 양수면 밀린 날 수, 0이면 오늘, 음수면 남은 날 수
 };
 
-const dayDiff = (a: string, b: string) => Math.round((parseDay(a)!.getTime() - parseDay(b)!.getTime()) / 86_400_000);
+/** 복습을 한 번도 안 한 글의 기준일 */
+const startOf = (target: ReviewTarget) => (target.date < REVIEW_SINCE ? REVIEW_SINCE : target.date);
+
+export const dayDiff = (a: string, b: string) => Math.round((parseDay(a)!.getTime() - parseDay(b)!.getTime()) / 86_400_000);
 
 export function scheduleOf(target: ReviewTarget, log: ReviewLog, today: string): ReviewSchedule {
   const record = log[target.ref];
   const stage = Math.min(record?.stage ?? 0, REVIEW_TOTAL);
   if (stage >= REVIEW_TOTAL) return { ref: target.ref, stage, done: true, due: null, days: 0 };
   // 기준일: 마지막 복습일, 아직 한 번도 안 했으면 작성일 (배포일 이전 글은 배포일)
-  const base = record?.last ?? (target.date < REVIEW_SINCE ? REVIEW_SINCE : target.date);
+  const base = record?.last ?? startOf(target);
   const due = isoDay(addDays(parseDay(base)!, REVIEW_INTERVALS[stage]));
-  return { ref: target.ref, stage, done: false, due, days: dayDiff(today, due) };
+  return {
+    ref: target.ref,
+    stage,
+    done: false,
+    due,
+    days: dayDiff(today, due),
+  };
 }
 
 /** 오늘 복습할 글(밀린 것 먼저, 오래 밀린 순)과 예정, 완료로 나눈다 */
@@ -54,7 +67,14 @@ export function groupSchedules(schedules: ReviewSchedule[]) {
 /** 복습 완료 처리 결과 — 단계 +1, 마지막 복습일 = 오늘 */
 export function completeReview(log: ReviewLog, ref: string, today: string): ReviewLog {
   const stage = Math.min((log[ref]?.stage ?? 0) + 1, REVIEW_TOTAL);
-  return { ...log, [ref]: { stage, last: today } };
+  return { ...log, [ref]: { ...log[ref], stage, last: today } };
+}
+
+/** 학습 단계 건너뛰기 (#135). 복습 일정은 그대로 두고 건너뛴 날만 남긴다 */
+export function skipSteps(log: ReviewLog, target: ReviewTarget, steps: StepId[], today: string): ReviewLog {
+  const record = log[target.ref] ?? { stage: 0, last: startOf(target) };
+  const skipped = { ...record.skipped, ...Object.fromEntries(steps.map((s) => [s, today])) };
+  return { ...log, [target.ref]: { ...record, skipped } };
 }
 
 export function parseReviewLog(text: string | null): ReviewLog {
@@ -66,6 +86,10 @@ export function parseReviewLog(text: string | null): ReviewLog {
       const r = v as Partial<ReviewRecord>;
       if (typeof r?.stage === "number" && typeof r?.last === "string" && parseDay(r.last)) {
         log[ref] = { stage: r.stage, last: r.last };
+        const skipped = Object.entries(r.skipped ?? {}).filter(
+          ([step, day]) => isStepId(step) && typeof day === "string" && parseDay(day),
+        );
+        if (skipped.length > 0) log[ref].skipped = Object.fromEntries(skipped);
       }
     }
     return log;
