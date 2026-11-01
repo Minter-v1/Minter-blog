@@ -6,6 +6,7 @@ import { findEntry, loadArchive, relatedOf } from "@/lib/archive";
 import { COLLECTIONS, entryHref, isCollectionId, type CollectionId } from "@/lib/collections";
 import { Article } from "../../components/article";
 import { AuthOnly } from "../../components/auth";
+import { LearningSteps } from "../../components/learning-steps";
 import { ReviewCheck } from "../../components/review";
 import { ArrowUpRight, ChevronRight } from "../../components/icons";
 import { Outline } from "../../components/outline";
@@ -144,6 +145,7 @@ export default async function EntryPage(props: Props) {
               {formatDate(entry.date)}
               {entry.updated && ` · ${formatDate(entry.updated)} 수정`}
             </p>
+            <LearningSteps entry={entry} entries={archive.entries} />
 
             {entry.body ? (
               <>
