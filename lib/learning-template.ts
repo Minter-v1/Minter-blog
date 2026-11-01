@@ -3,7 +3,7 @@
 // - 본문(상세 설명)에 `## 섹션명` + 회색 작성 가이드를 깔아 주는 작성 보조 도구다. 저장 구조는 그대로 Markdown
 // - 작성 강제 없음: 가이드만 남은(=안 쓴) 섹션은 작성 완료로 저장할 때 제목·가이드째 빠진다
 // - 이미 쓴 글에는 아직 없는 섹션만 본문 끝에 추가한다 (기존 내용은 건드리지 않음)
-// - 컬렉션마다 템플릿이 여러 개일 수 있다. 학습 기록은 Log · Hands-on · Deep Dive 중에서 고른다
+// - 컬렉션마다 템플릿이 여러 개일 수 있다. 학습 기록은 Log · Hands-on · Deep Dive · Insight 중에서 고른다
 //   용어(Quick) → Hands-on → Deep Dive 순서로 글을 늘려 가는 흐름은 lib/learning-steps.ts
 import type { CollectionId } from "./collections";
 
@@ -13,7 +13,7 @@ export type TemplateSection = {
   subs?: { title: string; guide: string }[];
   guides?: string[]; // 정리용: 같은 제목의 섹션이 여러 템플릿에 있을 때 모든 가이드
 };
-export type TemplateId = "quick" | "log" | "hands-on" | "deep-dive" | "default";
+export type TemplateId = "quick" | "log" | "hands-on" | "deep-dive" | "insight" | "default";
 export type LearningTemplate = { id: TemplateId; name: string; summary: string; sections: TemplateSection[] };
 
 const QUICK: LearningTemplate = {
@@ -78,11 +78,25 @@ const LOG: LearningTemplate = {
   ],
 };
 
+// 궁금증 → 확인 → 이해를 짧게 남기는 고찰 글 (#137). 예상과 실제를 나눠 적어 무엇을 잘못 알았는지 남긴다
+const INSIGHT: LearningTemplate = {
+  id: "insight",
+  name: "Insight",
+  summary: "계기 · 처음 생각 · 확인 · 이유 · 정리",
+  sections: [
+    { title: "계기", guide: "무엇을 하다가 어떤 점이 궁금하거나 이상했는지. 그때 본 화면이나 상황 한두 줄" },
+    { title: "처음 생각", guide: "확인하기 전에 내가 예상한 것과 그렇게 생각한 이유" },
+    { title: "확인해 보니", guide: "실제로 확인한 것. 실행한 명령, 콘솔 화면, 문서 (코드 블록이나 캡처)" },
+    { title: "왜 그런가", guide: "예상과 달랐던 이유. 관련 개념과 동작 방식을 내 말로" },
+    { title: "정리", guide: "한 줄 결론. 다음에 같은 상황을 보면 어떻게 생각할지" },
+  ],
+};
+
 const single = (sections: TemplateSection[]): LearningTemplate[] => [{ id: "default", name: "기본", summary: "", sections }];
 
 export const LEARNING_TEMPLATES: Record<CollectionId, LearningTemplate[]> = {
   terms: [QUICK],
-  log: [LOG, HANDS_ON, DEEP_DIVE],
+  log: [LOG, HANDS_ON, DEEP_DIVE, INSIGHT],
   git: single([
     { title: "5초 이해", guide: "이 명령이 하는 일을 1~2문장으로" },
     { title: "사용법", guide: "기본 문법과 자주 쓰는 형태 (코드 블록)" },
