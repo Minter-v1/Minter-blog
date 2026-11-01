@@ -218,15 +218,22 @@ export function DraftBoard(props: { drafts: EntrySummary[] }) {
         <p className="text-[13px] font-medium text-text-3">
           <b className="font-semibold text-text-2 tabular-nums">{visible.length}</b>개
         </p>
-          <div role="group" aria-label="정렬" className="inline-flex h-9 items-center rounded-full bg-fill p-1">
+          {/* 세그먼트 컨트롤: 흰 판(thumb)이 고른 쪽으로 미끄러져 간다. 두 칸 같은 폭 */}
+          <div role="group" aria-label="정렬" className="relative grid h-9 grid-cols-2 items-center rounded-full bg-fill p-1">
+            <span
+              aria-hidden
+              className={`absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full bg-surface shadow-[0_1px_3px_rgba(0,23,51,0.12)] transition-transform duration-300 ease-[cubic-bezier(0.3,0.7,0.2,1)] motion-reduce:transition-none ${
+                order === "newest" ? "translate-x-full" : ""
+              }`}
+            />
             {ORDERS.map((o) => (
               <button
                 key={o.id}
                 type="button"
                 onClick={() => saveOrder(o.id)}
                 aria-pressed={order === o.id}
-                className={`h-7 rounded-full px-3 text-[13px] font-semibold transition-[background-color,color,box-shadow] duration-150 ${
-                  order === o.id ? "bg-surface text-text shadow-[0_1px_3px_rgba(0,23,51,0.12)]" : "text-text-3 hover:text-text-2"
+                className={`relative h-7 rounded-full px-3 text-[13px] font-semibold transition-colors duration-200 ${
+                  order === o.id ? "text-text" : "text-text-3 hover:text-text-2"
                 }`}
               >
                 {o.label}
@@ -242,7 +249,7 @@ export function DraftBoard(props: { drafts: EntrySummary[] }) {
           desc={words.length ? "다른 검색어로 찾아보세요" : undefined}
         />
       ) : (
-        <ul className="mt-2">
+        <ul key={order} className="mt-2 motion-safe:animate-[fade-in_0.25s_ease-out]">
           {visible.map((e) => (
             <DraftRow key={e.ref} entry={e} words={words} showCollection />
           ))}
