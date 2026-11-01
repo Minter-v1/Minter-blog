@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
+import type { StepId } from "@/lib/learning-steps";
 import { REVIEW_TOTAL } from "@/lib/review";
 import { useAuthed } from "./auth";
 import { Check } from "./icons";
@@ -62,8 +63,8 @@ export function ReviewProgress({ stage }: { stage: number }) {
   );
 }
 
-/** 복습 완료 버튼. 누르면 커밋하고 화면을 새로 그린다 */
-export function ReviewDoneButton({ refKey, className = "" }: { refKey: string; className?: string }) {
+/** 복습 기록 저장 (복습 완료 · 학습 단계 건너뛰기). 저장하면 헤더 숫자와 화면을 새로 그린다 */
+function useReviewPost(body: { ref: string; skip?: StepId | "all" }) {
   const router = useRouter();
   const [state, setState] = useState<"idle" | "saving" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +76,7 @@ export function ReviewDoneButton({ refKey, className = "" }: { refKey: string; c
       const res = await fetch("/api/review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ref: refKey }),
+        body: JSON.stringify(body),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? `저장하지 못했어요 (${res.status})`);
@@ -87,6 +88,12 @@ export function ReviewDoneButton({ refKey, className = "" }: { refKey: string; c
       setState("idle");
     }
   }
+  return { state, error, submit };
+}
+
+/** 복습 완료 버튼. 누르면 커밋하고 화면을 새로 그린다 */
+export function ReviewDoneButton({ refKey, className = "" }: { refKey: string; className?: string }) {
+  const { state, error, submit } = useReviewPost({ ref: refKey });
 
   return (
     <span className="inline-flex flex-col items-end gap-1">
@@ -101,6 +108,27 @@ export function ReviewDoneButton({ refKey, className = "" }: { refKey: string; c
         {state === "saving" && <Spinner className="size-3.5" />}
         {state === "done" && <Check className="size-3.5" />}
         {state === "done" ? "복습 완료" : state === "saving" ? "저장 중…" : "복습 완료"}
+      </button>
+      {error && <span className="text-[12px] text-danger">{error}</span>}
+    </span>
+  );
+}
+
+/** 학습 단계 건너뛰기 (#135): 이 단계만, 또는 이 용어는 여기까지(남은 단계 전부) */
+export function StepSkipButton({ refKey, skip, label }: { refKey: string; skip: StepId | "all"; label: string }) {
+  const { state, error, submit } = useReviewPost({ ref: refKey, skip });
+
+  return (
+    <span className="inline-flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={submit}
+        disabled={state !== "idle"}
+        className="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl bg-fill px-3 text-[13px] font-semibold text-text-2 transition-colors hover:bg-fill-strong disabled:cursor-default disabled:opacity-70"
+      >
+        {state === "saving" && <Spinner className="size-3.5" />}
+        {state === "done" && <Check className="size-3.5" />}
+        {state === "saving" ? "저장 중…" : label}
       </button>
       {error && <span className="text-[12px] text-danger">{error}</span>}
     </span>
