@@ -7,7 +7,7 @@ import { SiteHeader } from "../components/site-header";
 
 export const metadata: Metadata = { title: "작성 중" };
 
-// 전 컬렉션의 작성 중인 글 (나만). 먼저 적어둔 것부터 정리하도록 오래된 순
+// 전 컬렉션의 작성 중인 글 (나만). 기본은 먼저 적어둔 것부터 정리하도록 오래된 순, 최신 순으로 바꿀 수 있다 (#129)
 export default async function DraftsPage() {
   if (!(await isAuthed())) redirect("/login");
   const { drafts } = await loadArchive();

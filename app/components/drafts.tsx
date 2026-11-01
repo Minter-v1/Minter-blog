@@ -109,12 +109,49 @@ function matches(entry: EntrySummary, words: string[]) {
   return words.every((w) => hay.includes(w));
 }
 
-/** /drafts: 전 컬렉션의 작성 중인 글. 오래된 순, 컬렉션 칩·검색으로 좁혀 보기 */
+type Order = "oldest" | "newest";
+const ORDER_KEY = "drafts-order";
+// 고른 순서는 이 브라우저에 기억 (저장소를 못 쓰면 기본값 오래된 순)
+const orderListeners = new Set<() => void>();
+function readOrder(): Order {
+  try {
+    return localStorage.getItem(ORDER_KEY) === "newest" ? "newest" : "oldest";
+  } catch {
+    return "oldest";
+  }
+}
+let memoOrder: Order | null = null;
+function saveOrder(o: Order) {
+  memoOrder = o;
+  try {
+    localStorage.setItem(ORDER_KEY, o);
+  } catch {}
+  orderListeners.forEach((l) => l());
+}
+function useOrder() {
+  return useSyncExternalStore(
+    (l) => {
+      orderListeners.add(l);
+      return () => orderListeners.delete(l);
+    },
+    () => memoOrder ?? readOrder(),
+    () => "oldest" as Order,
+  );
+}
+const ORDERS: { id: Order; label: string }[] = [
+  { id: "oldest", label: "오래된 순" },
+  { id: "newest", label: "최신 순" },
+];
+
+/** /drafts: 전 컬렉션의 작성 중인 글. 오래된 순 · 최신 순(#129), 컬렉션 칩·검색으로 좁혀 보기 */
 export function DraftBoard(props: { drafts: EntrySummary[] }) {
   const [filter, setFilter] = useState<CollectionId | null>(null);
   const [query, setQuery] = useState("");
+  const order = useOrder();
   const words = useMemo(() => query.trim().toLowerCase().split(/\s+/).filter(Boolean), [query]);
+  // 받은 목록은 오래된 순(lib/draft-order) — 최신 순은 뒤집기만
   const visible = props.drafts.filter((e) => (!filter || e.collection === filter) && matches(e, words));
+  if (order === "newest") visible.reverse();
 
   if (props.drafts.length === 0) {
     return (
@@ -177,6 +214,27 @@ export function DraftBoard(props: { drafts: EntrySummary[] }) {
         })}
       </div>
 
+      <div className="mt-5 flex items-center justify-between gap-3 px-1">
+        <p className="text-[13px] font-medium text-text-3">
+          <b className="font-semibold text-text-2 tabular-nums">{visible.length}</b>개
+        </p>
+          <div role="group" aria-label="정렬" className="inline-flex h-9 items-center rounded-full bg-fill p-1">
+            {ORDERS.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => saveOrder(o.id)}
+                aria-pressed={order === o.id}
+                className={`h-7 rounded-full px-3 text-[13px] font-semibold transition-[background-color,color,box-shadow] duration-150 ${
+                  order === o.id ? "bg-surface text-text shadow-[0_1px_3px_rgba(0,23,51,0.12)]" : "text-text-3 hover:text-text-2"
+                }`}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+      </div>
+
       {visible.length === 0 ? (
         <EmptyState
           emoji={words.length ? "🔍" : "📭"}
@@ -184,7 +242,7 @@ export function DraftBoard(props: { drafts: EntrySummary[] }) {
           desc={words.length ? "다른 검색어로 찾아보세요" : undefined}
         />
       ) : (
-        <ul className="mt-5">
+        <ul className="mt-2">
           {visible.map((e) => (
             <DraftRow key={e.ref} entry={e} words={words} showCollection />
           ))}
