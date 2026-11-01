@@ -2,6 +2,7 @@ import "server-only";
 import { COLLECTIONS, parseRef, toRef, type Collection, type CollectionId, type Ref } from "./collections";
 import { githubEnv } from "./env";
 import { commitFiles, ConflictError, listDir, listDirFiles, readTextFile, type CommitFile } from "./github";
+import { cleanStepMeta } from "./learning-steps";
 import { formatEntry, parseEntry } from "./markdown";
 import { parseReviewLog, REVIEW_FILE, serializeReviewLog } from "./review";
 import { toSlug } from "./slug";
@@ -35,7 +36,11 @@ export function parseEntryInput(collection: Collection, raw: unknown): EntryInpu
     .slice(0, 30)
     .map((ref) => parseRef(ref, collection.id));
   const rawExtra = (r.extra ?? {}) as Record<string, unknown>;
-  const extra = Object.fromEntries(collection.extraFields.map((f) => [f.key, str(rawExtra[f.key]).trim()]));
+  const extra = {
+    ...Object.fromEntries(collection.extraFields.map((f) => [f.key, str(rawExtra[f.key]).trim()])),
+    // 학습 단계 정보(step · source · handsOn, #133)는 입력칸 없이 함께 저장
+    ...cleanStepMeta(rawExtra, collection.id),
+  };
   const images = (Array.isArray(r.images) ? r.images : []).filter(
     (i): i is UploadedImage =>
       !!i &&

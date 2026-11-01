@@ -13,8 +13,10 @@ import { refreshDrafts } from "./drafts";
 import { Check } from "./icons";
 import { Bone, Spinner } from "./loaders";
 import { OutlinePopover } from "./outline";
-import { missingTemplateMarkdown, stripUnfilledTemplate } from "@/lib/learning-template";
+import { HANDS_ON_KEY, stepName, stepWriteHref, type StepId } from "@/lib/learning-steps";
+import { missingTemplateMarkdown, stripUnfilledTemplate, templatesOf, type LearningTemplate } from "@/lib/learning-template";
 import { RelatedPicker, type RelatedCandidate } from "./related-picker";
+import { TemplateMenu } from "./template-menu";
 import { TagPicker } from "./tag-picker";
 
 const BodyEditor = dynamic(() => import("./body-editor"), {
@@ -50,6 +52,7 @@ export function WriteForm(props: {
   slugsByCollection: Record<CollectionId, string[]>;
   candidates: RelatedCandidate[]; // 연관 기록으로 고를 수 있는 전 컬렉션 기록 (자기 자신 제외)
   backlinks: { ref: string; title: string }[]; // 이 기록을 연결해 둔 다른 글
+  stepSource?: { step: StepId; title: string; ref: string }; // 용어에서 이어 쓰는 단계 글이면 출발한 용어 (#133)
 }) {
   const router = useRouter();
   const editing = props.mode === "edit";
@@ -217,13 +220,13 @@ export function WriteForm(props: {
   }
 
   // 학습 템플릿: 빈 본문이면 전체, 이미 쓴 본문이면 확인 후 아직 없는 섹션만 끝에 추가 (기존 내용 유지)
-  function applyTemplate() {
+  function applyTemplate(template: LearningTemplate) {
     const api = editorApi.current;
     if (!api) return;
     const current = api.getMarkdown();
-    const { count, markdown } = missingTemplateMarkdown(c.id, current);
+    const { count, markdown } = missingTemplateMarkdown(template, current);
     if (count === 0) {
-      setToast({ text: "이미 모든 템플릿 섹션이 있어요" });
+      setToast({ text: `이미 ${template.id === "default" ? "모든 템플릿" : template.name} 섹션이 다 있어요` });
       return;
     }
     const hasBody = current.replace(/&nbsp;|\s/g, "") !== "";
@@ -310,6 +313,16 @@ export function WriteForm(props: {
           )}
         </div>
 
+        {props.stepSource && c.id === "log" && (
+          <p className="-mt-3 flex items-center gap-1.5 rounded-xl bg-primary-weak px-3 py-2 text-[13px] text-text-2">
+            <span aria-hidden className="star-mark size-2.5 shrink-0 bg-primary" />
+            <Link href={entryHref("terms", props.stepSource.ref.slice("terms/".length))} className="truncate font-semibold text-primary hover:underline">
+              {props.stepSource.title}
+            </Link>
+            <span className="shrink-0">에서 이어 쓰는 {stepName(props.stepSource.step)}</span>
+          </p>
+        )}
+
         <Field label={c.titleLabel} htmlFor="title">
           <input
             id="title"
@@ -386,6 +399,34 @@ export function WriteForm(props: {
             />
           </Field>
         ))}
+
+        {c.id === "terms" && (
+          <div className="-mt-2 space-y-1.5 px-1">
+            <label className="flex cursor-pointer items-center gap-2 text-[14px] font-semibold text-text-2">
+              <input
+                type="checkbox"
+                checked={extra[HANDS_ON_KEY] === "none"}
+                onChange={(e) => {
+                  setExtra((prev) => ({ ...prev, [HANDS_ON_KEY]: e.target.checked ? "none" : "" }));
+                  setDirty(true);
+                }}
+                className="size-4 accent-primary"
+              />
+              실습 없음
+            </label>
+            <p className="text-[13px] text-text-3">
+              손으로 해 볼 게 없는 개념이면 Hands-on을 건너뛰고 Deep Dive로 바로 가요
+              {editing && !props.initial.draft && extra[HANDS_ON_KEY] !== "none" && (
+                <>
+                  {" · "}
+                  <Link href={stepWriteHref("hands-on", `terms/${props.slug}`)} className="font-semibold text-primary hover:underline">
+                    Hands-on 쓰기
+                  </Link>
+                </>
+              )}
+            </p>
+          </div>
+        )}
 
         <Field
           label={c.tagLabel}
@@ -492,14 +533,7 @@ export function WriteForm(props: {
             <p className="hidden text-[13px] text-text-3 md:block">
               <Kbd>/</Kbd> 블록 · <Kbd>⋮⋮</Kbd> 끌어서 순서 변경 · 이미지 붙여넣기·드래그
             </p>
-            <button
-              type="button"
-              onClick={applyTemplate}
-              title="섹션 제목과 작성 가이드를 넣어요. 안 쓴 섹션은 작성 완료로 저장할 때 빠져요"
-              className="inline-flex h-8 items-center rounded-lg px-2.5 text-[13px] font-semibold text-text-2 transition-colors hover:bg-fill hover:text-text"
-            >
-              학습 템플릿
-            </button>
+            <TemplateMenu templates={templatesOf(c.id)} getBody={() => editorApi.current?.getMarkdown() ?? ""} onPick={applyTemplate} />
             <OutlinePopover
               selector='.body-editor .bn-block-content[data-content-type="heading"]'
               version={outlineVersion}
