@@ -9,9 +9,9 @@ import { useEffect, useState } from "react";
 // 지금 구간 이름표는 넓은 화면(2xl)에서만 늘 보이고, 그보다 좁으면 본문과 겹치지 않게 올렸을 때만
 const SECTIONS = [
   { id: "top", label: "소개" },
-  { id: "projects", label: "주요 프로젝트" },
-  { id: "records", label: "학습 기록" },
-  { id: "contact", label: "연락" },
+  { id: "projects", label: "Project" },
+  { id: "records", label: "Record" },
+  { id: "contact", label: "Contact" },
 ];
 
 export function HomeSectionNav() {
