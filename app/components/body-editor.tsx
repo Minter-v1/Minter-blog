@@ -1,6 +1,6 @@
 "use client";
 
-import { BlockNoteSchema, createCodeBlockSpec } from "@blocknote/core";
+import { BlockNoteSchema, createCodeBlockSpec, createExtension } from "@blocknote/core";
 import { ko } from "@blocknote/core/locales";
 import { codeBlockOptions, syntaxHighlighter } from "@blocknote/code-block";
 import { BlockNoteView } from "@blocknote/mantine";
@@ -9,6 +9,7 @@ import { useCreateBlockNote } from "@blocknote/react";
 import { useEffect, useRef, useState } from "react";
 import { CodeBlockOverlays } from "./code-lang-picker";
 import { EditorFormattingToolbar, EditorSideMenu } from "./editor-menus";
+import { symbolsPlugin } from "./editor-symbols";
 import { ImageEditButtons } from "./image-editor";
 import { decodeBlocks, encodeBlocks, htmlToTokens, tokensToHtml } from "@/lib/rich-markdown";
 
@@ -83,7 +84,8 @@ export default function BodyEditor(props: {
 }) {
   const editor = useCreateBlockNote({
     schema,
-    extensions: [syntaxHighlighter],
+    // -> 를 → 로 같은 기호 자동 변환 (#143, editor-symbols.ts)
+    extensions: [syntaxHighlighter, createExtension({ key: "editor-symbols", prosemirrorPlugins: [symbolsPlugin()] })],
     dictionary: {
       ...ko,
       placeholders: { ...ko.placeholders, emptyDocument: "자세한 설명을 적어 보세요. '/'로 블록 추가", default: "'/'로 블록 추가" },
