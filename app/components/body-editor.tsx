@@ -68,6 +68,16 @@ function normalizeFences(markdown: string) {
     .join("\n");
 }
 
+// 붙여넣은 HTML 코드 블록의 언어(class="language-xxx", data-language)도 정식 id로.
+// 별칭(js, yml)이나 지원 목록에 없는 언어(dockerfile, hcl)는 렌더링 중 예외라 붙여넣기가 통째로 실패한다
+function normalizeHtmlLanguages(html: string) {
+  return html
+    .replace(/(class="[^"]*?\blanguage-)([^\s"]+)/g, (_, pre: string, lang: string) => `${pre}${languageId(lang)}`)
+    .replace(/(data-language=")([^"]*)"/g, (_, pre: string, lang: string) => `${pre}${languageId(lang)}"`);
+}
+const HTML_CODE = /\blanguage-|data-language=/;
+const MD_FENCE = /^\s*(`{3,}|~{3,})/m;
+
 const RICH_PASTE = /<span data-(?:text|bg)-color=|<\/?(?:u|strong|em|del)>/;
 
 // md → 블록. 저장해 둔 <span data-*-color>, <br>을 다시 글자색·배경색·빈 줄로 되살린다
@@ -93,8 +103,22 @@ export default function BodyEditor(props: {
     uploadFile: props.uploadFile,
     // 블로그 저장 형식(글자색 <span data-*-color>, <u>, <strong> …)이 담긴 텍스트를 붙여넣으면
     // 저장된 글을 불러올 때와 같은 경로로 바꿔서 서식을 살린다. 그 밖의 붙여넣기는 BlockNote 기본 동작
+    // 코드 블록이 섞인 붙여넣기는 언어를 정식 id로 바꾼 뒤 넣는다 (에디터 안 복사·붙여넣기는 BlockNote 기본 동작)
     pasteHandler: ({ event, editor, defaultPasteHandler }) => {
-      const text = event.clipboardData?.getData("text/plain") ?? "";
+      const data = event.clipboardData;
+      const text = data?.getData("text/plain") ?? "";
+      const html = data?.getData("text/html") ?? "";
+      const internal = !!data?.types.includes("blocknote/html");
+      if (!internal && !RICH_PASTE.test(text)) {
+        if (html && HTML_CODE.test(html)) {
+          editor.pasteHTML(normalizeHtmlLanguages(html));
+          return true;
+        }
+        if (!html && MD_FENCE.test(text)) {
+          editor.pasteMarkdown(normalizeFences(text));
+          return true;
+        }
+      }
       if (!RICH_PASTE.test(text)) return defaultPasteHandler();
       const blocks = parseStoredMarkdown(editor, text);
       const current = editor.getTextCursorPosition().block;
