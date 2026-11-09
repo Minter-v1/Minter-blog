@@ -4,6 +4,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { decodeSlug } from "@/lib/api";
 import { findEntry, loadArchive, relatedOf } from "@/lib/archive";
 import { COLLECTIONS, entryHref, isCollectionId, type CollectionId } from "@/lib/collections";
+import { SITE } from "@/lib/site";
 import { Article } from "../../components/article";
 import { AuthOnly } from "../../components/auth";
 import { LearningSteps } from "../../components/learning-steps";
@@ -45,7 +46,24 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const found = await find(props);
   if (!found) return {};
   const { entry } = found;
-  return { title: `${entry.title} · ${COLLECTIONS[entry.collection].label}`, description: entry.description };
+  const title = `${entry.title} · ${COLLECTIONS[entry.collection].label}`;
+  return {
+    title,
+    description: entry.description,
+    alternates: { canonical: entryHref(entry.collection, entry.slug) },
+    // 링크 미리보기 (#141). 이미지는 같은 폴더의 opengraph-image.tsx
+    openGraph: {
+      type: "article",
+      url: entryHref(entry.collection, entry.slug),
+      siteName: SITE.name,
+      locale: "ko_KR",
+      title: `${title} · ${SITE.name}`,
+      description: entry.description,
+      publishedTime: entry.date,
+      ...(entry.updated ? { modifiedTime: entry.updated } : {}),
+      tags: entry.tags,
+    },
+  };
 }
 
 function formatDate(iso: string) {
